@@ -118,12 +118,14 @@ struct val *parse_sexpr(const char *str, size_t len)
 
 static struct str *dump_cons(struct val *lv, bool raw)
 {
+	static struct str dot = STR_STATIC_INITIALIZER(" . ");
+	static struct str space = STR_STATIC_INITIALIZER(" ");
 	struct val *head = lv->cons.head;
 	struct val *tail = lv->cons.tail;
 
 	if (raw)
 		return str_cat3(dump_expr(head, raw),
-				STR_DUP(" . "),
+				&dot,
 				dump_expr(tail, raw));
 	else if (!head && !tail)
 		return NULL;
@@ -131,20 +133,26 @@ static struct str *dump_cons(struct val *lv, bool raw)
 		return dump_expr(head, raw);
 	else if (tail->type == VT_CONS)
 		return str_cat3(dump_expr(head, raw),
-				STR_DUP(" "),
+				&space,
 				dump_cons(tail, raw));
 	else
 		return str_cat3(dump_expr(head, raw),
-				STR_DUP(" . "),
+				&dot,
 				dump_expr(tail, raw));
 }
 
 static struct str *dump_expr(struct val *lv, bool raw)
 {
+	static struct str quote = STR_STATIC_INITIALIZER("\"");
+	static struct str poundt = STR_STATIC_INITIALIZER("#t");
+	static struct str poundf = STR_STATIC_INITIALIZER("#f");
+	static struct str oparen = STR_STATIC_INITIALIZER("(");
+	static struct str cparen = STR_STATIC_INITIALIZER(")");
+	static struct str empty = STR_STATIC_INITIALIZER("()");
 	char *tmpstr;
 
 	if (!lv)
-		return STR_DUP("()");
+		return &empty;
 
 	switch (lv->type) {
 		case VT_SYM:
@@ -153,11 +161,9 @@ static struct str *dump_expr(struct val *lv, bool raw)
 			tmpstr = escape_str(str_cstr(lv->str));
 			/* TODO: we leak tmpstr */
 
-			return str_cat3(STR_DUP("\""),
-					STR_DUP(tmpstr),
-					STR_DUP("\""));
+			return str_cat3(&quote, STR_DUP(tmpstr), &quote);
 		case VT_BOOL:
-			return lv->b ? STR_DUP("#t") : STR_DUP("#f");
+			return lv->b ? &poundt : &poundf;
 		case VT_INT: {
 			char tmp[32];
 
@@ -166,9 +172,7 @@ static struct str *dump_expr(struct val *lv, bool raw)
 			return STR_DUP(tmp);
 		}
 		case VT_CONS:
-			return str_cat3(STR_DUP("("),
-					dump_cons(lv, raw),
-					STR_DUP(")"));
+			return str_cat3(&oparen, dump_cons(lv, raw), &cparen);
 	}
 
 	return NULL;
@@ -176,11 +180,12 @@ static struct str *dump_expr(struct val *lv, bool raw)
 
 struct str *sexpr_dump(struct val *lv, bool raw)
 {
+	static struct str quote = STR_STATIC_INITIALIZER("'");
 	struct str *ret;
 
 	ret = dump_expr(lv, raw);
 
-	return ret ? str_cat(STR_DUP("'"), ret) : NULL;
+	return ret ? str_cat(&quote, ret) : NULL;
 }
 
 void sexpr_dump_file(FILE *out, struct val *lv, bool raw)
