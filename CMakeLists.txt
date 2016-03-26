@@ -38,3 +38,7 @@ add_compile_options(
 	$<$<C_COMPILER_ID:gcc>:-fno-inline-small-functions>
 	$<$<C_COMPILER_ID:gcc>:-fno-inline-functions-called-once>
 )
+
+install(FILES	include/jeffpc/atomic.h
+	DESTINATION include/jeffpc
+	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
