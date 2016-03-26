@@ -24,6 +24,7 @@
 #define __JEFFPC_REFCNT_H
 
 #include <jeffpc/atomic.h>
+#include <jeffpc/error.h>
 
 typedef atomic_t refcnt_t;
 
