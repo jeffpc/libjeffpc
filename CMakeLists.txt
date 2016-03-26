@@ -45,6 +45,7 @@ include_directories(
 
 add_library(jeffpc SHARED
 	error.c
+	io.c
 	str.c
 	val.c
 )
@@ -58,6 +59,7 @@ install(TARGETS	jeffpc DESTINATION lib
 install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/error.h
 		include/jeffpc/int.h
+		include/jeffpc/io.h
 		include/jeffpc/refcnt.h
 		include/jeffpc/str.h
 		include/jeffpc/val.h
