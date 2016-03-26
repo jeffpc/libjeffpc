@@ -39,7 +39,18 @@ add_compile_options(
 	$<$<C_COMPILER_ID:gcc>:-fno-inline-functions-called-once>
 )
 
+include_directories(
+	include
+)
+
+add_library(jeffpc SHARED
+	error.c
+)
+
+install(TARGETS	jeffpc DESTINATION lib
+	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 install(FILES	include/jeffpc/atomic.h
+		include/jeffpc/error.h
 		include/jeffpc/refcnt.h
 	DESTINATION include/jeffpc
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
