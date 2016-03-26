@@ -35,6 +35,7 @@ enum val_type {
 	VT_STR,		/* a struct str string */
 	VT_SYM,		/* symbol */
 	VT_BOOL,	/* boolean */
+	VT_CONS,	/* cons cell */
 };
 
 struct val {
@@ -44,6 +45,10 @@ struct val {
 		uint64_t i;
 		bool b;
 		struct str *str;
+		struct {
+			struct val *head;
+			struct val *tail;
+		} cons;
 	};
 };
 
@@ -55,6 +60,7 @@ extern int val_set_bool(struct val *val, bool v);
 extern int val_set_int(struct val *val, uint64_t v);
 extern int val_set_str(struct val *val, struct str *v);
 extern int val_set_sym(struct val *val, struct str *v);
+extern int val_set_cons(struct val *val, struct val *head, struct val *tail);
 extern void val_dump(struct val *v, int indent);
 
 REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free)
@@ -105,10 +111,19 @@ REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free)
 		_x;				\
 	})
 
+#define VAL_ALLOC_CONS(head, tail)		\
+	({					\
+		struct val *_x;			\
+		_x = VAL_ALLOC(VT_CONS);	\
+		VAL_SET_CONS(_x, (head), (tail));\
+		_x;				\
+	})
+
 #define VAL_SET_INT(val, v)		ASSERT0(val_set_int((val), (v)))
 #define VAL_SET_BOOL(val, v)		ASSERT0(val_set_bool((val), (v)))
 #define VAL_SET_STR(val, v)		ASSERT0(val_set_str((val), (v)))
 #define VAL_SET_SYM(val, v)		ASSERT0(val_set_sym((val), (v)))
+#define VAL_SET_CONS(val, head, tail)	ASSERT0(val_set_cons((val), (head), (tail)))
 
 #define VAL_DUP_CSTR(v)			VAL_ALLOC_STR(STR_DUP(v))
 
