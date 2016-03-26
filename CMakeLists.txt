@@ -52,6 +52,7 @@ ADD_FLEX_BISON_DEPENDENCY(sexpr sexpr)
 
 add_library(jeffpc SHARED
 	error.c
+	init.c
 	io.c
 	sexpr.c
 	${FLEX_sexpr_OUTPUTS} ${BISON_sexpr_OUTPUTS}
@@ -69,6 +70,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/error.h
 		include/jeffpc/int.h
 		include/jeffpc/io.h
+		include/jeffpc/jeffpc.h
 		include/jeffpc/refcnt.h
 		include/jeffpc/sexpr.h
 		include/jeffpc/str.h

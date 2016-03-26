@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,48 +20,12 @@
  * SOFTWARE.
  */
 
-#include <stdlib.h>
-
-#include <jeffpc/error.h>
-#include <jeffpc/sexpr.h>
-#include <jeffpc/str.h>
-#include <jeffpc/val.h>
-#include <jeffpc/io.h>
 #include <jeffpc/jeffpc.h>
 
-static int onefile(char *ibuf, size_t len)
+#include "init.h"
+
+void jeffpc_init(void)
 {
-	struct val *lv;
-
-	lv = parse_sexpr(ibuf, len);
-
-	sexpr_dump_file(stderr, lv, false);
-	fprintf(stderr, "\n");
-
-	return 0;
-}
-
-int main(int argc, char **argv)
-{
-	char *in;
-	int i;
-	int result;
-
-	result = 0;
-
-	ASSERT0(putenv("UMEM_DEBUG=default,verbose"));
-
-	jeffpc_init();
-
-	for (i = 1; i < argc; i++) {
-		in = read_file(argv[i]);
-		ASSERT(!IS_ERR(in));
-
-		if (onefile(in, strlen(in)))
-			result = 1;
-
-		free(in);
-	}
-
-	return result;
+	init_str_subsys();
+	init_val_subsys();
 }

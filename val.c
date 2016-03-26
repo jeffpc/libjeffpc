@@ -28,6 +28,7 @@
 #include <umem.h>
 
 #include <jeffpc/val.h>
+#include <jeffpc/jeffpc.h>
 #include <jeffpc/error.h>
 
 static umem_cache_t *val_cache;

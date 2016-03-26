@@ -25,6 +25,7 @@
 #include <umem.h>
 
 #include <jeffpc/str.h>
+#include <jeffpc/jeffpc.h>
 
 static umem_cache_t *str_cache;
 

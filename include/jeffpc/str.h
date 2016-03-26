@@ -48,7 +48,6 @@ struct str {
 			.flags = STR_FLAG_STATIC,	\
 		}
 
-extern void init_str_subsys(void);
 extern struct str *str_alloc(char *s);
 extern size_t str_len(const struct str *str);
 extern int str_cmp(const struct str *a, const struct str *b);
