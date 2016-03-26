@@ -39,13 +39,22 @@ add_compile_options(
 	$<$<C_COMPILER_ID:gcc>:-fno-inline-functions-called-once>
 )
 
+find_package(BISON)
+find_package(FLEX)
+
 include_directories(
 	include
 )
 
+BISON_TARGET(sexpr sexpr.y sexpr.tab.c COMPILE_FLAGS "-p sexpr_reader_")
+FLEX_TARGET(sexpr sexpr.l sexpr.lex.c COMPILE_FLAGS "-P sexpr_reader_")
+ADD_FLEX_BISON_DEPENDENCY(sexpr sexpr)
+
 add_library(jeffpc SHARED
 	error.c
 	io.c
+	sexpr.c
+	${FLEX_sexpr_OUTPUTS} ${BISON_sexpr_OUTPUTS}
 	str.c
 	val.c
 )
@@ -61,6 +70,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/int.h
 		include/jeffpc/io.h
 		include/jeffpc/refcnt.h
+		include/jeffpc/sexpr.h
 		include/jeffpc/str.h
 		include/jeffpc/val.h
 	DESTINATION include/jeffpc
@@ -72,5 +82,17 @@ function(simple_c_test type section bin data)
 			 "${CMAKE_CURRENT_SOURCE_DIR}/${data}"
 	)
 endfunction()
+
+#
+# Test related executables
+#
+
+add_executable(test_sexpr_parser
+	test_sexpr_parser.c
+)
+
+target_link_libraries(test_sexpr_parser
+	jeffpc
+)
 
 add_subdirectory(tests)

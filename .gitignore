@@ -6,4 +6,9 @@ cmake_install.cmake
 install_manifest.txt
 Testing
 
+sexpr.lex.c
+sexpr.tab.c
+sexpr.tab.h
+
 libjeffpc.so
+test_sexpr_parser
