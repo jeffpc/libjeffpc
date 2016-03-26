@@ -57,6 +57,7 @@ install(TARGETS	jeffpc DESTINATION lib
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/error.h
+		include/jeffpc/int.h
 		include/jeffpc/refcnt.h
 		include/jeffpc/str.h
 		include/jeffpc/val.h
