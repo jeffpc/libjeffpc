@@ -38,6 +38,18 @@ static inline uint32_t refcnt_read(refcnt_t *x)
 	return atomic_read(x);
 }
 
+/* INTERNAL FUNCTION - DO NOT USE DIRECTLY */
+static inline void __refcnt_inc(refcnt_t *x)
+{
+	atomic_inc(x);
+}
+
+/* INTERNAL FUNCTION - DO NOT USE DIRECTLY */
+static inline uint32_t __refcnt_dec(refcnt_t *x)
+{
+	return atomic_dec(x);
+}
+
 #define REFCNT_PROTOTYPES(type, name)					\
 extern type *name##_getref(type *);					\
 extern void name##_putref(type *);
@@ -50,7 +62,7 @@ vol type *name##_getref(type *x)					\
 									\
 	ASSERT3U(refcnt_read(&x->member), >=, 1);			\
 									\
-	atomic_inc(&x->member);						\
+	__refcnt_inc(&x->member);						\
 									\
 	return x;							\
 }									\
@@ -61,7 +73,7 @@ vol void name##_putref(type *x)						\
 									\
 	ASSERT3S(refcnt_read(&x->member), >=, 1);			\
 									\
-	if (!atomic_dec(&x->member))					\
+	if (!__refcnt_dec(&x->member))					\
 		freefxn(x);						\
 }
 
