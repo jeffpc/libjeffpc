@@ -40,5 +40,6 @@ add_compile_options(
 )
 
 install(FILES	include/jeffpc/atomic.h
+		include/jeffpc/refcnt.h
 	DESTINATION include/jeffpc
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
