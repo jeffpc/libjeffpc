@@ -29,13 +29,24 @@
 
 /* ref-counted string */
 
-#define STR_INLINE_LEN	15
+#define STR_INLINE_LEN	14
+
+enum str_flags {
+	STR_FLAG_STATIC		= 0x01,
+};
 
 struct str {
 	char *str;
 	refcnt_t refcnt;
+	unsigned char flags;
 	char inline_str[STR_INLINE_LEN + 1];
 };
+
+#define STR_STATIC_INITIALIZER(val)			\
+		{					\
+			.str = (val),			\
+			.flags = STR_FLAG_STATIC,	\
+		}
 
 extern void init_str_subsys(void);
 extern struct str *str_alloc(char *s);
