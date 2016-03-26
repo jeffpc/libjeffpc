@@ -45,6 +45,11 @@ include_directories(
 
 add_library(jeffpc SHARED
 	error.c
+	str.c
+)
+
+target_link_libraries(jeffpc
+	umem
 )
 
 install(TARGETS	jeffpc DESTINATION lib
@@ -52,5 +57,6 @@ install(TARGETS	jeffpc DESTINATION lib
 install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/error.h
 		include/jeffpc/refcnt.h
+		include/jeffpc/str.h
 	DESTINATION include/jeffpc
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
