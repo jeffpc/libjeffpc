@@ -36,6 +36,10 @@ SYMBOL_VERSION JEFFPC_0.10 {
 		jeffpc_print;
 		panic;
 
+		# rand
+		rand32;
+		rand64;
+
 		# sexpr
 		parse_sexpr;
 		sexpr_alist_lookup_int;

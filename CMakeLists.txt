@@ -59,6 +59,7 @@ add_library(jeffpc SHARED
 	error.c
 	init.c
 	io.c
+	rand.c
 	sexpr.c
 	${FLEX_sexpr_OUTPUTS} ${BISON_sexpr_OUTPUTS}
 	str.c
@@ -78,6 +79,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/int.h
 		include/jeffpc/io.h
 		include/jeffpc/jeffpc.h
+		include/jeffpc/rand.h
 		include/jeffpc/refcnt.h
 		include/jeffpc/sexpr.h
 		include/jeffpc/str.h
