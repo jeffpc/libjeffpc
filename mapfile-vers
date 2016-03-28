@@ -51,7 +51,9 @@ SYMBOL_VERSION JEFFPC_0.10 {
 		str_cmp;
 		str_dup;
 		str_free;
+		str_getref;
 		str_len;
+		str_putref;
 
 		# val
 		val_alloc;
