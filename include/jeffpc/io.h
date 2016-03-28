@@ -23,7 +23,10 @@
 #ifndef __JEFFPC_IO_H
 #define __JEFFPC_IO_H
 
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <string.h>
 
 #include <jeffpc/error.h>
@@ -53,6 +56,21 @@ static inline char *read_file_len(const char *fname, size_t *len)
 		*len = sb.st_size;
 
 	return ret;
+}
+
+static inline int xopen(const char *fname, int flags, mode_t mode)
+{
+	int fd;
+
+	fd = open(fname, flags, mode);
+	return (fd == -1) ? errno : fd;
+}
+
+static inline int xclose(int fd)
+{
+	if (close(fd) == -1)
+		return errno;
+	return 0;
 }
 
 #endif
