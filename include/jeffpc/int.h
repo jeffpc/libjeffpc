@@ -39,13 +39,13 @@ static inline int __str2u##size(const char *restrict s,			\
 	tmp = strtoull(s, &endptr, base);				\
 									\
 	if (errno)							\
-		return errno;						\
+		return -errno;						\
 									\
 	if (endptr == s)						\
-		return EINVAL;						\
+		return -EINVAL;						\
 									\
 	if (tmp > imax)							\
-		return ERANGE;						\
+		return -ERANGE;						\
 									\
 	*i = tmp;							\
 	return 0;							\
