@@ -39,6 +39,9 @@ add_compile_options(
 	$<$<C_COMPILER_ID:gcc>:-fno-inline-functions-called-once>
 )
 
+set(CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+include(cmake/config.cmake)
 include(cmake/mapfile.cmake)
 
 find_package(BISON)
