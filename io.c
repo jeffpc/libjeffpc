@@ -44,13 +44,14 @@ int xread(int fd, void *buf, size_t nbyte)
 	while (nbyte) {
 		ret = read(fd, ptr, nbyte);
 		if (ret < 0) {
+			ret = -errno;
 			LOG("%s: failed to read %u bytes from fd %d: %s",
-			    __func__, nbyte, fd, strerror(errno));
-			return errno;
+			    __func__, nbyte, fd, xstrerror(ret));
+			return ret;
 		}
 
 		if (ret == 0)
-			return EPIPE;
+			return -EPIPE;
 
 		nbyte -= ret;
 		total += ret;
@@ -71,13 +72,14 @@ int xwrite(int fd, const void *buf, size_t nbyte)
 	while (nbyte) {
 		ret = write(fd, ptr, nbyte);
 		if (ret < 0) {
+			ret = -errno;
 			LOG("%s: failed to write %u bytes to fd %d: %s",
-			    __func__, nbyte, fd, strerror(errno));
-			return errno;
+			    __func__, nbyte, fd, xstrerror(ret));
+			return ret;
 		}
 
 		if (ret == 0)
-			return EPIPE;
+			return -EPIPE;
 
 		nbyte -= ret;
 		total += ret;
@@ -94,21 +96,21 @@ char *read_file_common(const char *fname, struct stat *sb)
 	int ret;
 	int fd;
 
-	fd = open(fname, O_RDONLY);
-	if (fd == -1) {
-		out = ERR_PTR(errno);
+	fd = xopen(fname, O_RDONLY, 0);
+	if (fd < 0) {
+		out = ERR_PTR(fd);
 		goto err;
 	}
 
 	ret = fstat(fd, &statbuf);
 	if (ret == -1) {
-		out = ERR_PTR(errno);
+		out = ERR_PTR(-errno);
 		goto err_close;
 	}
 
 	out = malloc(statbuf.st_size + 1);
 	if (!out) {
-		out = ERR_PTR(ENOMEM);
+		out = ERR_PTR(-ENOMEM);
 		goto err_close;
 	}
 
@@ -124,7 +126,7 @@ char *read_file_common(const char *fname, struct stat *sb)
 	}
 
 err_close:
-	close(fd);
+	xclose(fd);
 
 err:
 	return out;
@@ -135,14 +137,14 @@ int write_file(const char *fname, const char *data, size_t len)
 	int ret;
 	int fd;
 
-	fd = open(fname, O_WRONLY | O_CREAT | O_EXCL,
-		  S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-	if (fd == -1)
-		return errno;
+	fd = xopen(fname, O_WRONLY | O_CREAT | O_EXCL,
+		   S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	if (fd < 0)
+		return fd;
 
 	ret = xwrite(fd, data, len);
 
-	close(fd);
+	xclose(fd);
 
 	return ret;
 }

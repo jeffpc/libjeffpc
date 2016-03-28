@@ -63,13 +63,13 @@ static inline int xopen(const char *fname, int flags, mode_t mode)
 	int fd;
 
 	fd = open(fname, flags, mode);
-	return (fd == -1) ? errno : fd;
+	return (fd == -1) ? -errno : fd;
 }
 
 static inline int xclose(int fd)
 {
 	if (close(fd) == -1)
-		return errno;
+		return -errno;
 	return 0;
 }
 
