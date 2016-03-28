@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+# Copyright (c) 2015 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,10 +20,22 @@
 # SOFTWARE.
 #
 
-set(CMAKE_MODULE_PATH "${CMAKE_DIR}/Modules")
-find_package(umem)
+#
+# Find the UMEM includes and library.
+#
+# This module defines:
+#   UMEM_INCLUDE_DIR
+#   UMEM_LIBRARY
+#   UMEM_FOUND
+#
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/jeffpc/config.h.in"
-	"${CMAKE_CURRENT_BINARY_DIR}/include/jeffpc/config.h")
+find_path(UMEM_INCLUDE_DIR umem.h)
+find_library(UMEM_LIBRARY NAMES umem)
 
-include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
+#
+# Handle the QUIETLY and REQUIRED arguments and set UMEM_FOUND to TRUE if
+# all listed variables are TRUE.
+#
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(UMEM DEFAULT_MSG UMEM_LIBRARY
+	UMEM_INCLUDE_DIR)

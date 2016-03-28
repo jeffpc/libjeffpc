@@ -66,7 +66,7 @@ add_library(jeffpc SHARED
 )
 
 target_link_libraries(jeffpc
-	umem
+	${UMEM_LIBRARY}
 )
 
 target_apply_mapfile(jeffpc mapfile-vers)
