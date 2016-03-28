@@ -32,6 +32,7 @@
 #include <string.h>
 
 #include <jeffpc/io.h>
+#include <jeffpc/error.h>
 
 int xread(int fd, void *buf, size_t nbyte)
 {
@@ -45,8 +46,9 @@ int xread(int fd, void *buf, size_t nbyte)
 		ret = read(fd, ptr, nbyte);
 		if (ret < 0) {
 			ret = -errno;
-			LOG("%s: failed to read %u bytes from fd %d: %s",
-			    __func__, nbyte, fd, xstrerror(ret));
+			cmn_err(CE_DEBUG, "%s: failed to read %u bytes from "
+				"fd %d: %s", __func__, nbyte, fd,
+				xstrerror(ret));
 			return ret;
 		}
 
@@ -73,8 +75,9 @@ int xwrite(int fd, const void *buf, size_t nbyte)
 		ret = write(fd, ptr, nbyte);
 		if (ret < 0) {
 			ret = -errno;
-			LOG("%s: failed to write %u bytes to fd %d: %s",
-			    __func__, nbyte, fd, xstrerror(ret));
+			cmn_err(CE_DEBUG, "%s: failed to write %u bytes to "
+				"fd %d: %s", __func__, nbyte, fd,
+				xstrerror(ret));
 			return ret;
 		}
 

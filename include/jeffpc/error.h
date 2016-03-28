@@ -27,15 +27,28 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <stdarg.h>
 
 #define NORETURN __attribute__((__noreturn__))
 
-extern void jeffpc_log(const char *fmt, ...);
+enum errlevel {
+	CE_DEBUG,
+	CE_INFO,
+	CE_WARN,
+	CE_ERROR,
+	CE_CRIT,
+	CE_PANIC,
+};
+
+extern void jeffpc_print(enum errlevel level, const char *fmt, ...);
+extern void jeffpc_log(int loglevel, const char *fmt, ...);
+extern void cmn_err(enum errlevel level, const char *fmt, ...);
+extern void cmn_verr(enum errlevel level, const char *fmt, va_list ap);
+extern void panic(const char *fmt, ...);
+
 extern void jeffpc_assfail(const char *a, const char *f, int l) NORETURN;
 extern void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op,
                             uintmax_t rv, const char *f, int l) NORETURN;
-
-#define LOG(...)	jeffpc_log(__VA_ARGS__)
 
 #define ASSERT3P(l, op, r)						\
 	do {								\

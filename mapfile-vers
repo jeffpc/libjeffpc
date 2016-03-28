@@ -28,8 +28,13 @@ SYMBOL_VERSION JEFFPC_0.10 {
 		jeffpc_init;
 
 		# error
+		cmn_err;
+		cmn_verr;
 		jeffpc_assfail;
 		jeffpc_assfail3;
+		jeffpc_log;
+		jeffpc_print;
+		panic;
 
 		# sexpr
 		parse_sexpr;

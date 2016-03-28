@@ -42,12 +42,39 @@
 
 #include <sys/inttypes.h>
 #include <syslog.h>
-#include <stdarg.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <pthread.h>
 
 #include <jeffpc/error.h>
 
+#pragma weak jeffpc_print
+void jeffpc_print(enum errlevel level, const char *fmt, ...)
+{
+	FILE *out;
+	va_list ap;
+
+	switch (level) {
+		case CE_DEBUG:
+		case CE_INFO:
+			out = stdout;
+			break;
+		case CE_WARN:
+		case CE_ERROR:
+		case CE_CRIT:
+		case CE_PANIC:
+		default:
+			out = stderr;
+			break;
+	}
+
+	va_start(ap, fmt);
+	vfprintf(out, fmt, ap);
+	va_end(ap);
+}
+
 #pragma weak jeffpc_log
-void jeffpc_log(const char *fmt, ...)
+void jeffpc_log(int loglevel, const char *fmt, ...)
 {
 	/*
 	 * This function is a no-op but it exists to allow consumers of
@@ -58,7 +85,8 @@ void jeffpc_log(const char *fmt, ...)
 #pragma weak jeffpc_assfail
 void jeffpc_assfail(const char *a, const char *f, int l)
 {
-	LOG("assertion failed: %s, file: %s, line: %d", a, f, l);
+	jeffpc_log(LOG_ALERT, "assertion failed: %s, file: %s, line: %d",
+		   a, f, l);
 
 	assfail(a, f, l);
 
@@ -75,9 +103,92 @@ void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
 	snprintf(msg, sizeof(msg), "%s (0x%"PRIx64" %s 0x%"PRIx64")", a, lv,
 		 op, rv);
 
-	LOG("assertion failed: %s, file: %s, line: %d", msg, f, l);
+	jeffpc_log(LOG_ALERT, "assertion failed: %s, file: %s, line: %d",
+		   msg, f, l);
 
 	assfail(msg, f, l);
+
+	/* this is a hack to shut up gcc */
+	abort();
+}
+
+void cmn_verr(enum errlevel level, const char *fmt, va_list ap)
+{
+	const char *levelstr;
+	unsigned long tid;
+	int loglevel;
+	bool panic;
+	char buf[256];
+
+	tid = (unsigned long) pthread_self();
+	panic = false;
+
+	switch (level) {
+		case CE_DEBUG:
+			levelstr = "DEBUG";
+			loglevel = LOG_DEBUG;
+			break;
+		case CE_INFO:
+			levelstr = "INFO";
+			loglevel = LOG_INFO;
+			break;
+		case CE_WARN:
+			levelstr = "WARN";
+			loglevel = LOG_WARNING;
+			break;
+		case CE_ERROR:
+			levelstr = "ERROR";
+			loglevel = LOG_ERR;
+			break;
+		case CE_CRIT:
+			levelstr = "CRIT";
+			loglevel = LOG_CRIT;
+			break;
+		case CE_PANIC:
+			levelstr = "PANIC";
+			loglevel = LOG_ALERT;
+			panic = true;
+			break;
+		default:
+			levelstr = "?????";
+			loglevel = LOG_CRIT;
+			panic = true;
+			break;
+	}
+
+	vsnprintf(buf, sizeof(buf), fmt, ap);
+
+	/*
+	 * We are printing the thread ID as a 4-digit number. This will
+	 * allow systems that use small integers (e.g., Illumos) to have
+	 * short IDs.  Systems that use large integers (e.g., Linux) will
+	 * use more digits.  Since on those systems the IDs will be
+	 * clustered around some big integer, they will very likely always
+	 * print as the same number of digits.
+	 */
+	jeffpc_log(loglevel, "[%04lx] %-5s %s\n", tid, levelstr, buf);
+	jeffpc_print(level, "[%04lx] %-5s %s\n", tid, levelstr, buf);
+
+	if (panic)
+		abort();
+}
+
+void cmn_err(enum errlevel level, const char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	cmn_verr(level, fmt, ap);
+	va_end(ap);
+}
+
+void panic(const char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	cmn_verr(CE_PANIC, fmt, ap);
+	va_end(ap);
 
 	/* this is a hack to shut up gcc */
 	abort();

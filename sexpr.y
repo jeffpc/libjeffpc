@@ -35,12 +35,12 @@ extern int sexpr_reader_lex(void *, void *);
 
 void yyerror(void *scan, char *e)
 {
-	LOG("Error: %s", e);
+	cmn_err(CE_ERROR, "Error: %s", e);
 }
 
 void sexpr_error2(char *e, char *yytext)
 {
-	LOG("Error: %s (%s)", e, yytext);
+	cmn_err(CE_ERROR, "Error: %s (%s)", e, yytext);
 }
 
 %}
