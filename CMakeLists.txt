@@ -39,6 +39,8 @@ add_compile_options(
 	$<$<C_COMPILER_ID:gcc>:-fno-inline-functions-called-once>
 )
 
+include(cmake/mapfile.cmake)
+
 find_package(BISON)
 find_package(FLEX)
 
