@@ -1,1 +1,1 @@
-/* currently empty */
+#cmakedefine HAVE_ARC4RANDOM
