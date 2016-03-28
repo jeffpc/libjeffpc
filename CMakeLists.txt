@@ -66,6 +66,8 @@ target_link_libraries(jeffpc
 	umem
 )
 
+target_apply_mapfile(jeffpc mapfile-vers)
+
 install(TARGETS	jeffpc DESTINATION lib
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 install(FILES	include/jeffpc/atomic.h
