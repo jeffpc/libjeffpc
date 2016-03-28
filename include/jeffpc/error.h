@@ -28,37 +28,6 @@
 #include <errno.h>
 #include <string.h>
 
-#define MAX_ERRNO	1023
-
-static inline int PTR_ERR(void *ptr)
-{
-	return (intptr_t) ptr;
-}
-
-static inline void *ERR_PTR(int err)
-{
-	if (err > 0) // FIXME: this shouldn't exist
-		return (void *)(intptr_t) -err;
-	return (void *)(intptr_t) err;
-}
-
-static inline int IS_ERR(void *ptr)
-{
-	intptr_t err = (intptr_t) ptr;
-
-	return (err < 0) && (err >= -MAX_ERRNO);
-}
-
-static inline void *ERR_CAST(void *ptr)
-{
-	return ptr;
-}
-
-static inline const char *xstrerror(int e)
-{
-	return strerror(e);
-}
-
 #define NORETURN __attribute__((__noreturn__))
 
 extern void jeffpc_log(const char *fmt, ...);
@@ -102,5 +71,38 @@ extern void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op,
 	} while(0)
 
 #define ASSERT0(c)	ASSERT3U((c), ==, 0)
+
+/*
+ * Negated errno handling
+ */
+#define MAX_ERRNO	1023
+
+static inline int PTR_ERR(void *ptr)
+{
+	return (intptr_t) ptr;
+}
+
+static inline void *ERR_PTR(int err)
+{
+	ASSERT3S(err, <=, 0); /* FIXME: this shouldn't exist */
+	return (void *)(intptr_t) err;
+}
+
+static inline int IS_ERR(void *ptr)
+{
+	intptr_t err = (intptr_t) ptr;
+
+	return (err < 0) && (err >= -MAX_ERRNO);
+}
+
+static inline void *ERR_CAST(void *ptr)
+{
+	return ptr;
+}
+
+static inline const char *xstrerror(int e)
+{
+	return strerror(e);
+}
 
 #endif
