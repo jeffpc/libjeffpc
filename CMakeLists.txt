@@ -81,6 +81,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/refcnt.h
 		include/jeffpc/sexpr.h
 		include/jeffpc/str.h
+		include/jeffpc/time.h
 		include/jeffpc/val.h
 	DESTINATION include/jeffpc
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
