@@ -44,11 +44,21 @@ set(CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(cmake/config.cmake)
 include(cmake/mapfile.cmake)
 
+# handle missing libumem
+if(NOT UMEM_FOUND)
+	set(UMEM_LIBRARY)
+	set(UMEM_INCLUDE_DIR fakeumem/include)
+	set(UMEM_EXTRA_SOURCE fakeumem/fakeumem.c)
+else()
+	set(UMEM_EXTRA_SOURCE)
+endif()
+
 find_package(BISON)
 find_package(FLEX)
 
 include_directories(
 	include
+	${UMEM_INCLUDE_DIR}
 )
 
 BISON_TARGET(sexpr sexpr.y sexpr.tab.c COMPILE_FLAGS "-p sexpr_reader_")
@@ -64,6 +74,7 @@ add_library(jeffpc SHARED
 	${FLEX_sexpr_OUTPUTS} ${BISON_sexpr_OUTPUTS}
 	str.c
 	val.c
+	${UMEM_EXTRA_SOURCE}
 )
 
 target_link_libraries(jeffpc
