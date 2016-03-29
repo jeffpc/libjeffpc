@@ -24,7 +24,11 @@
 #define __JEFFPC_INT_H
 
 #include <inttypes.h>
+#include <sys/byteorder.h>
 
+/*
+ * string to integer conversion
+ */
 #define STR_TO_INT(size, imax)						\
 static inline int __str2u##size(const char *restrict s,			\
 				uint##size##_t *i,			\
@@ -60,5 +64,36 @@ STR_TO_INT(64, 0xffffffffffffffffull)
 #define str2u64(s, i)	__str2u64((s), (i), 10)
 #define str2u32(s, i)	__str2u32((s), (i), 10)
 #define str2u16(s, i)	__str2u16((s), (i), 10)
+
+/*
+ * byte ordering
+ */
+#define __GEN(from, size, to, bswap)					\
+static inline uint##size##_t from##size##_to_##to(uint##size##_t x)	\
+{									\
+	return bswap;							\
+}
+
+#ifdef CPU_BIG_ENDIAN
+#define GEN(size)							\
+	__GEN(be,  size, cpu, x)					\
+	__GEN(cpu, size, be,  x)					\
+	__GEN(le,  size, cpu, BSWAP_##size(x))				\
+	__GEN(cpu, size, le,  BSWAP_##size(x))
+#else
+#define GEN(size)							\
+	__GEN(be,  size, cpu, BSWAP_##size(x))				\
+	__GEN(cpu, size, be,  BSWAP_##size(x))				\
+	__GEN(le,  size, cpu, x)					\
+	__GEN(cpu, size, le,  x)
+#endif
+
+GEN(64)
+GEN(32)
+GEN(16)
+GEN(8)
+
+#undef __GEN
+#undef GEN
 
 #endif
