@@ -68,6 +68,7 @@ ADD_FLEX_BISON_DEPENDENCY(sexpr sexpr)
 
 add_library(jeffpc SHARED
 	error.c
+	hexdump.c
 	init.c
 	io.c
 	rand.c
@@ -91,6 +92,7 @@ install(TARGETS	jeffpc DESTINATION lib
 install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/config.h
 		include/jeffpc/error.h
+		include/jeffpc/hexdump.h
 		include/jeffpc/int.h
 		include/jeffpc/io.h
 		include/jeffpc/jeffpc.h

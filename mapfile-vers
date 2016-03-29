@@ -36,6 +36,10 @@ SYMBOL_VERSION JEFFPC_0.10 {
 		jeffpc_print;
 		panic;
 
+		# hexdump
+		hexdump;
+		hexdumpz;
+
 		# rand
 		rand32;
 		rand64;
