@@ -21,6 +21,9 @@
 #
 
 include(CheckFunctionExists)
+include(TestBigEndian)
+
+test_big_endian(CPU_BIG_ENDIAN)
 
 check_function_exists(arc4random HAVE_ARC4RANDOM)
 

@@ -23,6 +23,8 @@
 #ifndef __JEFFPC_CONFIG_H
 #define __JEFFPC_CONFIG_H
 
+#cmakedefine CPU_BIG_ENDIAN
+
 #cmakedefine HAVE_ARC4RANDOM
 
 #endif
