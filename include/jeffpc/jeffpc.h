@@ -23,6 +23,16 @@
 #ifndef __JEFFPC_JEFFPC_H
 #define __JEFFPC_JEFFPC_H
 
-extern void jeffpc_init(void);
+#include <jeffpc/error.h>
+
+struct jeffpc_ops {
+	void (*print)(enum errlevel level, const char *fmt, va_list ap);
+	void (*log)(int loglevel, const char *fmt, va_list ap);
+	void (*assfail)(const char *a, const char *f, int l);
+	void (*assfail3)(const char *a, uintmax_t lv, const char *op,
+			 uintmax_t rv, const char *f, int l);
+};
+
+extern void jeffpc_init(struct jeffpc_ops *ops);
 
 #endif

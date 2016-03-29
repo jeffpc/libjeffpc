@@ -23,9 +23,30 @@
 #include <jeffpc/jeffpc.h>
 
 #include "init.h"
+#include "error_impl.h"
 
-void jeffpc_init(void)
+struct jeffpc_ops libops;
+
+#define SET_OP(mem, def)				\
+	do {						\
+		libops.mem = ops->mem ? ops->mem : def;	\
+	} while (0)
+
+void jeffpc_init(struct jeffpc_ops *ops)
 {
+	struct jeffpc_ops dummy;
+
+	if (!ops) {
+		memset(&dummy, 0, sizeof(dummy));
+		ops = &dummy;
+	}
+
+	SET_OP(print,    default_print);
+	SET_OP(log,      default_log);
+	SET_OP(assfail,  default_assfail);
+	SET_OP(assfail3, default_assfail3);
+
 	init_str_subsys();
 	init_val_subsys();
+
 }

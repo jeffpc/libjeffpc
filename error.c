@@ -48,11 +48,11 @@
 
 #include <jeffpc/error.h>
 
-#pragma weak jeffpc_print
-void jeffpc_print(enum errlevel level, const char *fmt, ...)
+#include "init.h"
+
+void default_print(enum errlevel level, const char *fmt, va_list ap)
 {
 	FILE *out;
-	va_list ap;
 
 	switch (level) {
 		case CE_DEBUG:
@@ -68,13 +68,19 @@ void jeffpc_print(enum errlevel level, const char *fmt, ...)
 			break;
 	}
 
-	va_start(ap, fmt);
 	vfprintf(out, fmt, ap);
+}
+
+void jeffpc_print(enum errlevel level, const char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	libops.print(level, fmt, ap);
 	va_end(ap);
 }
 
-#pragma weak jeffpc_log
-void jeffpc_log(int loglevel, const char *fmt, ...)
+void default_log(int loglevel, const char *fmt, va_list ap)
 {
 	/*
 	 * This function is a no-op but it exists to allow consumers of
@@ -82,21 +88,33 @@ void jeffpc_log(int loglevel, const char *fmt, ...)
 	 */
 }
 
-#pragma weak jeffpc_assfail
-void jeffpc_assfail(const char *a, const char *f, int l)
+void jeffpc_log(int loglevel, const char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	libops.log(loglevel, fmt, ap);
+	va_end(ap);
+}
+
+void default_assfail(const char *a, const char *f, int l)
 {
 	jeffpc_log(LOG_ALERT, "assertion failed: %s, file: %s, line: %d",
 		   a, f, l);
 
 	assfail(a, f, l);
+}
+
+void jeffpc_assfail(const char *a, const char *f, int l)
+{
+	libops.assfail(a, f, l);
 
 	/* this is a hack to shut up gcc */
 	abort();
 }
 
-#pragma weak jeffpc_assfail3
-void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
-                     const char *f, int l)
+void default_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
+		      const char *f, int l)
 {
 	char msg[512];
 
@@ -107,6 +125,12 @@ void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
 		   msg, f, l);
 
 	assfail(msg, f, l);
+}
+
+void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
+		     const char *f, int l)
+{
+	libops.assfail3(a, lv, op, rv, f, l);
 
 	/* this is a hack to shut up gcc */
 	abort();

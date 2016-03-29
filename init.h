@@ -23,7 +23,11 @@
 #ifndef __INIT_H
 #define __INIT_H
 
+#include <jeffpc/jeffpc.h>
+
 extern void init_val_subsys(void);
 extern void init_str_subsys(void);
+
+extern struct jeffpc_ops libops;
 
 #endif
