@@ -23,6 +23,8 @@
 #ifndef __JEFFPC_RAND_H
 #define __JEFFPC_RAND_H
 
+#include <inttypes.h>
+
 extern uint32_t rand32(void);
 extern uint64_t rand64(void);
 
