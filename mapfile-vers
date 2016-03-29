@@ -80,6 +80,11 @@ SYMBOL_VERSION JEFFPC_0.10 {
 		xread;
 		xwrite;
 
+		# uuid
+		xuuid_clear;
+		xuuid_compare;
+		xuuid_generate;
+
 	local:
 		*;
 };

@@ -73,12 +73,14 @@ add_library(jeffpc SHARED
 	sexpr.c
 	${FLEX_sexpr_OUTPUTS} ${BISON_sexpr_OUTPUTS}
 	str.c
+	uuid.c
 	val.c
 	${UMEM_EXTRA_SOURCE}
 )
 
 target_link_libraries(jeffpc
 	${UMEM_LIBRARY}
+	uuid
 )
 
 target_apply_mapfile(jeffpc mapfile-vers)
@@ -97,6 +99,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/str.h
 		include/jeffpc/thread.h
 		include/jeffpc/time.h
+		include/jeffpc/uuid.h
 		include/jeffpc/val.h
 	DESTINATION include/jeffpc
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
