@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <umem.h>
+#include <alloca.h>
 
 #include <jeffpc/str.h>
 #include <jeffpc/jeffpc.h>
@@ -82,43 +83,60 @@ int str_cmp(const struct str *a, const struct str *b)
 	return strcmp(a->str, b->str);
 }
 
-struct str *str_cat5(struct str *a, struct str *b, struct str *c,
-		     struct str *d, struct str *e)
+struct str *str_cat(int n, ...)
 {
-#define NSTRS	5
-	struct str *strs[NSTRS] = {a, b, c, d, e};
-	size_t len[NSTRS];
 	size_t totallen;
 	struct str *ret;
 	char *buf, *out;
+	size_t *len;
+	va_list ap;
 	int i;
 
-	totallen = 0;
+	if (!n)
+		return NULL;
 
-	for (i = 0; i < NSTRS; i++) {
-		if (!strs[i])
+	if (n == 1) {
+		va_start(ap, n);
+		ret = va_arg(ap, struct str *);
+		va_end(ap);
+		return ret;
+	}
+
+	totallen = 0;
+	len = alloca(sizeof(size_t) * n);
+
+	va_start(ap, n);
+	for (i = 0; i < n; i++) {
+		struct str *str = va_arg(ap, struct str *);
+
+		if (!str)
 			continue;
 
-		len[i] = strlen(strs[i]->str);
+		len[i] = strlen(str->str);
 
 		totallen += len[i];
 	}
+	va_end(ap);
 
 	buf = malloc(totallen + 1);
 	ASSERT(buf);
 
 	out = buf;
 
-	for (i = 0; i < NSTRS; i++) {
-		if (!strs[i])
+	va_start(ap, n);
+	for (i = 0; i < n; i++) {
+		struct str *str = va_arg(ap, struct str *);
+
+		if (!str)
 			continue;
 
-		strcpy(out, strs[i]->str);
+		strcpy(out, str->str);
 
 		out += len[i];
 
-		str_putref(strs[i]);
+		str_putref(str);
 	}
+	va_end(ap);
 
 	ret = str_alloc(buf);
 	ASSERT(ret);

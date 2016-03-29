@@ -56,7 +56,7 @@ SYMBOL_VERSION JEFFPC_0.10 {
 
 		# str
 		str_alloc;
-		str_cat5;
+		str_cat;
 		str_cmp;
 		str_dup;
 		str_free;

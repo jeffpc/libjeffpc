@@ -52,14 +52,9 @@ extern struct str *str_alloc(char *s);
 extern size_t str_len(const struct str *str);
 extern int str_cmp(const struct str *a, const struct str *b);
 extern struct str *str_dup(const char *s);
-extern struct str *str_cat5(struct str *a, struct str *b, struct str *c,
-			    struct str *d, struct str *e);
+extern struct str *str_cat(int n, ...);
 extern void str_free(struct str *str);
 REFCNT_PROTOTYPES(struct str, str)
-
-#define str_cat4(a, b, c, d)		str_cat5((a), (b), (c), (d), NULL)
-#define str_cat3(a, b, c)		str_cat5((a), (b), (c), NULL, NULL)
-#define str_cat(a, b)			str_cat5((a), (b), NULL, NULL, NULL)
 
 #define STR_ALLOC(s)			\
 	({				\

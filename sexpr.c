@@ -124,21 +124,21 @@ static struct str *dump_cons(struct val *lv, bool raw)
 	struct val *tail = lv->cons.tail;
 
 	if (raw)
-		return str_cat3(dump_expr(head, raw),
-				&dot,
-				dump_expr(tail, raw));
+		return str_cat(3, dump_expr(head, raw),
+			       &dot,
+			       dump_expr(tail, raw));
 	else if (!head && !tail)
 		return NULL;
 	else if (head && !tail)
 		return dump_expr(head, raw);
 	else if (tail->type == VT_CONS)
-		return str_cat3(dump_expr(head, raw),
-				&space,
-				dump_cons(tail, raw));
+		return str_cat(3, dump_expr(head, raw),
+			       &space,
+			       dump_cons(tail, raw));
 	else
-		return str_cat3(dump_expr(head, raw),
-				&dot,
-				dump_expr(tail, raw));
+		return str_cat(3, dump_expr(head, raw),
+			       &dot,
+			       dump_expr(tail, raw));
 }
 
 static struct str *dump_expr(struct val *lv, bool raw)
@@ -161,7 +161,7 @@ static struct str *dump_expr(struct val *lv, bool raw)
 			tmpstr = escape_str(str_cstr(lv->str));
 			/* TODO: we leak tmpstr */
 
-			return str_cat3(&quote, STR_DUP(tmpstr), &quote);
+			return str_cat(3, &quote, STR_DUP(tmpstr), &quote);
 		case VT_BOOL:
 			return lv->b ? &poundt : &poundf;
 		case VT_INT: {
@@ -172,7 +172,7 @@ static struct str *dump_expr(struct val *lv, bool raw)
 			return STR_DUP(tmp);
 		}
 		case VT_CONS:
-			return str_cat3(&oparen, dump_cons(lv, raw), &cparen);
+			return str_cat(3, &oparen, dump_cons(lv, raw), &cparen);
 	}
 
 	return NULL;
@@ -185,7 +185,7 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 
 	ret = dump_expr(lv, raw);
 
-	return ret ? str_cat(&quote, ret) : NULL;
+	return ret ? str_cat(2, &quote, ret) : NULL;
 }
 
 void sexpr_dump_file(FILE *out, struct val *lv, bool raw)
