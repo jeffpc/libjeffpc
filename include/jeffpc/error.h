@@ -89,6 +89,9 @@ extern void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op,
 
 #define ASSERT0(c)	ASSERT3U((c), ==, 0)
 
+#define FIXME(m, ...)	cmn_err(CE_ERROR, "FIXME @ " __FILE__":%d: " fmt, \
+				__LINE__, ##__VA_ARGS__)
+
 /*
  * Negated errno handling
  */
