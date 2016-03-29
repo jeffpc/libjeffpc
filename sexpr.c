@@ -98,7 +98,7 @@ static char *escape_str(const char *in)
 	return out;
 }
 
-struct val *parse_sexpr(const char *str, size_t len)
+struct val *sexpr_parse(const char *str, size_t len)
 {
 	struct sexpr_parser_state x;
 

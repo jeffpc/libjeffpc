@@ -33,7 +33,7 @@ static int onefile(char *ibuf, size_t len)
 {
 	struct val *lv;
 
-	lv = parse_sexpr(ibuf, len);
+	lv = sexpr_parse(ibuf, len);
 
 	sexpr_dump_file(stderr, lv, false);
 	fprintf(stderr, "\n");

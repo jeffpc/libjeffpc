@@ -28,25 +28,25 @@
 #include <jeffpc/val.h>
 #include <jeffpc/str.h>
 
-extern struct val *parse_sexpr(const char *str, size_t len);
+extern struct val *sexpr_parse(const char *str, size_t len);
 extern struct str *sexpr_dump(struct val *lv, bool raw);
 extern void sexpr_dump_file(FILE *out, struct val *lv, bool raw);
 extern struct val *sexpr_array_to_list(struct val **vals, int nvals);
 
-static inline struct val *parse_sexpr_str(struct str *str)
+static inline struct val *sexpr_parse_str(struct str *str)
 {
 	if (!str)
 		return NULL;
 
-	return parse_sexpr(str_cstr(str), str_len(str));
+	return sexpr_parse(str_cstr(str), str_len(str));
 }
 
-static inline struct val *parse_sexpr_cstr(const char *str)
+static inline struct val *sexpr_parse_cstr(const char *str)
 {
 	if (!str)
 		return NULL;
 
-	return parse_sexpr(str, strlen(str));
+	return sexpr_parse(str, strlen(str));
 }
 
 extern struct val *sexpr_car(struct val *val);
