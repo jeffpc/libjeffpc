@@ -24,7 +24,8 @@
 #define __JEFFPC_INT_H
 
 #include <inttypes.h>
-#include <sys/byteorder.h>
+#include <stdlib.h>
+#include <errno.h>
 
 /*
  * string to integer conversion
@@ -68,6 +69,37 @@ STR_TO_INT(64, 0xffffffffffffffffull)
 /*
  * byte ordering
  */
+static inline uint64_t bswap_64(uint64_t in)
+{
+	return ((in & 0xff00000000000000) >> 56) |
+	       ((in & 0x00ff000000000000) >> 40) |
+	       ((in & 0x0000ff0000000000) >> 24) |
+	       ((in & 0x000000ff00000000) >> 8) |
+	       ((in & 0x00000000ff000000) << 8) |
+	       ((in & 0x0000000000ff0000) << 24) |
+	       ((in & 0x000000000000ff00) << 40) |
+	       ((in & 0x00000000000000ff) << 56);
+}
+
+static inline uint32_t bswap_32(uint32_t in)
+{
+	return ((in & 0xff000000) >> 24) |
+	       ((in & 0x00ff0000) >> 8) |
+	       ((in & 0x0000ff00) << 8) |
+	       ((in & 0x000000ff) << 24);
+}
+
+static inline uint16_t bswap_16(uint16_t in)
+{
+	return ((in & 0xff00) >> 8) |
+	       ((in & 0x00ff) << 8);
+}
+
+static inline uint8_t bswap_8(uint8_t in)
+{
+	return (in & 0xff);
+}
+
 #define __GEN(from, size, to, bswap)					\
 static inline uint##size##_t from##size##_to_##to(uint##size##_t x)	\
 {									\
@@ -78,12 +110,12 @@ static inline uint##size##_t from##size##_to_##to(uint##size##_t x)	\
 #define GEN(size)							\
 	__GEN(be,  size, cpu, x)					\
 	__GEN(cpu, size, be,  x)					\
-	__GEN(le,  size, cpu, BSWAP_##size(x))				\
-	__GEN(cpu, size, le,  BSWAP_##size(x))
+	__GEN(le,  size, cpu, bswap_##size(x))				\
+	__GEN(cpu, size, le,  bswap_##size(x))
 #else
 #define GEN(size)							\
-	__GEN(be,  size, cpu, BSWAP_##size(x))				\
-	__GEN(cpu, size, be,  BSWAP_##size(x))				\
+	__GEN(be,  size, cpu, bswap_##size(x))				\
+	__GEN(cpu, size, be,  bswap_##size(x))				\
 	__GEN(le,  size, cpu, x)					\
 	__GEN(cpu, size, le,  x)
 #endif
