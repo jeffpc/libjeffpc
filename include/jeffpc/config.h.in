@@ -26,5 +26,6 @@
 #cmakedefine CPU_BIG_ENDIAN
 
 #cmakedefine HAVE_ARC4RANDOM
+#cmakedefine HAVE_ASSFAIL
 
 #endif

@@ -40,15 +40,24 @@
 #undef ASSERT3P
 #undef ASSERT0
 
-#include <sys/inttypes.h>
+#include <inttypes.h>
 #include <syslog.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <assert.h>
 #include <pthread.h>
 
 #include <jeffpc/error.h>
+#include <jeffpc/config.h>
 
 #include "init.h"
+
+#ifndef HAVE_ASSFAIL
+static void assfail(const char *assertion, const char *file, int line)
+{
+	__assert(assertion, file, line);
+}
+#endif
 
 void default_print(enum errlevel level, const char *fmt, va_list ap)
 {
