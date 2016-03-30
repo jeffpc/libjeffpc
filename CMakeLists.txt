@@ -44,6 +44,7 @@ set(CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(cmake/config.cmake)
 include(cmake/mapfile.cmake)
+include(cmake/test.cmake)
 
 # handle missing libumem
 if(NOT UMEM_FOUND)
@@ -107,23 +108,10 @@ install(FILES	include/jeffpc/atomic.h
 	DESTINATION include/jeffpc
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 
-function(simple_c_test type section bin data)
-	add_test(NAME "${type}:${section}:${data}"
-		 COMMAND "${CMAKE_BINARY_DIR}/test_${bin}"
-			 "${CMAKE_CURRENT_SOURCE_DIR}/${data}"
-	)
-endfunction()
-
 #
 # Test related executables
 #
 
-add_executable(test_sexpr_parser
-	test_sexpr_parser.c
-)
-
-target_link_libraries(test_sexpr_parser
-	jeffpc
-)
+build_test_bin(sexpr_parser)
 
 add_subdirectory(tests)
