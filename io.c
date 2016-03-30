@@ -44,13 +44,8 @@ int xread(int fd, void *buf, size_t nbyte)
 
 	while (nbyte) {
 		ret = read(fd, ptr, nbyte);
-		if (ret < 0) {
-			ret = -errno;
-			cmn_err(CE_DEBUG, "%s: failed to read %u bytes from "
-				"fd %d: %s", __func__, nbyte, fd,
-				xstrerror(ret));
-			return ret;
-		}
+		if (ret < 0)
+			return -errno;
 
 		if (ret == 0)
 			return -EPIPE;
@@ -73,13 +68,8 @@ int xwrite(int fd, const void *buf, size_t nbyte)
 
 	while (nbyte) {
 		ret = write(fd, ptr, nbyte);
-		if (ret < 0) {
-			ret = -errno;
-			cmn_err(CE_DEBUG, "%s: failed to write %u bytes to "
-				"fd %d: %s", __func__, nbyte, fd,
-				xstrerror(ret));
-			return ret;
-		}
+		if (ret < 0)
+			return -errno;
 
 		if (ret == 0)
 			return -EPIPE;
