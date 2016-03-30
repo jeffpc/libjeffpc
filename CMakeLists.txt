@@ -48,7 +48,7 @@ include(cmake/test.cmake)
 
 # handle missing libumem
 if(NOT UMEM_FOUND)
-	set(UMEM_LIBRARY)
+	set(UMEM_LIBRARY "")
 	set(UMEM_INCLUDE_DIR fakeumem/include)
 	set(UMEM_EXTRA_SOURCE fakeumem/fakeumem.c)
 else()
