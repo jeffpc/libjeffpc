@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 
+#include <stdint.h>
+
 #include <jeffpc/hexdump.h>
 
 void hexdump(char *out, const void *in, size_t inlen, bool upper)
