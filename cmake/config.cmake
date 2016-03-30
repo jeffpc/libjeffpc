@@ -21,12 +21,14 @@
 #
 
 include(CheckFunctionExists)
+include(CheckIncludeFiles)
 include(TestBigEndian)
 
 test_big_endian(CPU_BIG_ENDIAN)
 
 check_function_exists(arc4random HAVE_ARC4RANDOM)
 check_function_exists(assfail HAVE_ASSFAIL)
+check_include_files(sys/debug.h HAVE_SYS_DEBUG_H)
 
 set(CMAKE_MODULE_PATH "${CMAKE_DIR}/Modules")
 find_package(umem)

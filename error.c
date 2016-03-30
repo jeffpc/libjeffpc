@@ -20,26 +20,6 @@
  * SOFTWARE.
  */
 
-#include <sys/debug.h>
-
-/*
- * clean up the pulled in defines since we want to do our own thing
- */
-#undef ASSERT
-#undef VERIFY
-#undef ASSERT64
-#undef ASSERT32
-#undef IMPLY
-#undef EQUIV
-#undef VERIFY3S
-#undef VERIFY3U
-#undef VERIFY3P
-#undef VERIFY0
-#undef ASSERT3S
-#undef ASSERT3U
-#undef ASSERT3P
-#undef ASSERT0
-
 #include <inttypes.h>
 #include <syslog.h>
 #include <stdio.h>
@@ -47,16 +27,20 @@
 #include <assert.h>
 #include <pthread.h>
 
-#include <jeffpc/error.h>
 #include <jeffpc/config.h>
+#include <jeffpc/error.h>
 
 #include "init.h"
 
 #ifndef HAVE_ASSFAIL
-static void assfail(const char *assertion, const char *file, int line)
+static int assfail(const char *assertion, const char *file, int line)
 {
 	__assert(assertion, file, line);
+
+	return 0; /* not reached */
 }
+#else
+extern int assfail(const char *a, const char *f, int l);
 #endif
 
 void default_print(enum errlevel level, const char *fmt, va_list ap)
@@ -226,3 +210,14 @@ void panic(const char *fmt, ...)
 	/* this is a hack to shut up gcc */
 	abort();
 }
+
+/*
+ * If we have sys/debug.h, let's include it so that the assfail function
+ * signature gets checked to be what we expect.
+ *
+ * This include is at the end of this file because it polutes the namespace
+ * big time.
+ */
+#ifdef HAVE_SYS_DEBUG_H
+#include <sys/debug.h>
+#endif
