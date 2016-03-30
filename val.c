@@ -25,6 +25,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <inttypes.h>
 #include <umem.h>
 
 #include <jeffpc/val.h>
