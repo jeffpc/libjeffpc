@@ -36,3 +36,10 @@ macro(build_test_bin name)
 		jeffpc
 	)
 endmacro()
+
+macro(build_test_bin_and_run name)
+	build_test_bin(${name})
+	add_test(NAME "${name}"
+		 COMMAND "${CMAKE_BINARY_DIR}/test_${name}"
+	)
+endmacro()
