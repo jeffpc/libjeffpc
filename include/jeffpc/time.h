@@ -21,6 +21,7 @@
  */
 
 #include <inttypes.h>
+#include <time.h>
 
 static inline uint64_t gettime(void)
 {
