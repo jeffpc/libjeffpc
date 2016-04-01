@@ -63,8 +63,10 @@ include_directories(
 	${UMEM_INCLUDE_DIR}
 )
 
-BISON_TARGET(sexpr sexpr.y sexpr.tab.c COMPILE_FLAGS "-p sexpr_reader_")
-FLEX_TARGET(sexpr sexpr.l sexpr.lex.c COMPILE_FLAGS "-P sexpr_reader_")
+BISON_TARGET(sexpr sexpr.y ${CMAKE_CURRENT_BINARY_DIR}/sexpr.tab.c
+	COMPILE_FLAGS "-p sexpr_reader_")
+FLEX_TARGET(sexpr sexpr.l ${CMAKE_CURRENT_BINARY_DIR}/sexpr.lex.c
+	COMPILE_FLAGS "-P sexpr_reader_")
 ADD_FLEX_BISON_DEPENDENCY(sexpr sexpr)
 
 add_library(jeffpc SHARED
