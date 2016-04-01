@@ -35,11 +35,9 @@ struct sexpr_parser_state {
 	int lineno;
 };
 
-typedef void* yyscan_t;
-
-extern int sexpr_reader_lex_destroy(yyscan_t yyscanner);
+extern int sexpr_reader_lex_destroy(void *yyscanner);
 extern int sexpr_reader_parse(struct sexpr_parser_state *data);
-extern void sexpr_reader_set_extra(void *user, yyscan_t yyscanner);
-extern int sexpr_reader_lex_init(yyscan_t *scanner);
+extern void sexpr_reader_set_extra(void *user, void *yyscanner);
+extern int sexpr_reader_lex_init(void **scanner);
 
 #endif
