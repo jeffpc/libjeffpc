@@ -45,6 +45,7 @@ set(CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(cmake/config.cmake)
 include(cmake/mapfile.cmake)
 include(cmake/test.cmake)
+include(cmake/paths.cmake)
 
 # handle missing libumem
 if(NOT UMEM_FOUND)
@@ -95,7 +96,7 @@ target_link_libraries(jeffpc
 
 target_apply_mapfile(jeffpc mapfile-vers)
 
-install(TARGETS	jeffpc DESTINATION lib
+install(TARGETS	jeffpc DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/error.h
