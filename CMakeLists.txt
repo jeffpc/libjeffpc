@@ -108,6 +108,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/refcnt.h
 		include/jeffpc/sexpr.h
 		include/jeffpc/str.h
+		include/jeffpc/synch.h
 		include/jeffpc/thread.h
 		include/jeffpc/time.h
 		include/jeffpc/uuid.h
