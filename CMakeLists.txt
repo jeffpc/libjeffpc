@@ -98,7 +98,6 @@ target_apply_mapfile(jeffpc mapfile-vers)
 install(TARGETS	jeffpc DESTINATION lib
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 install(FILES	include/jeffpc/atomic.h
-		include/jeffpc/config.h
 		include/jeffpc/error.h
 		include/jeffpc/hexdump.h
 		include/jeffpc/int.h
@@ -112,6 +111,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/time.h
 		include/jeffpc/uuid.h
 		include/jeffpc/val.h
+		${CMAKE_CURRENT_BINARY_DIR}/include/jeffpc/config.h
 	DESTINATION include/jeffpc
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 
