@@ -73,4 +73,39 @@ static inline int xclose(int fd)
 	return 0;
 }
 
+static inline int xstat(const char *restrict path, struct stat *restrict buf)
+{
+	if (stat(path, buf) == -1)
+		return -errno;
+	return 0;
+}
+
+static inline int xlstat(const char *restrict path, struct stat *restrict buf)
+{
+	if (lstat(path, buf) == -1)
+		return -errno;
+	return 0;
+}
+
+static inline int xmkdir(const char *path, mode_t mode)
+{
+	if (mkdir(path, mode) == -1)
+		return -errno;
+	return 0;
+}
+
+static inline int xrename(const char *old, const char *new)
+{
+	if (rename(old, new) == -1)
+		return -errno;
+	return 0;
+}
+
+static inline int xunlink(const char *path)
+{
+	if (unlink(path) == -1)
+		return -errno;
+	return 0;
+}
+
 #endif
