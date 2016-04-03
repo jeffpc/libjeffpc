@@ -46,6 +46,7 @@ static struct str *__alloc(char *s, bool copy)
 		return NULL;
 
 	refcnt_init(&str->refcnt, 1);
+	str->flags = 0;
 
 	if (copy) {
 		strcpy(str->inline_str, s);
