@@ -49,7 +49,7 @@ extern void cmn_err(enum errlevel level, const char *fmt, ...)
 	__attribute__ ((format (printf, 2, 3)));
 extern void cmn_verr(enum errlevel level, const char *fmt, va_list ap);
 extern void panic(const char *fmt, ...)
-	__attribute__ ((format (printf, 1, 2)));
+	__attribute__ ((format (printf, 1, 2))) NORETURN;
 
 extern void jeffpc_assfail(const char *a, const char *f, int l) NORETURN;
 extern void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op,
