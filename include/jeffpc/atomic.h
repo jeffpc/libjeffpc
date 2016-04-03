@@ -39,7 +39,7 @@ typedef struct {
 #define atomic_set(var, val)	((var)->v = (val))
 #define atomic_read(var)	((var)->v)
 #define atomic_add(var, val)	__sync_add_and_fetch(&(var)->v, (val))
-#define atomic_sub(var, val)	__sync_sub_and_fetch(&(var)->v, -(val))
+#define atomic_sub(var, val)	__sync_sub_and_fetch(&(var)->v, (val))
 #define atomic_inc(var)		atomic_add((var), 1)
 #define atomic_dec(var)		atomic_sub((var), 1)
 #define atomic_cas(var, old, new)	\
