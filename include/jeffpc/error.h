@@ -55,7 +55,7 @@ extern void jeffpc_assfail(const char *a, const char *f, int l) NORETURN;
 extern void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op,
                             uintmax_t rv, const char *f, int l) NORETURN;
 
-#define ASSERT3P(l, op, r)						\
+#define VERIFY3P(l, op, r)						\
 	do {								\
 		uintptr_t lhs = (uintptr_t)(l);				\
 		uintptr_t rhs = (uintptr_t)(r);				\
@@ -64,7 +64,7 @@ extern void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op,
 					__FILE__, __LINE__);		\
 	} while(0)
 
-#define ASSERT3U(l, op, r)						\
+#define VERIFY3U(l, op, r)						\
 	do {								\
 		uint64_t lhs = (l);					\
 		uint64_t rhs = (r);					\
@@ -73,7 +73,7 @@ extern void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op,
 					__FILE__, __LINE__);		\
 	} while(0)
 
-#define ASSERT3S(l, op, r)						\
+#define VERIFY3S(l, op, r)						\
 	do {								\
 		int64_t lhs = (l);					\
 		int64_t rhs = (r);					\
@@ -82,13 +82,19 @@ extern void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op,
 					__FILE__, __LINE__);		\
 	} while(0)
 
-#define ASSERT(c)							\
+#define VERIFY(c)							\
 	do {								\
 		if (!(c))						\
 			jeffpc_assfail(#c, __FILE__, __LINE__);		\
 	} while(0)
 
-#define ASSERT0(c)	ASSERT3U((c), ==, 0)
+#define VERIFY0(c)	VERIFY3U((c), ==, 0)
+
+#define ASSERT3P(l, op, r)	VERIFY3P(l, op, r)
+#define ASSERT3U(l, op, r)	VERIFY3U(l, op, r)
+#define ASSERT3S(l, op, r)	VERIFY3S(l, op, r)
+#define ASSERT(c)		VERIFY(c)
+#define ASSERT0(c)		VERIFY0(c)
 
 #define FIXME(m, ...)	cmn_err(CE_ERROR, "FIXME @ " __FILE__":%d: " fmt, \
 				__LINE__, ##__VA_ARGS__)
