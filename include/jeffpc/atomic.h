@@ -29,6 +29,10 @@ typedef struct {
 	volatile uint32_t v;
 } atomic_t;
 
+typedef struct {
+	volatile uint64_t v;
+} atomic64_t;
+
 /*
  * The following implement generic set/read/add/sub/inc/dec operations.
  *
