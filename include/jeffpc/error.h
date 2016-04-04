@@ -96,7 +96,7 @@ extern void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op,
 #define ASSERT(c)		VERIFY(c)
 #define ASSERT0(c)		VERIFY0(c)
 
-#define FIXME(m, ...)	cmn_err(CE_ERROR, "FIXME @ " __FILE__":%d: " fmt, \
+#define FIXME(fmt, ...)	cmn_err(CE_ERROR, "FIXME @ " __FILE__":%d: " fmt, \
 				__LINE__, ##__VA_ARGS__)
 
 /*
