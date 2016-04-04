@@ -25,7 +25,16 @@
 #include "init.h"
 #include "error_impl.h"
 
-struct jeffpc_ops libops;
+/*
+ * We initialize these to the defaults to allow cmn_err to work even before
+ * the library is initialized.
+ */
+struct jeffpc_ops libops = {
+	.print		= default_print,
+	.log		= default_log,
+	.assfail	= default_assfail,
+	.assfail3	= default_assfail3,
+};
 
 #define SET_OP(mem, def)				\
 	do {						\
