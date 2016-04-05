@@ -1,1 +1,1 @@
-'((abc . def)(ghi . jkl))
+((abc . def)(ghi . jkl))

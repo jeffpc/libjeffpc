@@ -29,8 +29,6 @@
 
 #include "sexpr_impl.h"
 
-static struct str *dump_expr(struct val *lv, bool raw);
-
 static char *escape_str(const char *in)
 {
 	char *out, *tmp;
@@ -124,24 +122,24 @@ static struct str *dump_cons(struct val *lv, bool raw)
 	struct val *tail = lv->cons.tail;
 
 	if (raw)
-		return str_cat(3, dump_expr(head, raw),
+		return str_cat(3, sexpr_dump(head, raw),
 			       &dot,
-			       dump_expr(tail, raw));
+			       sexpr_dump(tail, raw));
 	else if (!head && !tail)
 		return NULL;
 	else if (head && !tail)
-		return dump_expr(head, raw);
+		return sexpr_dump(head, raw);
 	else if (tail->type == VT_CONS)
-		return str_cat(3, dump_expr(head, raw),
+		return str_cat(3, sexpr_dump(head, raw),
 			       &space,
 			       dump_cons(tail, raw));
 	else
-		return str_cat(3, dump_expr(head, raw),
+		return str_cat(3, sexpr_dump(head, raw),
 			       &dot,
-			       dump_expr(tail, raw));
+			       sexpr_dump(tail, raw));
 }
 
-static struct str *dump_expr(struct val *lv, bool raw)
+struct str *sexpr_dump(struct val *lv, bool raw)
 {
 	static struct str quote = STR_STATIC_INITIALIZER("\"");
 	static struct str poundt = STR_STATIC_INITIALIZER("#t");
@@ -176,16 +174,6 @@ static struct str *dump_expr(struct val *lv, bool raw)
 	}
 
 	return NULL;
-}
-
-struct str *sexpr_dump(struct val *lv, bool raw)
-{
-	static struct str quote = STR_STATIC_INITIALIZER("'");
-	struct str *ret;
-
-	ret = dump_expr(lv, raw);
-
-	return ret ? str_cat(2, &quote, ret) : NULL;
 }
 
 void sexpr_dump_file(FILE *out, struct val *lv, bool raw)

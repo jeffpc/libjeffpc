@@ -59,7 +59,7 @@ void sexpr_error2(char *e, char *yytext)
 %type <lv> document tok list toklist
 
 %%
-document : '\'' tok		{ data->output = $2; }
+document : tok			{ data->output = $1; }
 	 ;
 
 tok : SYMBOL			{ $$ = VAL_ALLOC_SYM($1); }
