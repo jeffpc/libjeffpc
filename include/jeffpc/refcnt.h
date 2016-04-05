@@ -26,28 +26,30 @@
 #include <jeffpc/atomic.h>
 #include <jeffpc/error.h>
 
-typedef atomic_t refcnt_t;
+typedef struct {
+	atomic_t count;
+} refcnt_t;
 
 static inline void refcnt_init(refcnt_t *x, uint32_t v)
 {
-	atomic_set(x, v);
+	atomic_set(&x->count, v);
 }
 
 static inline uint32_t refcnt_read(refcnt_t *x)
 {
-	return atomic_read(x);
+	return atomic_read(&x->count);
 }
 
 /* INTERNAL FUNCTION - DO NOT USE DIRECTLY */
 static inline void __refcnt_inc(refcnt_t *x)
 {
-	atomic_inc(x);
+	atomic_inc(&x->count);
 }
 
 /* INTERNAL FUNCTION - DO NOT USE DIRECTLY */
 static inline uint32_t __refcnt_dec(refcnt_t *x)
 {
-	return atomic_dec(x);
+	return atomic_dec(&x->count);
 }
 
 #define REFCNT_PROTOTYPES(type, name)					\
