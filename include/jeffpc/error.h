@@ -129,7 +129,7 @@ static inline void *ERR_CAST(void *ptr)
 
 static inline const char *xstrerror(int e)
 {
-	return strerror(e);
+	return strerror(-e);
 }
 
 #endif
