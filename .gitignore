@@ -11,4 +11,5 @@ sexpr.tab.c
 sexpr.tab.h
 
 libjeffpc.so
+test_padding
 test_sexpr_parser

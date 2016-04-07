@@ -40,6 +40,9 @@ SYMBOL_VERSION JEFFPC_0.10 {
 		hexdump;
 		hexdumpz;
 
+		# padding
+		check_padding;
+
 		# rand
 		rand32;
 		rand64;

@@ -80,6 +80,7 @@ add_library(jeffpc SHARED
 	hexdump.c
 	init.c
 	io.c
+	padding.c
 	rand.c
 	sexpr.c
 	${FLEX_sexpr_OUTPUTS} ${BISON_sexpr_OUTPUTS}
@@ -104,6 +105,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/int.h
 		include/jeffpc/io.h
 		include/jeffpc/jeffpc.h
+		include/jeffpc/padding.h
 		include/jeffpc/rand.h
 		include/jeffpc/refcnt.h
 		include/jeffpc/sexpr.h
@@ -122,5 +124,6 @@ install(FILES	include/jeffpc/atomic.h
 #
 
 build_test_bin(sexpr_parser)
+build_test_bin_and_run(padding)
 
 add_subdirectory(tests)
