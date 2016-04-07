@@ -113,6 +113,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/synch.h
 		include/jeffpc/thread.h
 		include/jeffpc/time.h
+		include/jeffpc/types.h
 		include/jeffpc/uuid.h
 		include/jeffpc/val.h
 		${CMAKE_CURRENT_BINARY_DIR}/include/jeffpc/config.h
@@ -124,6 +125,7 @@ install(FILES	include/jeffpc/atomic.h
 #
 
 build_test_bin(sexpr_parser)
+build_test_bin_and_run(array)
 build_test_bin_and_run(hexdump)
 build_test_bin_and_run(padding)
 
