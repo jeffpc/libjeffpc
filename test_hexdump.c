@@ -22,6 +22,7 @@
 
 #include <jeffpc/hexdump.h>
 #include <jeffpc/padding.h>
+#include <jeffpc/types.h>
 
 #include "test.c"
 
@@ -49,7 +50,6 @@ static const struct run runs[] = {
 	TEST_ENTRY("\0\1\2\3\4\5\6\7\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f",
 		   "000102030405060708090a0b0c0d0e0f",
 		   "000102030405060708090A0B0C0D0E0F"),
-	{ NULL, },
 };
 
 /*
@@ -111,7 +111,7 @@ void test(void)
 {
 	int i;
 
-	for (i = 0; runs[i].in ; i++) {
+	for (i = 0; i < ARRAY_LEN(runs) ; i++) {
 		__test(hexdump,  "hexdump",  i, true,  false);
 		__test(hexdump,  "hexdump",  i, false, false);
 		__test(hexdumpz, "hexdumpz", i, true,  true);

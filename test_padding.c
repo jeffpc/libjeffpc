@@ -21,6 +21,7 @@
  */
 
 #include <jeffpc/padding.h>
+#include <jeffpc/types.h>
 
 #include "test.c"
 
@@ -54,7 +55,6 @@ static const struct run runs[] = {
 	TEST_ENTRY(mid5,	'A',  false),
 	TEST_ENTRY(end4,	'A',  false),
 	TEST_ENTRY(end4,	'X',  false),
-	{ NULL, },
 };
 
 static void __test(int idx, const uint8_t *in, size_t inlen, uint8_t byte,
@@ -74,7 +74,7 @@ void test(void)
 {
 	int i;
 
-	for (i = 0; runs[i].in ; i++)
+	for (i = 0; i < ARRAY_LEN(runs) ; i++)
 		__test(i, runs[i].in, runs[i].inlen, runs[i].byte,
 		       runs[i].success);
 }
