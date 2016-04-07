@@ -12,6 +12,7 @@ sexpr.tab.h
 
 libjeffpc.so
 test_array
+test_atomic-single-thread
 test_bswap
 test_hexdump
 test_padding

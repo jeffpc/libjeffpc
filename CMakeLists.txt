@@ -126,6 +126,7 @@ install(FILES	include/jeffpc/atomic.h
 
 build_test_bin(sexpr_parser)
 build_test_bin_and_run(array)
+build_test_bin_and_run(atomic-single-thread)
 build_test_bin_and_run(bswap)
 build_test_bin_and_run(hexdump)
 build_test_bin_and_run(padding)
