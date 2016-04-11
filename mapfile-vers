@@ -24,14 +24,11 @@ $mapfile_version 2
 
 SYMBOL_VERSION JEFFPC_0.10 {
 	protected:
-		# init
-		jeffpc_init;
-
 		# error
 		cmn_err;
 		cmn_verr;
-		jeffpc_assfail;
 		jeffpc_assfail3;
+		jeffpc_assfail;
 		jeffpc_log;
 		jeffpc_print;
 		panic;
@@ -39,6 +36,15 @@ SYMBOL_VERSION JEFFPC_0.10 {
 		# hexdump
 		hexdump;
 		hexdumpz;
+
+		# init
+		jeffpc_init;
+
+		# io
+		read_file_common;
+		write_file;
+		xread;
+		xwrite;
 
 		# padding
 		check_padding;
@@ -71,6 +77,11 @@ SYMBOL_VERSION JEFFPC_0.10 {
 		str_len;
 		str_putref;
 
+		# uuid
+		xuuid_clear;
+		xuuid_compare;
+		xuuid_generate;
+
 		# val
 		val_alloc;
 		val_dump;
@@ -80,17 +91,6 @@ SYMBOL_VERSION JEFFPC_0.10 {
 		val_set_int;
 		val_set_str;
 		val_set_sym;
-
-		# io
-		read_file_common;
-		write_file;
-		xread;
-		xwrite;
-
-		# uuid
-		xuuid_clear;
-		xuuid_compare;
-		xuuid_generate;
 
 	local:
 		*;
