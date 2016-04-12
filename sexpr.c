@@ -335,9 +335,20 @@ bool sexpr_equal(struct val *lhs, struct val *rhs)
 		goto out;
 	}
 
-	/* if one is NUL, they are unequal */
+	/* if one is NULL, they are unequal */
 	if (!lhs || !rhs) {
-		ret = false;
+		/* ... unless we're comparing a NULL with a '() */
+		if ((!lhs && ((rhs->type != VT_CONS) ||
+			      rhs->cons.head ||
+			      rhs->cons.tail)) ||
+		    (!rhs && ((lhs->type != VT_CONS) ||
+			      lhs->cons.head ||
+			      lhs->cons.tail))) {
+			ret = false;
+			goto out;
+		}
+
+		ret = true;
 		goto out;
 	}
 
