@@ -65,6 +65,7 @@ SYMBOL_VERSION JEFFPC_0.10 {
 		sexpr_dump;
 		sexpr_dump_file;
 		sexpr_equal;
+		sexpr_list_to_array;
 		sexpr_parse;
 
 		# str

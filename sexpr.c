@@ -211,6 +211,42 @@ struct val *sexpr_array_to_list(struct val **vals, int nvals)
 	return last;
 }
 
+/*
+ * Convert a sexpr list into a C array of vals.  E.g.,
+ *
+ *     '(A B C)
+ *
+ * turns into:
+ *
+ *     array = { A, B, C }, nvals = 3
+ *
+ * We fill in the passed in array with at most alen elements.  The number of
+ * filled in elements is returned to the caller.
+ */
+int sexpr_list_to_array(struct val *list, struct val **array, int alen)
+{
+	struct val *tmp;
+	int nvals = 0;
+
+	for (tmp = list; tmp && (alen > nvals); tmp = tmp->cons.tail, nvals++) {
+		if (tmp->type != VT_CONS)
+			goto err;
+
+		array[nvals] = val_getref(tmp->cons.head);
+	}
+
+	if ((alen == nvals) && tmp)
+		goto err;
+
+	return nvals;
+
+err:
+	while (nvals)
+		val_putref(array[--nvals]);
+
+	return -1;
+}
+
 struct val *sexpr_car(struct val *lv)
 {
 	struct val *ret;
