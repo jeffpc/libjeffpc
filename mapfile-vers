@@ -68,6 +68,9 @@ SYMBOL_VERSION JEFFPC_0.10 {
 		sexpr_list_to_array;
 		sexpr_parse;
 
+		# sock
+		connect_ip;
+
 		# str
 		str_alloc;
 		str_cat;
