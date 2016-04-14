@@ -235,6 +235,13 @@ void save_stacktrace(struct stack *stack)
 		stack->frames[nframes++] = NULL;
 }
 
+#ifndef HAVE_ADDRTOSYMSTR
+static void addrtosymstr(void *pc, char *buf, size_t buflen)
+{
+	snprintf(buf, buflen, "[%#p]", pc);
+}
+#endif
+
 /*
  * Note: We must not allocate any memory, etc. because we want this function
  * to be callable from any context.
