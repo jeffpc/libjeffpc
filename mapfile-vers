@@ -32,6 +32,8 @@ SYMBOL_VERSION JEFFPC_0.10 {
 		jeffpc_log;
 		jeffpc_print;
 		panic;
+		print_stacktrace;
+		save_stacktrace;
 
 		# hexdump
 		hexdump;

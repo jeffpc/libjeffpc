@@ -41,6 +41,13 @@ enum errlevel {
 	CE_PANIC,
 };
 
+#define ERROR_STACK_FRAMES	16
+
+struct stack {
+	size_t nframes;
+	void *frames[ERROR_STACK_FRAMES];
+};
+
 extern void jeffpc_print(enum errlevel level, const char *fmt, ...)
 	__attribute__ ((format (printf, 2, 3)));
 extern void jeffpc_log(int loglevel, const char *fmt, ...)
@@ -54,6 +61,9 @@ extern void panic(const char *fmt, ...)
 extern void jeffpc_assfail(const char *a, const char *f, int l) NORETURN;
 extern void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op,
                             uintmax_t rv, const char *f, int l) NORETURN;
+
+extern void save_stacktrace(struct stack *stack);
+extern void print_stacktrace(enum errlevel level, struct stack *stack);
 
 #define VERIFY3P(l, op, r)						\
 	do {								\

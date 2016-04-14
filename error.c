@@ -26,6 +26,8 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <pthread.h>
+#include <execinfo.h>
+#include <ucontext.h>
 
 #include <jeffpc/config.h>
 #include <jeffpc/error.h>
@@ -95,6 +97,8 @@ void default_assfail(const char *a, const char *f, int l)
 	jeffpc_log(LOG_ALERT, "assertion failed: %s, file: %s, line: %d",
 		   a, f, l);
 
+	print_stacktrace(CE_CRIT, NULL);
+
 	assfail(a, f, l);
 }
 
@@ -116,6 +120,8 @@ void default_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
 
 	jeffpc_log(LOG_ALERT, "assertion failed: %s, file: %s, line: %d",
 		   msg, f, l);
+
+	print_stacktrace(CE_CRIT, NULL);
 
 	assfail(msg, f, l);
 }
@@ -186,8 +192,10 @@ void cmn_verr(enum errlevel level, const char *fmt, va_list ap)
 	jeffpc_log(loglevel, "[%04lx] %-5s %s\n", tid, levelstr, buf);
 	jeffpc_print(level, "[%04lx] %-5s %s\n", tid, levelstr, buf);
 
-	if (panic)
+	if (panic) {
+		print_stacktrace(CE_CRIT, NULL);
 		abort();
+	}
 }
 
 void cmn_err(enum errlevel level, const char *fmt, ...)
@@ -209,6 +217,45 @@ void panic(const char *fmt, ...)
 
 	/* this is a hack to shut up gcc */
 	abort();
+}
+
+/*
+ * Note: We must not allocate any memory, etc. because we want this function
+ * to be callable from any context.
+ */
+void save_stacktrace(struct stack *stack)
+{
+	size_t nframes;
+
+	nframes = backtrace(stack->frames, ERROR_STACK_FRAMES);
+	stack->nframes = nframes;
+
+	/* NULL-out any unused frames */
+	while (nframes < ERROR_STACK_FRAMES)
+		stack->frames[nframes++] = NULL;
+}
+
+/*
+ * Note: We must not allocate any memory, etc. because we want this function
+ * to be callable from any context.
+ */
+void print_stacktrace(enum errlevel level, struct stack *stack)
+{
+	struct stack here;
+	size_t i;
+
+	if (!stack) {
+		save_stacktrace(&here);
+		stack = &here;
+	}
+
+	for (i = 0; i < stack->nframes; i++) {
+		char tmp[256];
+
+		addrtosymstr(stack->frames[i], tmp, sizeof(tmp));
+
+		cmn_err(level, "  %s", tmp);
+	}
 }
 
 /*
