@@ -64,7 +64,7 @@ vol type *name##_getref(type *x)					\
 									\
 	ASSERT3U(refcnt_read(&x->member), >=, 1);			\
 									\
-	__refcnt_inc(&x->member);						\
+	__refcnt_inc(&x->member);					\
 									\
 	return x;							\
 }									\
