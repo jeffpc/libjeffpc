@@ -23,27 +23,39 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdio.h>
-#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
+#include <sys/uio.h>
 
 #include <jeffpc/io.h>
 #include <jeffpc/error.h>
 
-int xread(int fd, void *buf, size_t nbyte)
+static inline ssize_t rw(int fd, void *buf, size_t nbyte, off_t off,
+			 const bool useoff, const bool readfxns)
 {
 	char *ptr = buf;
 	size_t total;
-	int ret;
+	ssize_t ret;
 
 	total = 0;
 
 	while (nbyte) {
-		ret = read(fd, ptr, nbyte);
+		if (readfxns) {
+			if (useoff)
+				ret = pread(fd, ptr, nbyte, off);
+			else
+				ret = read(fd, ptr, nbyte);
+		} else {
+			if (useoff)
+				ret = pwrite(fd, ptr, nbyte, off);
+			else
+				ret = write(fd, ptr, nbyte);
+		}
+
 		if (ret < 0)
 			return -errno;
 
@@ -53,83 +65,30 @@ int xread(int fd, void *buf, size_t nbyte)
 		nbyte -= ret;
 		total += ret;
 		ptr   += ret;
+		off   += ret;
 	}
 
 	return 0;
+}
+
+int xread(int fd, void *buf, size_t nbyte)
+{
+	return rw(fd, buf, nbyte, 0, false, true);
 }
 
 int xpread(int fd, void *buf, size_t nbyte, off_t off)
 {
-	char *ptr = buf;
-	size_t total;
-	int ret;
-
-	total = 0;
-
-	while (nbyte) {
-		ret = pread(fd, ptr, nbyte, off);
-		if (ret < 0)
-			return -errno;
-
-		if (ret == 0)
-			return -EPIPE;
-
-		nbyte -= ret;
-		total += ret;
-		ptr   += ret;
-		off   += ret;
-	}
-
-	return 0;
+	return rw(fd, buf, nbyte, off, true, true);
 }
 
 int xwrite(int fd, const void *buf, size_t nbyte)
 {
-	const char *ptr = buf;
-	size_t total;
-	int ret;
-
-	total = 0;
-
-	while (nbyte) {
-		ret = write(fd, ptr, nbyte);
-		if (ret < 0)
-			return -errno;
-
-		if (ret == 0)
-			return -EPIPE;
-
-		nbyte -= ret;
-		total += ret;
-		ptr   += ret;
-	}
-
-	return 0;
+	return rw(fd, (void *) buf, nbyte, 0, false, false);
 }
 
 int xpwrite(int fd, const void *buf, size_t nbyte, off_t off)
 {
-	const char *ptr = buf;
-	size_t total;
-	int ret;
-
-	total = 0;
-
-	while (nbyte) {
-		ret = pwrite(fd, ptr, nbyte, off);
-		if (ret < 0)
-			return -errno;
-
-		if (ret == 0)
-			return -EPIPE;
-
-		nbyte -= ret;
-		total += ret;
-		ptr   += ret;
-		off   += ret;
-	}
-
-	return 0;
+	return rw(fd, (void *) buf, nbyte, off, true, false);
 }
 
 char *read_file_common(const char *fname, struct stat *sb)
