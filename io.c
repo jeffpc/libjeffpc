@@ -58,6 +58,31 @@ int xread(int fd, void *buf, size_t nbyte)
 	return 0;
 }
 
+int xpread(int fd, void *buf, size_t nbyte, off_t off)
+{
+	char *ptr = buf;
+	size_t total;
+	int ret;
+
+	total = 0;
+
+	while (nbyte) {
+		ret = pread(fd, ptr, nbyte, off);
+		if (ret < 0)
+			return -errno;
+
+		if (ret == 0)
+			return -EPIPE;
+
+		nbyte -= ret;
+		total += ret;
+		ptr   += ret;
+		off   += ret;
+	}
+
+	return 0;
+}
+
 int xwrite(int fd, const void *buf, size_t nbyte)
 {
 	const char *ptr = buf;
@@ -77,6 +102,31 @@ int xwrite(int fd, const void *buf, size_t nbyte)
 		nbyte -= ret;
 		total += ret;
 		ptr   += ret;
+	}
+
+	return 0;
+}
+
+int xpwrite(int fd, const void *buf, size_t nbyte, off_t off)
+{
+	const char *ptr = buf;
+	size_t total;
+	int ret;
+
+	total = 0;
+
+	while (nbyte) {
+		ret = pwrite(fd, ptr, nbyte, off);
+		if (ret < 0)
+			return -errno;
+
+		if (ret == 0)
+			return -EPIPE;
+
+		nbyte -= ret;
+		total += ret;
+		ptr   += ret;
+		off   += ret;
 	}
 
 	return 0;

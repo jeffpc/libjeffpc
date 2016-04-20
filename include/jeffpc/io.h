@@ -31,8 +31,14 @@
 
 #include <jeffpc/error.h>
 
+/*
+ * An incomplete read/write is considered an error.
+ */
 extern int xread(int fd, void *buf, size_t nbyte);
 extern int xwrite(int fd, const void *buf, size_t nbyte);
+extern int xpread(int fd, void *buf, size_t nbyte, off_t off);
+extern int xpwrite(int fd, const void *buf, size_t nbyte, off_t off);
+
 extern char *read_file_common(const char *fname, struct stat *sb);
 extern int write_file(const char *fname, const char *data, size_t len);
 

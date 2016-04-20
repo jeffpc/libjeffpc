@@ -45,6 +45,8 @@ SYMBOL_VERSION JEFFPC_0.10 {
 		# io
 		read_file_common;
 		write_file;
+		xpread;
+		xpwrite;
 		xread;
 		xwrite;
 
