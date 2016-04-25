@@ -21,6 +21,7 @@
  */
 
 #include <jeffpc/atomic.h>
+#include <jeffpc/int.h>
 
 #include "test.c"
 
