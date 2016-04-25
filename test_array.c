@@ -39,7 +39,7 @@ union bar {
 		type test_array[nelem];				\
 		size_t res = ARRAY_LEN(test_array);		\
 								\
-		fprintf(stderr, "   %-16s test_array[%zu]\t=> %zu...",\
+		fprintf(stderr, "   %-16s test_array[%lu]\t=> %zu...",\
 			#type, nelem, res);			\
 								\
 		if (res != nelem)				\
@@ -95,7 +95,7 @@ static void test_array_len(void)
 	 * time if we feed TEST_ONE a type that is large to begin with.
 	 */
 	for (i = 0; i <= 24; i++)
-		TEST_TYPES(1u << i);
+		TEST_TYPES(1UL << i);
 
 	fprintf(stderr, "All ARRAY_LEN tests passed.\n");
 }
