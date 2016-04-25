@@ -23,6 +23,8 @@
 #ifndef __JEFFPC_TYPES_H
 #define __JEFFPC_TYPES_H
 
-#define ARRAY_LEN(x)		(sizeof(x) / sizeof(x[0]))
+#include <jeffpc/int.h>
+
+#define ARRAY_LEN(x)		((size_t) (sizeof(x) / sizeof(x[0])))
 
 #endif
