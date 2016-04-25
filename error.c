@@ -238,7 +238,7 @@ void save_stacktrace(struct stack *stack)
 #ifndef HAVE_ADDRTOSYMSTR
 static void addrtosymstr(void *pc, char *buf, size_t buflen)
 {
-	snprintf(buf, buflen, "[%#p]", pc);
+	snprintf(buf, buflen, "[%p]", pc);
 }
 #endif
 
