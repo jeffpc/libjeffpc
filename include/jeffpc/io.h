@@ -122,4 +122,11 @@ static inline int xunlink(const char *path)
 	return 0;
 }
 
+static inline int xftruncate(int fd, off_t len)
+{
+	if (ftruncate(fd, len) == -1)
+		return -errno;
+	return 0;
+}
+
 #endif
