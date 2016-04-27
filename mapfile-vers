@@ -85,6 +85,22 @@ SYMBOL_VERSION JEFFPC_0.10 {
 		str_len;
 		str_putref;
 
+		# synch
+		mxinit;
+		mxdestroy;
+		mxlock;
+		mxunlock;
+		rwinit;
+		rwdestroy;
+		rwlock;
+		rwunlock;
+		condinit;
+		conddestroy;
+		condwait;
+		condreltimedwait;
+		condsig;
+		condbcast;
+
 		# uuid
 		xuuid_clear;
 		xuuid_compare;

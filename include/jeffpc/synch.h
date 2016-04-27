@@ -23,18 +23,48 @@
 #ifndef __JEFFPC_SYNCH_H
 #define __JEFFPC_SYNCH_H
 
+#include <stdbool.h>
 #include <pthread.h>
 
-#include <jeffpc/error.h>
+struct lock {
+	pthread_mutex_t lock;
+};
 
-#define MXINIT(l)	ASSERT0(pthread_mutex_init((l), NULL))
-#define MXDESTROY(l)	ASSERT0(pthread_mutex_destroy(l))
-#define MXLOCK(l)	ASSERT0(pthread_mutex_lock(l))
-#define MXUNLOCK(l)	ASSERT0(pthread_mutex_unlock(l))
-#define CONDINIT(c)	ASSERT0(pthread_cond_init((c), NULL))
-#define CONDDESTROY(c)	ASSERT0(pthread_cond_destroy(c))
-#define CONDWAIT(c,m)	ASSERT0(pthread_cond_wait((c),(m)))
-#define CONDSIG(c)	ASSERT0(pthread_cond_signal(c))
-#define CONDBCAST(c)	ASSERT0(pthread_cond_broadcast(c))
+struct rwlock {
+	pthread_rwlock_t lock;
+};
+
+struct cond {
+	pthread_cond_t cond;
+};
+
+extern void mxinit(struct lock *m);
+extern void mxdestroy(struct lock *m);
+extern void mxlock(struct lock *m);
+extern void mxunlock(struct lock *m);
+
+extern void rwinit(struct rwlock *l);
+extern void rwdestroy(struct rwlock *l);
+extern void rwlock(struct rwlock *l, bool wr);
+extern void rwunlock(struct rwlock *l);
+
+extern void condinit(struct cond *c);
+extern void conddestroy(struct cond *c);
+extern void condwait(struct cond *c, struct lock *m);
+extern int condreltimedwait(struct cond *c, struct lock *m,
+			    const struct timespec *reltime);
+extern void condsig(struct cond *c);
+extern void condbcast(struct cond *c);
+
+/* compat macros */
+#define MXINIT(l)	mxinit(l)
+#define MXDESTROY(l)	mxdestroy(l)
+#define MXLOCK(l)	mxlock(l)
+#define MXUNLOCK(l)	mxunlock(l)
+#define CONDINIT(c)	condinit(c)
+#define CONDDESTROY(c)	conddestroy(c)
+#define CONDWAIT(c,m)	condwait((c),(m))
+#define CONDSIG(c)	condsig(c)
+#define CONDBCAST(c)	condbcast(c)
 
 #endif

@@ -88,6 +88,7 @@ add_library(jeffpc SHARED
 	${FLEX_sexpr_OUTPUTS} ${BISON_sexpr_OUTPUTS}
 	sock.c
 	str.c
+	synch.c
 	uuid.c
 	val.c
 	${UMEM_EXTRA_SOURCE}

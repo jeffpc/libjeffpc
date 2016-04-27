@@ -28,6 +28,7 @@
 #cmakedefine HAVE_ARC4RANDOM
 #cmakedefine HAVE_ASSFAIL
 #cmakedefine HAVE_ADDRTOSYMSTR
+#cmakedefine HAVE_PTHREAD_COND_RELTIMEDWAIT_NP
 #cmakedefine HAVE_SYS_DEBUG_H
 
 #endif
