@@ -20,25 +20,12 @@
 # SOFTWARE.
 #
 
-include(CheckFunctionExists)
-include(CheckIncludeFiles)
-include(TestBigEndian)
+message("-- Checking for GNU linker")
+try_compile(HAVE_GNU_LD "${CMAKE_BINARY_DIR}/cmake/check-for-gnu-ld"
+	"${CMAKE_SOURCE_DIR}/cmake/check-for-gnu-ld" shared-test)
 
-test_big_endian(CPU_BIG_ENDIAN)
-
-check_function_exists(arc4random HAVE_ARC4RANDOM)
-check_function_exists(assfail HAVE_ASSFAIL)
-check_function_exists(addrtosymstr HAVE_ADDRTOSYMSTR)
-check_function_exists(pthread_cond_reltimedwait_np
-	HAVE_PTHREAD_COND_RELTIMEDWAIT_NP)
-check_include_files(sys/debug.h HAVE_SYS_DEBUG_H)
-
-include("${CMAKE_DIR}/config-gnu-ld.cmake")
-
-set(CMAKE_MODULE_PATH "${CMAKE_DIR}/Modules")
-find_package(umem)
-
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/jeffpc/config.h.in"
-	"${CMAKE_CURRENT_BINARY_DIR}/include/jeffpc/config.h")
-
-include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
+if (HAVE_GNU_LD)
+	message("-- Checking for GNU linker - found")
+else()
+	message("-- Checking for GNU linker - not found")
+endif()
