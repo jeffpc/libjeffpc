@@ -37,7 +37,7 @@ uint32_t rand32(void)
 	int ret;
 	int fd;
 
-	fd = xopen("/dev/random", O_RDONLY, 0);
+	fd = xopen("/dev/urandom", O_RDONLY, 0);
 	if (fd < 0)
 		panic("Failed to get random number: %s", xstrerror(fd));
 
