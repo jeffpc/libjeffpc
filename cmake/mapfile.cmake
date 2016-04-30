@@ -21,9 +21,27 @@
 #
 
 macro(target_apply_mapfile tgt mapfile)
-	# This is assuming an illumos-style -M linker option & mapfile format
+	if (HAVE_GNU_LD)
+		set(ld_script "${CMAKE_CURRENT_BINARY_DIR}/${mapfile}.gnu")
+		set(ld_flag "'-Wl,${ld_script}'")
+		add_custom_command(
+			OUTPUT "${ld_script}"
+			COMMAND echo "VERSION {" > "${ld_script}"
+			COMMAND cat "${CMAKE_CURRENT_SOURCE_DIR}/${mapfile}" >> "${ld_script}"
+			COMMAND echo "'};'" >> "${ld_script}"
+			DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${mapfile}"
+			COMMENT "Generating ${mapfile}.gnu for ${tgt}"
+		)
+		add_custom_target("${tgt}-${mapfile}" DEPENDS "${ld_script}")
+		add_dependencies("${tgt}" "${tgt}-${mapfile}")
+	else()
+		# This is assuming an illumos-style -M linker option &
+		# mapfile format
+		set(ld_script "${CMAKE_CURRENT_SOURCE_DIR}/${mapfile}")
+		set(ld_flag "-Wl,-M '${ld_script}'")
+	endif()
 	set_target_properties("${tgt}" PROPERTIES
-		LINK_FLAGS "-Wl,-M '${CMAKE_CURRENT_SOURCE_DIR}/${mapfile}'"
-		LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${mapfile}"
+		LINK_FLAGS "${ld_flag}"
+		LINK_DEPENDS "${ld_script}"
 	)
 endmacro()

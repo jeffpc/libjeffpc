@@ -5,6 +5,7 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 Testing
+mapfile-vers.gnu
 
 sexpr.lex.c
 sexpr.tab.c
