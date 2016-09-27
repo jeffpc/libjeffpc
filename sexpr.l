@@ -75,6 +75,7 @@ static void inc_lineno(yyscan_t scanner);
 #[tf]			{ yylval->b = (yytext[1] == 't'); return BOOL; }
 0[0-7]*			{ ASSERT0(__str2u64(yytext, &yylval->i, 8)); return NUMBER; }
 0x[0-9a-fA-F]*		{ ASSERT0(__str2u64(yytext, &yylval->i, 16)); return NUMBER; }
+#x[0-9a-fA-F]+		{ ASSERT0(__str2u64(yytext + 2, &yylval->i, 16)); return NUMBER; }
 [1-9][0-9]*		{ ASSERT0(str2u64(yytext, &yylval->i)); return NUMBER; }
 [a-zA-Z+_-]+		{ yylval->s = STR_DUP(yytext); return SYMBOL; }
 [ \r\t]			{ /* ignore */ }
