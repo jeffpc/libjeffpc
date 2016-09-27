@@ -146,7 +146,7 @@ void val_dump(struct val *val, int indent)
 			fprintf(stderr, "%*s%"PRIu64"\n", indent, "", val->i);
 			break;
 		case VT_BOOL:
-			fprintf(stderr, "%*s%s", indent, "",
+			fprintf(stderr, "%*s%s\n", indent, "",
 				val->b ? "true" : "false");
 			break;
 		case VT_CONS:
