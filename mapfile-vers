@@ -68,6 +68,7 @@ JEFFPC_0.10 {
 		sexpr_dump_file;
 		sexpr_equal;
 		sexpr_list_to_array;
+		sexpr_nth;
 		sexpr_parse;
 
 		# sock

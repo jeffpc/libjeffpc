@@ -281,6 +281,32 @@ struct val *sexpr_cdr(struct val *lv)
 	return ret;
 }
 
+struct val *sexpr_nth(struct val *lv, uint64_t n)
+{
+	while (n-- && lv) {
+		struct val *tmp;
+
+		if (lv->type == VT_CONS) {
+			/*
+			 * If this is not the one we want, follow the tail.
+			 * Otherwise, grab the head.
+			 */
+			if (n)
+				tmp = val_getref(lv->cons.tail);
+			else
+				tmp = val_getref(lv->cons.head);
+		} else {
+			tmp = NULL;
+		}
+
+		val_putref(lv);
+
+		lv = tmp;
+	}
+
+	return lv;
+}
+
 /*
  * Given a list, lookup a certain name.
  *
