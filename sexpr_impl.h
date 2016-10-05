@@ -26,6 +26,11 @@
 #include <jeffpc/sexpr.h>
 #include <jeffpc/int.h>
 
+static inline bool sexpr_is_null(struct val *v)
+{
+	return !v || (v->type == VT_CONS && !v->cons.head && !v->cons.tail);
+}
+
 struct sexpr_parser_state {
 	void *scanner;
 	const char *input;

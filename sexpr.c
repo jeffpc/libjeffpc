@@ -141,7 +141,8 @@ static struct str *dump_cons(struct val *lv, bool raw)
 
 struct str *sexpr_dump(struct val *lv, bool raw)
 {
-	static struct str quote = STR_STATIC_INITIALIZER("\"");
+	static struct str dquote = STR_STATIC_INITIALIZER("\"");
+	static struct str squote = STR_STATIC_INITIALIZER("'");
 	static struct str poundt = STR_STATIC_INITIALIZER("#t");
 	static struct str poundf = STR_STATIC_INITIALIZER("#f");
 	static struct str oparen = STR_STATIC_INITIALIZER("(");
@@ -159,7 +160,7 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 			tmpstr = escape_str(str_cstr(lv->str));
 			/* TODO: we leak tmpstr */
 
-			return str_cat(3, &quote, STR_DUP(tmpstr), &quote);
+			return str_cat(3, &dquote, STR_DUP(tmpstr), &dquote);
 		case VT_BOOL:
 			return lv->b ? &poundt : &poundf;
 		case VT_INT: {
@@ -169,8 +170,24 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 
 			return STR_DUP(tmp);
 		}
-		case VT_CONS:
+		case VT_CONS: {
+			struct val *head = lv->cons.head;
+			struct val *tail = lv->cons.tail;
+
+			/* handle quoting */
+			if (!raw && head && (head->type == VT_SYM) &&
+			    !strcmp(str_cstr(head->str), "quote")) {
+				/* we're dealing with a (quote) */
+				if (sexpr_is_null(tail))
+					return str_cat(2, &squote, &empty);
+
+				/* we're dealing with a (quote ...) */
+				return str_cat(2, &squote, dump_cons(tail, raw));
+			}
+
+			/* nothing to quote */
 			return str_cat(3, &oparen, dump_cons(lv, raw), &cparen);
+		}
 	}
 
 	return NULL;

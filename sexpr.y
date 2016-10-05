@@ -67,6 +67,9 @@ tok : SYMBOL			{ $$ = VAL_ALLOC_SYM($1); }
     | NUMBER			{ $$ = VAL_ALLOC_INT($1); }
     | BOOL			{ $$ = VAL_ALLOC_BOOL($1); }
     | list			{ $$ = $1; }
+    | '\'' tok			{ $$ = VAL_ALLOC_CONS(
+				         VAL_ALLOC_SYM_CSTR("quote"),
+				         VAL_ALLOC_CONS($2, NULL)); }
     ;
 
 /*

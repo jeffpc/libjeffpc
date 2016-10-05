@@ -18,3 +18,4 @@ test_bswap
 test_hexdump
 test_padding
 test_sexpr_parser
+test_sexpr_eval
