@@ -298,6 +298,28 @@ struct val *sexpr_cdr(struct val *lv)
 	return ret;
 }
 
+ssize_t sexpr_length(struct val *lv)
+{
+	ssize_t len;
+
+	len = 0;
+
+	while (!sexpr_is_null(lv)) {
+		if (lv->type != VT_CONS) {
+			/* not a list */
+			val_putref(lv);
+			return -1;
+		}
+
+		len++;
+		lv = sexpr_cdr(lv);
+	}
+
+	val_putref(lv);
+
+	return len;
+}
+
 struct val *sexpr_nth(struct val *lv, uint64_t n)
 {
 	while (n-- && lv) {

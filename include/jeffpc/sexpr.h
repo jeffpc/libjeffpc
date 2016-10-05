@@ -53,6 +53,7 @@ static inline struct val *sexpr_parse_cstr(const char *str)
 extern struct val *sexpr_car(struct val *val);
 extern struct val *sexpr_cdr(struct val *val);
 /* get nth entry; 0 is the same val, 1 is the same a (car val) */
+extern ssize_t sexpr_length(struct val *lv);
 extern struct val *sexpr_nth(struct val *val, uint64_t n);
 extern struct val *sexpr_assoc(struct val *val, const char *name);
 extern bool sexpr_equal(struct val *lhs, struct val *rhs);
