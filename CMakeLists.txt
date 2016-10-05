@@ -85,6 +85,7 @@ add_library(jeffpc SHARED
 	padding.c
 	rand.c
 	sexpr.c
+	sexpr_eval.c
 	${FLEX_sexpr_OUTPUTS} ${BISON_sexpr_OUTPUTS}
 	sock.c
 	str.c
@@ -136,5 +137,6 @@ build_test_bin_and_run(atomic-single-thread)
 build_test_bin_and_run(bswap)
 build_test_bin_and_run(hexdump)
 build_test_bin_and_run(padding)
+build_test_bin_and_run(sexpr_eval)
 
 add_subdirectory(tests)

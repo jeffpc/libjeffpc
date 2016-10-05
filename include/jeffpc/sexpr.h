@@ -57,6 +57,10 @@ extern struct val *sexpr_nth(struct val *val, uint64_t n);
 extern struct val *sexpr_assoc(struct val *val, const char *name);
 extern bool sexpr_equal(struct val *lhs, struct val *rhs);
 
+extern struct val *sexpr_eval(struct val *val,
+			      struct val *(*lookup)(struct str *, void *),
+			      void *private);
+
 /*
  * Assorted helpers to make alists more pleasant to use.
  */
