@@ -79,6 +79,8 @@ static struct val *fxn_quote(struct val *args,
 static struct builtin_fxn builtins[] = {
 	{ "and",   fxn_and, },
 	{ "or",    fxn_or, },
+	{ "&&",    fxn_and, },
+	{ "||",    fxn_or, },
 	{ "+",     fxn_add, },
 	{ "*",     fxn_mult, },
 	{ "quote", fxn_quote, },

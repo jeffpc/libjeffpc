@@ -136,33 +136,33 @@ static void test_int_op(char *opname, enum val_type type, uint64_t expected,
 								   VAL_ALLOC_INT(v2), \
 								   VAL_ALLOC_INT(v3)))
 
-static void test_bools(void)
+static void test_bools(char *or, char *and)
 {
 	int i, j, k;
 
 	fprintf(stderr, "Testing booleans...\n");
 
-	TEST_BOOL_OP0("or", false);
-	TEST_BOOL_OP0("and", true);
+	TEST_BOOL_OP0(or, false);
+	TEST_BOOL_OP0(and, true);
 
 	for (i = 0; i < 2; i++) {
-		TEST_BOOL_OP1("or",  !!i, !!i);
-		TEST_BOOL_OP1("and", !!i, !!i);
+		TEST_BOOL_OP1(or,  !!i, !!i);
+		TEST_BOOL_OP1(and, !!i, !!i);
 	}
 
 	for (i = 0; i < 2; i++) {
 		for (j = 0; j < 2; j++) {
-			TEST_BOOL_OP2("or",  (!!i) || (!!j), !!i, !!j);
-			TEST_BOOL_OP2("and", (!!i) && (!!j), !!i, !!j);
+			TEST_BOOL_OP2(or,  (!!i) || (!!j), !!i, !!j);
+			TEST_BOOL_OP2(and, (!!i) && (!!j), !!i, !!j);
 		}
 	}
 
 	for (i = 0; i < 2; i++) {
 		for (j = 0; j < 2; j++) {
 			for (k = 0; k < 2; k++) {
-				TEST_BOOL_OP3("or",  (!!i) || (!!j) || (!!k),
+				TEST_BOOL_OP3(or,  (!!i) || (!!j) || (!!k),
 					      !!i, !!j, !!k);
-				TEST_BOOL_OP3("and", (!!i) && (!!j) && (!!k),
+				TEST_BOOL_OP3(and, (!!i) && (!!j) && (!!k),
 					      !!i, !!j, !!k);
 			}
 		}
@@ -204,6 +204,7 @@ void test(void)
 {
 	jeffpc_init(NULL);
 
-	test_bools();
+	test_bools("or", "and");
+	test_bools("||", "&&");
 	test_ints();
 }
