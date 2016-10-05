@@ -39,7 +39,7 @@ extern int xwrite(int fd, const void *buf, size_t nbyte);
 extern int xpread(int fd, void *buf, size_t nbyte, off_t off);
 extern int xpwrite(int fd, const void *buf, size_t nbyte, off_t off);
 
-extern char *read_file_common(const char *fname, struct stat *sb);
+extern char *read_file_common(int dirfd, const char *fname, struct stat *sb);
 extern int write_file(const char *fname, const char *data, size_t len);
 
 static inline int xwrite_str(int fd, const char *s)
@@ -49,7 +49,12 @@ static inline int xwrite_str(int fd, const char *s)
 
 static inline char *read_file(const char *fname)
 {
-	return read_file_common(fname, NULL);
+	return read_file_common(AT_FDCWD, fname, NULL);
+}
+
+static inline char *read_file_at(int dirfd, const char *fname)
+{
+	return read_file_common(dirfd, fname, NULL);
 }
 
 static inline char *read_file_len(const char *fname, size_t *len)
@@ -57,7 +62,7 @@ static inline char *read_file_len(const char *fname, size_t *len)
 	struct stat sb;
 	char *ret;
 
-	ret = read_file_common(fname, &sb);
+	ret = read_file_common(AT_FDCWD, fname, &sb);
 	if (!IS_ERR(ret))
 		*len = sb.st_size;
 

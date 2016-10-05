@@ -91,14 +91,14 @@ int xpwrite(int fd, const void *buf, size_t nbyte, off_t off)
 	return rw(fd, (void *) buf, nbyte, off, true, false);
 }
 
-char *read_file_common(const char *fname, struct stat *sb)
+char *read_file_common(int dirfd, const char *fname, struct stat *sb)
 {
 	struct stat statbuf;
 	char *out;
 	int ret;
 	int fd;
 
-	fd = xopen(fname, O_RDONLY, 0);
+	fd = xopenat(dirfd, fname, O_RDONLY, 0);
 	if (fd < 0) {
 		out = ERR_PTR(fd);
 		goto err;
