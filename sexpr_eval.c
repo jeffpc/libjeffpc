@@ -76,6 +76,20 @@ static struct val *fxn_quote(struct val *args,
 	return sexpr_car(args);
 }
 
+static struct val *fxn_equal(struct val *args,
+			     struct val *(*lookup)(struct str *name, void *private),
+			     void *private)
+{
+	struct val *a, *b;
+
+	VERIFY3U(sexpr_length(val_getref(args)), == ,2);
+
+	a = sexpr_eval(sexpr_nth(val_getref(args), 1), lookup, private);
+	b = sexpr_eval(sexpr_nth(args, 2), lookup, private);
+
+	return VAL_ALLOC_BOOL(sexpr_equal(a, b));
+}
+
 static struct builtin_fxn builtins[] = {
 	{ "and",   fxn_and, },
 	{ "or",    fxn_or, },
@@ -84,6 +98,8 @@ static struct builtin_fxn builtins[] = {
 	{ "+",     fxn_add, },
 	{ "*",     fxn_mult, },
 	{ "quote", fxn_quote, },
+	{ "=",     fxn_equal, },
+	{ "==",    fxn_equal, },
 	{ NULL, },
 };
 

@@ -77,8 +77,7 @@ static void inc_lineno(yyscan_t scanner);
 0x[0-9a-fA-F]*		{ ASSERT0(__str2u64(yytext, &yylval->i, 16)); return NUMBER; }
 #x[0-9a-fA-F]+		{ ASSERT0(__str2u64(yytext + 2, &yylval->i, 16)); return NUMBER; }
 [1-9][0-9]*		{ ASSERT0(str2u64(yytext, &yylval->i)); return NUMBER; }
-[a-zA-Z+_-]?[a-zA-Z0-9+_-]*	{ yylval->s = STR_DUP(yytext); return SYMBOL; }
-(&&|\|\|)		{ yylval->s = STR_DUP(yytext); return SYMBOL; }
+[a-zA-Z+=|&_-]?[a-zA-Z0-9+=|&_-]* { yylval->s = STR_DUP(yytext); return SYMBOL; }
 [ \r\t]			{ /* ignore */ }
 \n			{ inc_lineno(yyscanner); /* ignore */}
 ;[^\n]*			{ /* comment: ignore it */ }
