@@ -95,23 +95,49 @@ static struct builtin_fxn builtins[] = {
 	{ NULL, },
 };
 
-static struct val *eval_cons(struct val *expr, struct sexpr_eval_env *env)
+static void *fxnlookup_builtin(struct str *name)
 {
-	struct val *args;
-	struct val *op;
 	size_t i;
 
+	for (i = 0; builtins[i].name; i++)
+		if (!strcmp(builtins[i].name, str_cstr(name)))
+			return builtins[i].f;
+
+	return NULL;
+}
+
+static struct val *eval_cons(struct val *expr, struct sexpr_eval_env *env)
+{
+	struct val *(*fxn)(struct val *, struct sexpr_eval_env *);
+	struct str *name;
+	struct val *args;
+	struct val *op;
+
 	op = sexpr_car(val_getref(expr));
-	args = sexpr_cdr(val_getref(expr));
+	args = sexpr_cdr(expr);
 
 	ASSERT(op);
 	ASSERT3U(op->type, ==, VT_SYM);
 
-	for (i = 0; builtins[i].name; i++)
-		if (!strcmp(builtins[i].name, str_cstr(op->str)))
-			return builtins[i].f(args, env);
+	name = str_getref(op->str);
+	val_putref(op);
 
-	panic("unknown builtin function '%s'", str_cstr(op->str));
+	if (env->fxnlookup) {
+		fxn = env->fxnlookup(name, env);
+		if (fxn)
+			goto found;
+	}
+
+	fxn = fxnlookup_builtin(name);
+	if (fxn)
+		goto found;
+
+	panic("unknown function '%s'", str_cstr(name));
+
+found:
+	str_putref(name);
+
+	return fxn(args, env);
 }
 
 struct val *sexpr_eval(struct val *expr,
@@ -140,8 +166,7 @@ struct val *sexpr_eval(struct val *expr,
 			name = str_getref(expr->str);
 			val_putref(expr);
 
-			return sexpr_eval(env->symlookup(name, env->private),
-					  env);
+			return sexpr_eval(env->symlookup(name, env), env);
 		}
 		case VT_CONS:
 			return eval_cons(expr, env);

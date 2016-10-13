@@ -29,7 +29,8 @@
 #include <jeffpc/str.h>
 
 struct sexpr_eval_env {
-	struct val *(*symlookup)(struct str *, void *);
+	struct val *(*symlookup)(struct str *, struct sexpr_eval_env *);
+	void *(*fxnlookup)(struct str *, struct sexpr_eval_env *);
 	void *private;
 };
 
