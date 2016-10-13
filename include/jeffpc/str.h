@@ -53,6 +53,9 @@ extern size_t str_len(const struct str *str);
 extern int str_cmp(const struct str *a, const struct str *b);
 extern struct str *str_dup(const char *s);
 extern struct str *str_cat(int n, ...);
+extern struct str *str_printf(const char *fmt, ...)
+	__attribute__((format (printf, 1, 2)));
+extern struct str *str_vprintf(const char *fmt, va_list args);
 extern void str_free(struct str *str);
 REFCNT_PROTOTYPES(struct str, str)
 

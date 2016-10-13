@@ -83,7 +83,9 @@ JEFFPC_0.10 {
 		str_free;
 		str_getref;
 		str_len;
+		str_printf;
 		str_putref;
+		str_vprintf;
 
 		# synch
 		mxinit;

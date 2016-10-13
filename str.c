@@ -145,6 +145,32 @@ struct str *str_cat(int n, ...)
 	return ret;
 }
 
+struct str *str_vprintf(const char *fmt, va_list args)
+{
+	char *tmp;
+	int ret;
+
+	ret = vasprintf(&tmp, fmt, args);
+	if (ret < 0)
+		return ERR_PTR(-errno);
+	if (ret == 0)
+		return NULL;
+
+	return STR_ALLOC(tmp);
+}
+
+struct str *str_printf(const char *fmt, ...)
+{
+	struct str *ret;
+	va_list args;
+
+	va_start(args, fmt);
+	ret = str_vprintf(fmt, args);
+	va_end(args);
+
+	return ret;
+}
+
 void str_free(struct str *str)
 {
 	if (!str)
