@@ -24,15 +24,11 @@
 
 struct builtin_fxn {
 	const char *name;
-	struct val *(*f)(struct val *args,
-			 struct val *(*lookup)(struct str *name, void *private),
-			 void *private);
+	struct val *(*f)(struct val *args, struct sexpr_eval_env *env);
 };
 
 #define __REDUCE(fname, alloc, t, valmember, ident, op)				\
-static struct val *fname(struct val *args,					\
-			 struct val *(*lookup)(struct str *, void *),		\
-			 void *private)						\
+static struct val *fname(struct val *args, struct sexpr_eval_env *env)		\
 {										\
 	struct val *ret;							\
 										\
@@ -43,7 +39,7 @@ static struct val *fname(struct val *args,					\
 		struct val *next = sexpr_cdr(args);				\
 										\
 		while (el && (el->type == VT_CONS || el->type == VT_SYM))	\
-			el = sexpr_eval(el, lookup, private);			\
+			el = sexpr_eval(el, env);				\
 										\
 		ASSERT(el);							\
 		ASSERT3U(el->type, ==, t);					\
@@ -69,23 +65,19 @@ BOOL_REDUCE(fxn_and, true,  &&)
 INT_REDUCE(fxn_add,  0, +)
 INT_REDUCE(fxn_mult, 1, *)
 
-static struct val *fxn_quote(struct val *args,
-			     struct val *(*lookup)(struct str *name, void *private),
-			     void *private)
+static struct val *fxn_quote(struct val *args, struct sexpr_eval_env *env)
 {
 	return sexpr_car(args);
 }
 
-static struct val *fxn_equal(struct val *args,
-			     struct val *(*lookup)(struct str *name, void *private),
-			     void *private)
+static struct val *fxn_equal(struct val *args, struct sexpr_eval_env *env)
 {
 	struct val *a, *b;
 
 	VERIFY3U(sexpr_length(val_getref(args)), == ,2);
 
-	a = sexpr_eval(sexpr_nth(val_getref(args), 1), lookup, private);
-	b = sexpr_eval(sexpr_nth(args, 2), lookup, private);
+	a = sexpr_eval(sexpr_nth(val_getref(args), 1), env);
+	b = sexpr_eval(sexpr_nth(args, 2), env);
 
 	return VAL_ALLOC_BOOL(sexpr_equal(a, b));
 }
@@ -103,9 +95,7 @@ static struct builtin_fxn builtins[] = {
 	{ NULL, },
 };
 
-static struct val *eval_cons(struct val *expr,
-			     struct val *(*lookup)(struct str *, void *),
-			     void *private)
+static struct val *eval_cons(struct val *expr, struct sexpr_eval_env *env)
 {
 	struct val *args;
 	struct val *op;
@@ -119,17 +109,21 @@ static struct val *eval_cons(struct val *expr,
 
 	for (i = 0; builtins[i].name; i++)
 		if (!strcmp(builtins[i].name, str_cstr(op->str)))
-			return builtins[i].f(args, lookup, private);
+			return builtins[i].f(args, env);
 
 	panic("unknown builtin function '%s'", str_cstr(op->str));
 }
 
 struct val *sexpr_eval(struct val *expr,
-		       struct val *(*lookup)(struct str *, void *),
-		       void *private)
+		       struct sexpr_eval_env *env)
 {
+	static struct sexpr_eval_env emptyenv;
+
 	if (!expr)
 		return NULL;
+
+	if (!env)
+		env = &emptyenv;
 
 	switch (expr->type) {
 		case VT_INT:
@@ -139,17 +133,18 @@ struct val *sexpr_eval(struct val *expr,
 		case VT_SYM: {
 			struct str *name;
 
-			if (!lookup)
-				panic("VT_SYM requires non-NULL lookup "
-				      "function passed to sexpr_eval");
+			if (!env->symlookup)
+				panic("VT_SYM requires non-NULL symlookup "
+				      "function in the environment");
 
 			name = str_getref(expr->str);
 			val_putref(expr);
 
-			return sexpr_eval(lookup(name, private), lookup, private);
+			return sexpr_eval(env->symlookup(name, env->private),
+					  env);
 		}
 		case VT_CONS:
-			return eval_cons(expr, lookup, private);
+			return eval_cons(expr, env);
 	}
 
 	panic("impossible!");

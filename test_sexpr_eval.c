@@ -93,7 +93,7 @@ static void test_int_op(char *opname, enum val_type type, uint64_t expected,
 {
 	struct val *res;
 
-	res = sexpr_eval(expr, NULL, NULL);
+	res = sexpr_eval(expr, NULL);
 
 	fprintf(stderr, " -> ");
 	sexpr_dump_file(stderr, res, false);

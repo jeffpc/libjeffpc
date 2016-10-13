@@ -28,6 +28,11 @@
 #include <jeffpc/val.h>
 #include <jeffpc/str.h>
 
+struct sexpr_eval_env {
+	struct val *(*symlookup)(struct str *, void *);
+	void *private;
+};
+
 extern struct val *sexpr_parse(const char *str, size_t len);
 extern struct str *sexpr_dump(struct val *lv, bool raw);
 extern void sexpr_dump_file(FILE *out, struct val *lv, bool raw);
@@ -59,9 +64,7 @@ extern struct val *sexpr_nth(struct val *val, uint64_t n);
 extern struct val *sexpr_assoc(struct val *val, const char *name);
 extern bool sexpr_equal(struct val *lhs, struct val *rhs);
 
-extern struct val *sexpr_eval(struct val *val,
-			      struct val *(*lookup)(struct str *, void *),
-			      void *private);
+extern struct val *sexpr_eval(struct val *val, struct sexpr_eval_env *);
 
 /*
  * Assorted helpers to make alists more pleasant to use.
