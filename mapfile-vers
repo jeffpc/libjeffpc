@@ -60,6 +60,7 @@ JEFFPC_0.10 {
 		sexpr_alist_lookup_list;
 		sexpr_alist_lookup_str;
 		sexpr_alist_lookup_val;
+		sexpr_args_to_list;
 		sexpr_array_to_list;
 		sexpr_assoc;
 		sexpr_car;

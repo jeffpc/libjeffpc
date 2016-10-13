@@ -229,6 +229,24 @@ struct val *sexpr_array_to_list(struct val **vals, int nvals)
 }
 
 /*
+ * Just like sexpr_array_to_list, but obtains value from args instead of an
+ * array.
+ */
+struct val *sexpr_args_to_list(int nvals, ...)
+{
+	struct val *arr[nvals];
+	va_list args;
+	int i;
+
+	va_start(args, nvals);
+	for (i = 0; i < nvals; i++)
+		arr[i] = va_arg(args, struct val *);
+	va_end(args);
+
+	return sexpr_array_to_list(arr, nvals);
+}
+
+/*
  * Convert a sexpr list into a C array of vals.  E.g.,
  *
  *     '(A B C)
