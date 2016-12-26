@@ -23,11 +23,21 @@
 #include <inttypes.h>
 #include <time.h>
 
-static inline uint64_t gettime(void)
+static inline uint64_t __gettime(int clock)
 {
 	struct timespec ts;
 
-	clock_gettime(CLOCK_REALTIME, &ts);
+	clock_gettime(clock, &ts);
 
 	return (ts.tv_sec * 1000000000ull) + ts.tv_nsec;
+}
+
+static inline uint64_t gettime(void)
+{
+	return __gettime(CLOCK_MONOTONIC);
+}
+
+static inline uint64_t gettime_unix(void)
+{
+	return __gettime(CLOCK_REALTIME);
 }
