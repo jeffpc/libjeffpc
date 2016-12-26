@@ -20,6 +20,9 @@
  * SOFTWARE.
  */
 
+#ifndef __JEFFPC_TIME_H
+#define __JEFFPC_TIME_H
+
 #include <inttypes.h>
 #include <time.h>
 
@@ -41,3 +44,5 @@ static inline uint64_t gettime_unix(void)
 {
 	return __gettime(CLOCK_REALTIME);
 }
+
+#endif
