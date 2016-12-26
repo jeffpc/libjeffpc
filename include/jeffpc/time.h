@@ -23,6 +23,8 @@
 #ifndef __JEFFPC_TIME_H
 #define __JEFFPC_TIME_H
 
+#include <jeffpc/error.h>
+
 #include <inttypes.h>
 #include <time.h>
 
@@ -30,7 +32,9 @@ static inline uint64_t __gettime(int clock)
 {
 	struct timespec ts;
 
-	clock_gettime(clock, &ts);
+	if (clock_gettime(clock, &ts) != 0)
+		panic("%s: clock_gettime failed: %s", __func__,
+		      strerror(errno));
 
 	return (ts.tv_sec * 1000000000ull) + ts.tv_nsec;
 }
