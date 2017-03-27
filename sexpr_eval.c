@@ -117,7 +117,21 @@ static struct val *eval_cons(struct val *expr, struct sexpr_eval_env *env)
 	args = sexpr_cdr(expr);
 
 	ASSERT(op);
-	ASSERT3U(op->type, ==, VT_SYM);
+	switch (op->type) {
+		case VT_INT:
+			panic("function name cannot be a VT_INT (%"PRIu64")",
+			      op->i);
+		case VT_STR:
+			panic("function name cannot be a VT_STR (\"%s\")",
+			      str_cstr(op->str));
+		case VT_BOOL:
+			panic("function name cannot be a VT_BOOL (%s)",
+			      op->b ? "true" : "false");
+		case VT_CONS:
+			panic("function name cannot be a VT_CONS");
+		case VT_SYM:
+			break; /* ok */
+	}
 
 	name = str_getref(op->str);
 	val_putref(op);
