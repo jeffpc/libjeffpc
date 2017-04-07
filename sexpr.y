@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,7 +53,7 @@ void sexpr_error2(char *e, char *yytext)
 };
 
 %token <s> SYMBOL STRING
-%token <i> NUMBER
+%token <i> NUMBER CHAR
 %token <b> BOOL
 
 %type <lv> document tok list toklist
@@ -66,6 +66,7 @@ tok : SYMBOL			{ $$ = VAL_ALLOC_SYM($1); }
     | STRING			{ $$ = VAL_ALLOC_STR($1); }
     | NUMBER			{ $$ = VAL_ALLOC_INT($1); }
     | BOOL			{ $$ = VAL_ALLOC_BOOL($1); }
+    | CHAR			{ $$ = VAL_ALLOC_CHAR($1); }
     | list			{ $$ = $1; }
     | '\'' tok			{ $$ = VAL_ALLOC_CONS(
 				         VAL_ALLOC_SYM_CSTR("quote"),

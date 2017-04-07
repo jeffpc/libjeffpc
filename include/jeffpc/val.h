@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2014-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,7 @@ enum val_type {
 	VT_SYM,		/* symbol */
 	VT_BOOL,	/* boolean */
 	VT_CONS,	/* cons cell */
+	VT_CHAR,	/* a single (unicode) character */
 };
 
 struct val {
@@ -55,6 +56,7 @@ struct val {
 extern struct val *val_alloc(enum val_type type);
 extern void val_free(struct val *v);
 extern int val_set_bool(struct val *val, bool v);
+extern int val_set_char(struct val *val, uint64_t v);
 extern int val_set_int(struct val *val, uint64_t v);
 extern int val_set_str(struct val *val, struct str *v);
 extern int val_set_sym(struct val *val, struct str *v);
@@ -93,6 +95,14 @@ REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free)
 #define VAL_ALLOC_CSTR(v)			\
 	VAL_ALLOC_STR(STR_ALLOC(v))
 
+#define VAL_ALLOC_CHAR(v)			\
+	({					\
+		struct val *_x;			\
+		_x = VAL_ALLOC(VT_CHAR);	\
+		VAL_SET_CHAR(_x, (v));		\
+		_x;				\
+	})
+
 #define VAL_ALLOC_INT(v)			\
 	({					\
 		struct val *_x;			\
@@ -117,6 +127,7 @@ REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free)
 		_x;				\
 	})
 
+#define VAL_SET_CHAR(val, v)		ASSERT0(val_set_char((val), (v)))
 #define VAL_SET_INT(val, v)		ASSERT0(val_set_int((val), (v)))
 #define VAL_SET_BOOL(val, v)		ASSERT0(val_set_bool((val), (v)))
 #define VAL_SET_STR(val, v)		ASSERT0(val_set_str((val), (v)))

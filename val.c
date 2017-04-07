@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2014-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include <inttypes.h>
 #include <umem.h>
 
@@ -50,6 +51,7 @@ static void __val_init(struct val *val, enum val_type type)
 			val->b = false;
 			break;
 		case VT_INT:
+		case VT_CHAR:
 			val->i = 0;
 			break;
 		case VT_STR:
@@ -68,6 +70,7 @@ static void __val_cleanup(struct val *val)
 	switch (val->type) {
 		case VT_INT:
 		case VT_BOOL:
+		case VT_CHAR:
 			break;
 		case VT_STR:
 		case VT_SYM:
@@ -120,6 +123,7 @@ DEF_VAL_SET(int, VT_INT, i, uint64_t)
 DEF_VAL_SET(str, VT_STR, str, struct str *)
 DEF_VAL_SET(sym, VT_SYM, str, struct str *)
 DEF_VAL_SET(bool, VT_BOOL, b, bool)
+DEF_VAL_SET(char, VT_CHAR, i, uint64_t)
 
 int val_set_cons(struct val *val, struct val *head, struct val *tail)
 {
@@ -148,6 +152,14 @@ void val_dump(struct val *val, int indent)
 		case VT_BOOL:
 			fprintf(stderr, "%*s%s\n", indent, "",
 				val->b ? "true" : "false");
+			break;
+		case VT_CHAR:
+			if (isprint(val->i))
+				fprintf(stderr, "%*s\\u%04"PRIX64": '%c'\n",
+					indent, "", val->i, (char) val->i);
+			else
+				fprintf(stderr, "%*s\\u%04"PRIX64"\n", indent,
+					"", val->i);
 			break;
 		case VT_CONS:
 			fprintf(stderr, "%*scons head:\n", indent, "");

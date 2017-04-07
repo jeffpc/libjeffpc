@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -121,6 +121,9 @@ static struct val *eval_cons(struct val *expr, struct sexpr_eval_env *env)
 		case VT_INT:
 			panic("function name cannot be a VT_INT (%"PRIu64")",
 			      op->i);
+		case VT_CHAR:
+			panic("function name cannot be a VT_CHAR (%"PRIu64")",
+			      op->i);
 		case VT_STR:
 			panic("function name cannot be a VT_STR (\"%s\")",
 			      str_cstr(op->str));
@@ -169,6 +172,7 @@ struct val *sexpr_eval(struct val *expr,
 		case VT_INT:
 		case VT_STR:
 		case VT_BOOL:
+		case VT_CHAR:
 			return expr;
 		case VT_SYM: {
 			struct str *name;
@@ -180,6 +184,13 @@ struct val *sexpr_eval(struct val *expr,
 			name = str_getref(expr->str);
 			val_putref(expr);
 
+			/*
+			 * TODO: Decide if symbol lookup should return a
+			 * value or code.
+			 *
+			 * If value: remove the eval call here.
+			 * If symbol: delete this comment.
+			 */
 			return sexpr_eval(env->symlookup(name, env), env);
 		}
 		case VT_CONS:

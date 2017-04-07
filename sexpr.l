@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -76,6 +76,9 @@ static void inc_lineno(yyscan_t scanner);
 0[0-7]*			{ ASSERT0(__str2u64(yytext, &yylval->i, 8)); return NUMBER; }
 0x[0-9a-fA-F]*		{ ASSERT0(__str2u64(yytext, &yylval->i, 16)); return NUMBER; }
 #x[0-9a-fA-F]+		{ ASSERT0(__str2u64(yytext + 2, &yylval->i, 16)); return NUMBER; }
+#\\u[0-9a-fA-F]+	{ ASSERT0(__str2u64(yytext + 3, &yylval->i, 16)); return CHAR; }
+#\\[^ ]			{ yylval->i = yytext[2]; return CHAR; }
+	/* TODO: handle '#\<utf-8>' */
 [1-9][0-9]*		{ ASSERT0(str2u64(yytext, &yylval->i)); return NUMBER; }
 [a-zA-Z+=|&_-]?[a-zA-Z0-9+=|&_-]* { yylval->s = STR_DUP(yytext); return SYMBOL; }
 [ \r\t]			{ /* ignore */ }

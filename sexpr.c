@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <jeffpc/str.h>
 #include <jeffpc/sexpr.h>
@@ -163,6 +164,18 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 			return str_cat(3, &dquote, STR_DUP(tmpstr), &dquote);
 		case VT_BOOL:
 			return lv->b ? &poundt : &poundf;
+		case VT_CHAR: {
+			char tmp[32];
+
+			if (isprint(lv->i))
+				snprintf(tmp, sizeof(tmp), "#\\%c",
+					 (char) lv->i);
+			else
+				snprintf(tmp, sizeof(tmp), "#\\u%04"PRIX64,
+					 lv->i);
+
+			return STR_DUP(tmp);
+		}
 		case VT_INT: {
 			char tmp[32];
 
@@ -449,6 +462,7 @@ bool sexpr_equal(struct val *lhs, struct val *rhs)
 
 	switch (lhs->type) {
 		case VT_INT:
+		case VT_CHAR:
 			ret = (lhs->i == rhs->i);
 			break;
 		case VT_STR:
