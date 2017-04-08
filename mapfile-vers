@@ -104,6 +104,9 @@ JEFFPC_0.10 {
 		condreltimedwait;
 		condsig;
 		condbcast;
+		barrierinit;
+		barrierdestroy;
+		barrierwait;
 
 		# taskq
 		taskq_create_fixed;

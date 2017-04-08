@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -123,4 +123,25 @@ void condsig(struct cond *c)
 void condbcast(struct cond *c)
 {
 	VERIFY0(pthread_cond_broadcast(&c->cond));
+}
+
+void barrierinit(struct barrier *b, unsigned count)
+{
+	VERIFY0(pthread_barrier_init(&b->bar, NULL, count));
+}
+
+void barrierdestroy(struct barrier *b)
+{
+	VERIFY0(pthread_barrier_destroy(&b->bar));
+}
+
+bool barrierwait(struct barrier *b)
+{
+	int ret;
+
+	ret = pthread_barrier_wait(&b->bar);
+
+	VERIFY((ret == 0) || (ret == PTHREAD_BARRIER_SERIAL_THREAD));
+
+	return (ret == PTHREAD_BARRIER_SERIAL_THREAD);
 }

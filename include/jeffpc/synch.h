@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2014-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +38,10 @@ struct cond {
 	pthread_cond_t cond;
 };
 
+struct barrier {
+	pthread_barrier_t bar;
+};
+
 extern void mxinit(struct lock *m);
 extern void mxdestroy(struct lock *m);
 extern void mxlock(struct lock *m);
@@ -55,6 +59,10 @@ extern int condreltimedwait(struct cond *c, struct lock *m,
 			    const struct timespec *reltime);
 extern void condsig(struct cond *c);
 extern void condbcast(struct cond *c);
+
+extern void barrierinit(struct barrier *b, unsigned count);
+extern void barrierdestroy(struct barrier *b);
+extern bool barrierwait(struct barrier *b);
 
 /* compat macros */
 #define MXINIT(l)	mxinit(l)
