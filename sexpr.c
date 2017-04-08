@@ -164,25 +164,13 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 			return str_cat(3, &dquote, STR_DUP(tmpstr), &dquote);
 		case VT_BOOL:
 			return lv->b ? &poundt : &poundf;
-		case VT_CHAR: {
-			char tmp[32];
-
+		case VT_CHAR:
 			if (isprint(lv->i))
-				snprintf(tmp, sizeof(tmp), "#\\%c",
-					 (char) lv->i);
+				return str_printf("#\\%c", (char) lv->i);
 			else
-				snprintf(tmp, sizeof(tmp), "#\\u%04"PRIX64,
-					 lv->i);
-
-			return STR_DUP(tmp);
-		}
-		case VT_INT: {
-			char tmp[32];
-
-			snprintf(tmp, sizeof(tmp), "%"PRIu64, lv->i);
-
-			return STR_DUP(tmp);
-		}
+				return str_printf("#\\u%04"PRIX64, lv->i);
+		case VT_INT:
+			return str_printf("%"PRIu64, lv->i);
 		case VT_CONS: {
 			struct val *head = lv->cons.head;
 			struct val *tail = lv->cons.tail;
