@@ -105,6 +105,12 @@ JEFFPC_0.10 {
 		condsig;
 		condbcast;
 
+		# taskq
+		taskq_create_fixed;
+		taskq_destroy;
+		taskq_dispatch;
+		taskq_wait;
+
 		# uuid
 		xuuid_clear;
 		xuuid_compare;

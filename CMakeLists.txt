@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+# Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -90,6 +90,7 @@ add_library(jeffpc SHARED
 	sock.c
 	str.c
 	synch.c
+	taskq.c
 	uuid.c
 	val.c
 	${UMEM_EXTRA_SOURCE}
@@ -118,6 +119,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/sock.h
 		include/jeffpc/str.h
 		include/jeffpc/synch.h
+		include/jeffpc/taskq.h
 		include/jeffpc/thread.h
 		include/jeffpc/time.h
 		include/jeffpc/types.h
