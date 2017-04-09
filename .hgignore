@@ -1,3 +1,5 @@
+syntax: glob
+
 CMakeCache.txt
 CMakeFiles
 CTestTestfile.cmake
@@ -19,3 +21,5 @@ test_hexdump
 test_padding
 test_sexpr_parser
 test_sexpr_eval
+
+subinclude:include/jeffpc/.hgignore
