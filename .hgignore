@@ -21,5 +21,8 @@ test_hexdump
 test_padding
 test_sexpr_parser
 test_sexpr_eval
+test_version
+
+version.h
 
 subinclude:include/jeffpc/.hgignore

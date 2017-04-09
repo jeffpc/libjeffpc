@@ -93,6 +93,7 @@ add_library(jeffpc SHARED
 	taskq.c
 	uuid.c
 	val.c
+	version.c
 	${UMEM_EXTRA_SOURCE}
 )
 
@@ -125,9 +126,21 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/types.h
 		include/jeffpc/uuid.h
 		include/jeffpc/val.h
+		include/jeffpc/version.h
 		${CMAKE_CURRENT_BINARY_DIR}/include/jeffpc/config.h
 	DESTINATION include/jeffpc
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
+
+add_custom_target(revisiontag ALL)
+
+add_custom_command(TARGET revisiontag
+	COMMAND ${CMAKE_COMMAND}
+		-DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+		-DBINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}
+		-P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/hg.cmake
+)
+
+add_dependencies(jeffpc revisiontag)
 
 #
 # Test related executables
@@ -140,5 +153,6 @@ build_test_bin_and_run(bswap)
 build_test_bin_and_run(hexdump)
 build_test_bin_and_run(padding)
 build_test_bin_and_run(sexpr_eval)
+build_test_bin_and_run(version)
 
 add_subdirectory(tests)
