@@ -137,6 +137,7 @@ JEFFPC_0.10 {
 		val_set_sym;
 
 		# version
+		jeffpc_hgrev;
 		jeffpc_version;
 
 	local:
