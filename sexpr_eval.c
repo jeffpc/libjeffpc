@@ -70,6 +70,48 @@ static struct val *fxn_quote(struct val *args, struct sexpr_eval_env *env)
 	return sexpr_car(args);
 }
 
+static struct val *fxn_cxr(struct val *args, struct sexpr_eval_env *env,
+			   struct val *(*cxr)(struct val *), const char *name)
+{
+	if (sexpr_length(val_getref(args)) != 1)
+		panic("%s not given the right number of arguments "
+		      "(expected 1, got %d)", name,
+		      sexpr_length(val_getref(args)));
+
+	/*
+	 * The args argument contains the cdr of the whole expression.  For
+	 * example, if we tried to evaluate:
+	 *
+	 *   (car '(a b))
+	 *
+	 * aka.
+	 *
+	 *   (car (quote (a b)))
+	 *
+	 * args will contain:
+	 *
+	 *   ((quote (a b)))
+	 *
+	 * That is why we do a car on it first before calling eval.
+	 *
+	 * Note: This makes sense because in general functions can take any
+	 * number of arguments - it's just that car and cdr take only one.
+	 * So, we need to take the first element of the list of arguments -
+	 * and we get that by calling car.
+	 */
+	return cxr(sexpr_eval(sexpr_car(args), env));
+}
+
+static struct val *fxn_car(struct val *args, struct sexpr_eval_env *env)
+{
+	return fxn_cxr(args, env, sexpr_car, "car");
+}
+
+static struct val *fxn_cdr(struct val *args, struct sexpr_eval_env *env)
+{
+	return fxn_cxr(args, env, sexpr_cdr, "cdr");
+}
+
 static struct val *fxn_equal(struct val *args, struct sexpr_eval_env *env)
 {
 	struct val *a, *b;
@@ -90,6 +132,8 @@ static struct builtin_fxn builtins[] = {
 	{ "+",     fxn_add, },
 	{ "*",     fxn_mult, },
 	{ "quote", fxn_quote, },
+	{ "car",   fxn_car, },
+	{ "cdr",   fxn_cdr, },
 	{ "=",     fxn_equal, },
 	{ "==",    fxn_equal, },
 	{ NULL, },
