@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2011-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,56 +20,10 @@
  * SOFTWARE.
  */
 
-#include <unistd.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <sys/uio.h>
-
 #include <jeffpc/io.h>
 #include <jeffpc/error.h>
 
-static inline ssize_t rw(int fd, void *buf, size_t nbyte, off_t off,
-			 const bool useoff, const bool readfxns)
-{
-	char *ptr = buf;
-	size_t total;
-	ssize_t ret;
-
-	total = 0;
-
-	while (nbyte) {
-		if (readfxns) {
-			if (useoff)
-				ret = pread(fd, ptr, nbyte, off);
-			else
-				ret = read(fd, ptr, nbyte);
-		} else {
-			if (useoff)
-				ret = pwrite(fd, ptr, nbyte, off);
-			else
-				ret = write(fd, ptr, nbyte);
-		}
-
-		if (ret < 0)
-			return -errno;
-
-		if (ret == 0)
-			return -EPIPE;
-
-		nbyte -= ret;
-		total += ret;
-		ptr   += ret;
-		off   += ret;
-	}
-
-	return 0;
-}
+#include "io_common.h"
 
 int xread(int fd, void *buf, size_t nbyte)
 {
