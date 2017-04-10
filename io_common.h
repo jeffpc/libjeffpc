@@ -26,7 +26,8 @@
 #include <stdbool.h>
 
 static inline ssize_t rw(int fd, void *buf, size_t nbyte, off_t off,
-			 const bool useoff, const bool readfxns)
+			 const bool useoff, const bool readfxns,
+			 size_t *resid)
 {
 	char *ptr = buf;
 	size_t total;
@@ -47,11 +48,15 @@ static inline ssize_t rw(int fd, void *buf, size_t nbyte, off_t off,
 				ret = write(fd, ptr, nbyte);
 		}
 
-		if (ret < 0)
-			return -errno;
+		if (ret < 0) {
+			ret = -errno;
+			goto err;
+		}
 
-		if (ret == 0)
-			return -EPIPE;
+		if (ret == 0) {
+			ret = -EPIPE;
+			goto err;
+		}
 
 		nbyte -= ret;
 		total += ret;
@@ -59,7 +64,13 @@ static inline ssize_t rw(int fd, void *buf, size_t nbyte, off_t off,
 		off   += ret;
 	}
 
-	return 0;
+	ret = 0; /* success, all read/written */
+
+err:
+	if (resid)
+		*resid = nbyte;
+
+	return ret;
 }
 
 #endif

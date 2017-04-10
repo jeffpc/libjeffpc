@@ -27,22 +27,22 @@
 
 int xread(int fd, void *buf, size_t nbyte)
 {
-	return rw(fd, buf, nbyte, 0, false, true);
+	return rw(fd, buf, nbyte, 0, false, true, NULL);
 }
 
 int xpread(int fd, void *buf, size_t nbyte, off_t off)
 {
-	return rw(fd, buf, nbyte, off, true, true);
+	return rw(fd, buf, nbyte, off, true, true, NULL);
 }
 
 int xwrite(int fd, const void *buf, size_t nbyte)
 {
-	return rw(fd, (void *) buf, nbyte, 0, false, false);
+	return rw(fd, (void *) buf, nbyte, 0, false, false, NULL);
 }
 
 int xpwrite(int fd, const void *buf, size_t nbyte, off_t off)
 {
-	return rw(fd, (void *) buf, nbyte, off, true, false);
+	return rw(fd, (void *) buf, nbyte, off, true, false, NULL);
 }
 
 char *read_file_common(int dirfd, const char *fname, struct stat *sb)
