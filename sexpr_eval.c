@@ -25,6 +25,9 @@
 struct builtin_fxn {
 	const char *name;
 	struct val *(*f)(struct val *args, struct sexpr_eval_env *env);
+
+	/* expected number of arguments; -1 indicates any length is ok */
+	ssize_t arglen;
 };
 
 #define __REDUCE(fname, alloc, t, valmember, ident, op)				\
@@ -71,13 +74,8 @@ static struct val *fxn_quote(struct val *args, struct sexpr_eval_env *env)
 }
 
 static struct val *fxn_cxr(struct val *args, struct sexpr_eval_env *env,
-			   struct val *(*cxr)(struct val *), const char *name)
+			   struct val *(*cxr)(struct val *))
 {
-	if (sexpr_length(val_getref(args)) != 1)
-		panic("%s not given the right number of arguments "
-		      "(expected 1, got %d)", name,
-		      sexpr_length(val_getref(args)));
-
 	/*
 	 * The args argument contains the cdr of the whole expression.  For
 	 * example, if we tried to evaluate:
@@ -104,19 +102,17 @@ static struct val *fxn_cxr(struct val *args, struct sexpr_eval_env *env,
 
 static struct val *fxn_car(struct val *args, struct sexpr_eval_env *env)
 {
-	return fxn_cxr(args, env, sexpr_car, "car");
+	return fxn_cxr(args, env, sexpr_car);
 }
 
 static struct val *fxn_cdr(struct val *args, struct sexpr_eval_env *env)
 {
-	return fxn_cxr(args, env, sexpr_cdr, "cdr");
+	return fxn_cxr(args, env, sexpr_cdr);
 }
 
 static struct val *fxn_equal(struct val *args, struct sexpr_eval_env *env)
 {
 	struct val *a, *b;
-
-	VERIFY3U(sexpr_length(val_getref(args)), == ,2);
 
 	a = sexpr_eval(sexpr_nth(val_getref(args), 1), env);
 	b = sexpr_eval(sexpr_nth(args, 2), env);
@@ -125,34 +121,34 @@ static struct val *fxn_equal(struct val *args, struct sexpr_eval_env *env)
 }
 
 static struct builtin_fxn builtins[] = {
-	{ "and",   fxn_and, },
-	{ "or",    fxn_or, },
-	{ "&&",    fxn_and, },
-	{ "||",    fxn_or, },
-	{ "+",     fxn_add, },
-	{ "*",     fxn_mult, },
-	{ "quote", fxn_quote, },
-	{ "car",   fxn_car, },
-	{ "cdr",   fxn_cdr, },
-	{ "=",     fxn_equal, },
-	{ "==",    fxn_equal, },
+	{ "and",   fxn_and,   -1, },
+	{ "or",    fxn_or,    -1, },
+	{ "&&",    fxn_and,   -1, },
+	{ "||",    fxn_or,    -1, },
+	{ "+",     fxn_add,   -1, },
+	{ "*",     fxn_mult,  -1, },
+	{ "quote", fxn_quote,  1, },
+	{ "car",   fxn_car,    1, },
+	{ "cdr",   fxn_cdr,    1, },
+	{ "=",     fxn_equal,  2, },
+	{ "==",    fxn_equal,  2, },
 	{ NULL, },
 };
 
-static void *fxnlookup_builtin(struct str *name)
+static struct builtin_fxn *fxnlookup_builtin(struct str *name)
 {
 	size_t i;
 
 	for (i = 0; builtins[i].name; i++)
 		if (!strcmp(builtins[i].name, str_cstr(name)))
-			return builtins[i].f;
+			return &builtins[i];
 
 	return NULL;
 }
 
 static struct val *eval_cons(struct val *expr, struct sexpr_eval_env *env)
 {
-	struct val *(*fxn)(struct val *, struct sexpr_eval_env *);
+	struct builtin_fxn *fxn;
 	struct str *name;
 	struct val *args;
 	struct val *op;
@@ -198,7 +194,18 @@ static struct val *eval_cons(struct val *expr, struct sexpr_eval_env *env)
 found:
 	str_putref(name);
 
-	return fxn(args, env);
+	if (fxn->arglen != -1) {
+		size_t got;
+
+		got = sexpr_length(val_getref(args));
+
+		if (got != fxn->arglen)
+			panic("'%s' not given the right number of arguments "
+			      "(expected %d, got %d)", fxn->name, fxn->arglen,
+			      got);
+	}
+
+	return fxn->f(args, env);
 }
 
 struct val *sexpr_eval(struct val *expr,
