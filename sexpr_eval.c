@@ -185,13 +185,10 @@ struct val *sexpr_eval(struct val *expr,
 			val_putref(expr);
 
 			/*
-			 * TODO: Decide if symbol lookup should return a
-			 * value or code.
-			 *
-			 * If value: remove the eval call here.
-			 * If symbol: delete this comment.
+			 * Symbol lookup returns a value (not an expression)
+			 * therefore we don't want to evaluate it.
 			 */
-			return sexpr_eval(env->symlookup(name, env), env);
+			return env->symlookup(name, env);
 		}
 		case VT_CONS:
 			return eval_cons(expr, env);
