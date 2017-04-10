@@ -40,10 +40,9 @@ endmacro()
 
 gethgrev(HG_COMMIT "{node}")
 
-# TODO:
-# (1) if there are local changes, append -dirty
-# (2) if latesttagdistance == 0, use only latesttag
-gethgrev(VERSION "{latesttag}-{latesttagdistance}-{node|short}")
+# TODO: if there are uncommitted changes, append -dirty
+gethgrev(VERSION
+	"{ifeq(latesttagdistance,0,\"{latesttag}\",\"{latesttag}-{latesttagdistance}-{node|short}\")}")
 
 if(${HG_COMMIT} EQUAL "unknown")
 	message(WARNING "Failed to get revision info from Mercurial.")
