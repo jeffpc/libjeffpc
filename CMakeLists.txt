@@ -145,6 +145,19 @@ add_custom_command(TARGET revisiontag
 add_dependencies(jeffpc revisiontag)
 
 #
+# REPL executable
+#
+
+add_executable(sexpr-repl EXCLUDE_FROM_ALL
+	repl.c
+)
+
+target_link_libraries(sexpr-repl
+	tecla
+	jeffpc
+)
+
+#
 # Test related executables
 #
 
