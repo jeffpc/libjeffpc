@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,16 +20,41 @@
  * SOFTWARE.
  */
 
-#ifndef __JEFFPC_CONFIG_H
-#define __JEFFPC_CONFIG_H
+#include <errno.h>
+#include <string.h>
+#include <umem.h>
 
-#cmakedefine CPU_BIG_ENDIAN
+#include <jeffpc/error.h>
+#include <jeffpc/mem.h>
 
-#cmakedefine HAVE_ARC4RANDOM
-#cmakedefine HAVE_ASSFAIL
-#cmakedefine HAVE_ADDRTOSYMSTR
-#cmakedefine HAVE_PTHREAD_COND_RELTIMEDWAIT_NP
-#cmakedefine HAVE_SYS_DEBUG_H
-#cmakedefine HAVE_UMEM
+/*
+ * A slab allocator - wrapping libumem.
+ */
 
-#endif
+struct mem_cache *mem_cache_create(char *name, size_t size, size_t align)
+{
+	struct mem_cache *cache;
+
+	cache = (struct mem_cache *) umem_cache_create(name, size, align,
+						       NULL, NULL, NULL,
+						       NULL, NULL, 0);
+	if (!cache)
+		return ERR_PTR(-errno);
+
+	return cache;
+}
+
+void mem_cache_destroy(struct mem_cache *cache)
+{
+	umem_cache_destroy((umem_cache_t *) cache);
+}
+
+void *mem_cache_alloc(struct mem_cache *cache)
+{
+	return umem_cache_alloc((umem_cache_t *) cache, 0);
+}
+
+void mem_cache_free(struct mem_cache *cache, void *buf)
+{
+	umem_cache_free((umem_cache_t *) cache, buf);
+}

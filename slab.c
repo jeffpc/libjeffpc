@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,74 +23,38 @@
 #include <errno.h>
 #include <string.h>
 
-#include <umem.h>
+#include <jeffpc/error.h>
+#include <jeffpc/mem.h>
 
-umem_cache_t *umem_cache_create(char *name, size_t size, size_t align,
-				umem_constructor_t *constructor,
-				umem_destructor_t *destructor,
-				umem_reclaim_t *reclaim,
-				void *cbdata, vmem_t *source, int cflags)
+/*
+ * A slab allocator - well, not really... just use malloc and free directly.
+ */
+
+#pragma weak mem_cache_create
+struct mem_cache *mem_cache_create(char *name, size_t size, size_t align)
 {
-	if (!size || align || constructor || destructor || reclaim || source ||
-	    cflags) {
-		errno = EINVAL;
-		return NULL;
-	}
+	if (!size || align)
+		return ERR_PTR(-EINVAL);
 
-	return (void *)(uintptr_t) size;
+	return (struct mem_cache *)(uintptr_t) size;
 }
 
-void umem_cache_destroy(umem_cache_t *cache)
+#pragma weak mem_cache_destroy
+void mem_cache_destroy(struct mem_cache *cache)
 {
 	/* nothing to do */
 }
 
-void *umem_cache_alloc(umem_cache_t *cache, int flags)
+#pragma weak mem_cache_alloc
+void *mem_cache_alloc(struct mem_cache *cache)
 {
 	size_t size = (uintptr_t)cache;
-
-	if (flags != UMEM_DEFAULT) {
-		errno = EINVAL;
-		return NULL;
-	}
 
 	return malloc(size);
 }
 
-void umem_cache_free(umem_cache_t *cache, void *buf)
-{
-	free(buf);
-}
-
-void *umem_alloc(size_t size, int flags)
-{
-	void *tmp;
-
-	/*
-	 * Yes, this is terrible busy wait loop if we're short on memory.
-	 * Alas, it should work well enough for now.
-	 */
-	do {
-		tmp = malloc(size);
-		if (tmp)
-			return tmp;
-	} while (flags & UMEM_NOFAIL);
-
-	return NULL;
-}
-
-void *umem_zalloc(size_t size, int flags)
-{
-	void *tmp;
-
-	tmp = umem_alloc(size, flags);
-	if (tmp)
-		memset(tmp, 0, size);
-
-	return tmp;
-}
-
-void umem_free(void *buf, size_t size)
+#pragma weak mem_cache_free
+void mem_cache_free(struct mem_cache *cache, void *buf)
 {
 	free(buf);
 }

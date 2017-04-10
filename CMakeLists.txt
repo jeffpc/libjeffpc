@@ -51,11 +51,11 @@ include(cmake/paths.cmake)
 
 # handle missing libumem
 if(NOT UMEM_FOUND)
-	set(UMEM_LIBRARY "")
-	set(UMEM_INCLUDE_DIR fakeumem/include)
-	set(UMEM_EXTRA_SOURCE fakeumem/fakeumem.c)
-else()
+	set(UMEM_LIBRARY)
+	set(UMEM_INCLUDE_DIR)
 	set(UMEM_EXTRA_SOURCE)
+else()
+	set(UMEM_EXTRA_SOURCE slab_umem.c)
 endif()
 
 find_package(BISON)
@@ -87,6 +87,7 @@ add_library(jeffpc SHARED
 	sexpr.c
 	sexpr_eval.c
 	${FLEX_sexpr_OUTPUTS} ${BISON_sexpr_OUTPUTS}
+	slab.c
 	sock.c
 	str.c
 	synch.c
@@ -113,6 +114,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/int.h
 		include/jeffpc/io.h
 		include/jeffpc/jeffpc.h
+		include/jeffpc/mem.h
 		include/jeffpc/padding.h
 		include/jeffpc/rand.h
 		include/jeffpc/refcnt.h

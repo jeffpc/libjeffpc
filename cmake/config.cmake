@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+# Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,9 @@ include("${CMAKE_DIR}/config-gnu-ld.cmake")
 
 set(CMAKE_MODULE_PATH "${CMAKE_DIR}/Modules")
 find_package(umem)
+
+# set a value that's "exported" into the generated config file
+set(HAVE_UMEM ${UMEM_FOUND})
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/jeffpc/config.h.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/include/jeffpc/config.h")

@@ -48,6 +48,12 @@ JEFFPC_0.10 {
 		xread;
 		xwrite;
 
+		# mem
+		mem_cache_create;
+		mem_cache_destroy;
+		mem_cache_alloc;
+		mem_cache_free;
+
 		# padding
 		check_padding;
 

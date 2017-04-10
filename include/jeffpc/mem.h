@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,39 +20,24 @@
  * SOFTWARE.
  */
 
-#ifndef __FAKEUMEM_H
-#define __FAKEUMEM_H
+#ifndef __JEFFPC_MEM_H
+#define __JEFFPC_MEM_H
 
 #include <stdlib.h>
 #include <stdint.h>
 
 /*
- * Not every distro has libumem available.  If we are unlucky enough to be
- * stuck on one of those, we just direct everything to standard malloc/free.
+ * slab allocator
  */
 
-#define UMEM_DEFAULT	0x0000 /* normal allocation - may fail */
-#define UMEM_NOFAIL	0x0100 /* never fails - not implemented */
+struct mem_cache {
+	int dummy;
+};
 
-typedef uintptr_t umem_cache_t;
-typedef uintptr_t umem_constructor_t;
-typedef uintptr_t umem_destructor_t;
-typedef uintptr_t umem_reclaim_t;
-typedef uintptr_t vmem_t;
+extern struct mem_cache *mem_cache_create(char *name, size_t size, size_t align);
+extern void mem_cache_destroy(struct mem_cache *cache);
 
-extern umem_cache_t *umem_cache_create(char *name, size_t size, size_t align,
-				       umem_constructor_t *constructor,
-				       umem_destructor_t *destructor,
-				       umem_reclaim_t *reclaim,
-				       void *cbdata, vmem_t *source,
-				       int cflags);
-extern void umem_cache_destroy(umem_cache_t *cache);
-
-extern void *umem_cache_alloc(umem_cache_t *cache, int flags);
-extern void umem_cache_free(umem_cache_t *cache, void *buf);
-
-extern void *umem_alloc(size_t size, int flags);
-extern void *umem_zalloc(size_t size, int flags);
-extern void umem_free(void *buf, size_t size);
+extern void *mem_cache_alloc(struct mem_cache *cache);
+extern void mem_cache_free(struct mem_cache *cache, void *buf);
 
 #endif
