@@ -27,12 +27,12 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <inttypes.h>
-#include <umem.h>
 
 #include <jeffpc/val.h>
 #include <jeffpc/jeffpc.h>
 #include <jeffpc/error.h>
 #include <jeffpc/types.h>
+#include <jeffpc/mem.h>
 
 #define INIT_STATIC_VAL(t, memb, val)				\
 		{						\
@@ -56,20 +56,19 @@ static const struct val val_ints[10] = {
 	[9] = INIT_STATIC_VAL(VT_INT, i, 9),
 };
 
-static umem_cache_t *val_cache;
+static struct mem_cache *val_cache;
 
 void init_val_subsys(void)
 {
-	val_cache = umem_cache_create("val-cache", sizeof(struct val),
-				      0, NULL, NULL, NULL, NULL, NULL, 0);
-	ASSERT(val_cache);
+	val_cache = mem_cache_create("val-cache", sizeof(struct val), 0);
+	ASSERT(!IS_ERR(val_cache));
 }
 
 static struct val *__val_alloc(enum val_type type)
 {
 	struct val *val;
 
-	val = umem_cache_alloc(val_cache, 0);
+	val = mem_cache_alloc(val_cache);
 	if (!val)
 		return val;
 
@@ -101,7 +100,7 @@ void val_free(struct val *val)
 			break;
 	}
 
-	umem_cache_free(val_cache, val);
+	mem_cache_free(val_cache, val);
 }
 
 #define DEF_VAL_SET(fxn, vttype, valelem, ctype)		\
