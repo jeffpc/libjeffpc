@@ -30,12 +30,10 @@ struct builtin_fxn {
 	ssize_t arglen;
 };
 
-#define __REDUCE(fname, alloc, t, valmember, ident, op)				\
+#define __REDUCE(fname, alloc, t, valmember, ctype, ident, op)			\
 static struct val *fname(struct val *args, struct sexpr_eval_env *env)		\
 {										\
-	struct val *ret;							\
-										\
-	ret = alloc(ident);							\
+	ctype ret = (ident);							\
 										\
 	while (args) {								\
 		struct val *el = sexpr_car(val_getref(args));			\
@@ -47,23 +45,23 @@ static struct val *fname(struct val *args, struct sexpr_eval_env *env)		\
 		ASSERT(el);							\
 		ASSERT3U(el->type, ==, t);					\
 										\
-		ret->valmember = ret->valmember op el->valmember;		\
+		ret = ret op el->valmember;					\
 										\
 		val_putref(el);							\
 		args = next;							\
 	}									\
 										\
-	return ret;								\
+	return alloc(ret);							\
 }
 
 #define BOOL_REDUCE(fname, ident, op) \
-	__REDUCE(fname, VAL_ALLOC_BOOL, VT_BOOL, b, ident, op)
+	__REDUCE(fname, VAL_ALLOC_BOOL, VT_BOOL, b, bool, ident, op)
 
 BOOL_REDUCE(fxn_or,  false, ||)
 BOOL_REDUCE(fxn_and, true,  &&)
 
 #define INT_REDUCE(fname, ident, op) \
-	__REDUCE(fname, VAL_ALLOC_INT, VT_INT, i, ident, op)
+	__REDUCE(fname, VAL_ALLOC_INT, VT_INT, i, uint64_t, ident, op)
 
 INT_REDUCE(fxn_add,  0, +)
 INT_REDUCE(fxn_mult, 1, *)
