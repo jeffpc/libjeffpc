@@ -51,6 +51,7 @@ static struct val *__val_alloc(enum val_type type)
 		return val;
 
 	val->type = type;
+	val->static_alloc = false;
 
 	refcnt_init(&val->refcnt, 1);
 

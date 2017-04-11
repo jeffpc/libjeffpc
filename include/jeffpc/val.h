@@ -42,6 +42,7 @@ enum val_type {
 struct val {
 	enum val_type type;
 	refcnt_t refcnt;
+	bool static_alloc:1;	/* statically allocated */
 	union {
 		const uint64_t i;
 		const bool b;
@@ -81,7 +82,12 @@ extern struct val *val_alloc_cons(struct val *head, struct val *tail);
 extern void val_free(struct val *v);
 extern void val_dump(struct val *v, int indent);
 
-REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free, NULL)
+static inline bool val_isstatic(struct val *x)
+{
+	return x->static_alloc;
+}
+
+REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free, val_isstatic)
 
 #define VAL_ALLOC_SYM(v)			\
 	({					\
