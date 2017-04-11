@@ -126,15 +126,14 @@ JEFFPC_0.10 {
 		xuuid_generate;
 
 		# val
-		val_alloc;
 		val_dump;
 		val_free;
-		val_set_bool;
-		val_set_char;
-		val_set_cons;
-		val_set_int;
-		val_set_str;
-		val_set_sym;
+		val_alloc_bool;
+		val_alloc_char;
+		val_alloc_cons;
+		val_alloc_int;
+		val_alloc_str;
+		val_alloc_sym;
 
 		# version
 		jeffpc_hgrev;

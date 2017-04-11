@@ -53,31 +53,22 @@ struct val {
 	};
 };
 
-extern struct val *val_alloc(enum val_type type);
+extern struct val *val_alloc_bool(bool v);
+extern struct val *val_alloc_char(uint64_t v);
+extern struct val *val_alloc_int(uint64_t v);
+extern struct val *val_alloc_str(struct str *v);
+extern struct val *val_alloc_sym(struct str *v);
+extern struct val *val_alloc_cons(struct val *head, struct val *tail);
 extern void val_free(struct val *v);
-extern int val_set_bool(struct val *val, bool v);
-extern int val_set_char(struct val *val, uint64_t v);
-extern int val_set_int(struct val *val, uint64_t v);
-extern int val_set_str(struct val *val, struct str *v);
-extern int val_set_sym(struct val *val, struct str *v);
-extern int val_set_cons(struct val *val, struct val *head, struct val *tail);
 extern void val_dump(struct val *v, int indent);
 
 REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free)
 
-#define VAL_ALLOC(t)				\
-	({					\
-		struct val *_x;			\
-		_x = val_alloc(t);		\
-		ASSERT(_x);			\
-		_x;				\
-	})
-
 #define VAL_ALLOC_SYM(v)			\
 	({					\
 		struct val *_x;			\
-		_x = VAL_ALLOC(VT_SYM);		\
-		VAL_SET_SYM(_x, (v));		\
+		_x = val_alloc_sym(v);		\
+		ASSERT(_x);			\
 		_x;				\
 	})
 
@@ -87,8 +78,8 @@ REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free)
 #define VAL_ALLOC_STR(v)			\
 	({					\
 		struct val *_x;			\
-		_x = VAL_ALLOC(VT_STR);		\
-		VAL_SET_STR(_x, (v));		\
+		_x = val_alloc_str(v);		\
+		ASSERT(_x);			\
 		_x;				\
 	})
 
@@ -98,41 +89,34 @@ REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free)
 #define VAL_ALLOC_CHAR(v)			\
 	({					\
 		struct val *_x;			\
-		_x = VAL_ALLOC(VT_CHAR);	\
-		VAL_SET_CHAR(_x, (v));		\
+		_x = val_alloc_char(v);		\
+		ASSERT(_x);			\
 		_x;				\
 	})
 
 #define VAL_ALLOC_INT(v)			\
 	({					\
 		struct val *_x;			\
-		_x = VAL_ALLOC(VT_INT);		\
-		VAL_SET_INT(_x, (v));		\
+		_x = val_alloc_int(v);		\
+		ASSERT(_x);			\
 		_x;				\
 	})
 
 #define VAL_ALLOC_BOOL(v)			\
 	({					\
 		struct val *_x;			\
-		_x = VAL_ALLOC(VT_BOOL);	\
-		VAL_SET_BOOL(_x, (v));		\
+		_x = val_alloc_bool(v);		\
+		ASSERT(_x);			\
 		_x;				\
 	})
 
 #define VAL_ALLOC_CONS(head, tail)		\
 	({					\
 		struct val *_x;			\
-		_x = VAL_ALLOC(VT_CONS);	\
-		VAL_SET_CONS(_x, (head), (tail));\
+		_x = val_alloc_cons((head), (tail));\
+		ASSERT(_x);			\
 		_x;				\
 	})
-
-#define VAL_SET_CHAR(val, v)		ASSERT0(val_set_char((val), (v)))
-#define VAL_SET_INT(val, v)		ASSERT0(val_set_int((val), (v)))
-#define VAL_SET_BOOL(val, v)		ASSERT0(val_set_bool((val), (v)))
-#define VAL_SET_STR(val, v)		ASSERT0(val_set_str((val), (v)))
-#define VAL_SET_SYM(val, v)		ASSERT0(val_set_sym((val), (v)))
-#define VAL_SET_CONS(val, head, tail)	ASSERT0(val_set_cons((val), (head), (tail)))
 
 #define VAL_DUP_CSTR(v)			VAL_ALLOC_STR(STR_DUP(v))
 

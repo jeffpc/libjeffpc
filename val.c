@@ -42,31 +42,26 @@ void init_val_subsys(void)
 	ASSERT(val_cache);
 }
 
-static void __val_init(struct val *val, enum val_type type)
+static struct val *__val_alloc(enum val_type type)
 {
+	struct val *val;
+
+	val = umem_cache_alloc(val_cache, 0);
+	if (!val)
+		return val;
+
 	val->type = type;
 
-	switch (type) {
-		case VT_BOOL:
-			val->b = false;
-			break;
-		case VT_INT:
-		case VT_CHAR:
-			val->i = 0;
-			break;
-		case VT_STR:
-		case VT_SYM:
-			val->str = NULL;
-			break;
-		case VT_CONS:
-			val->cons.head = NULL;
-			val->cons.tail = NULL;
-			break;
-	}
+	refcnt_init(&val->refcnt, 1);
+
+	return val;
 }
 
-static void __val_cleanup(struct val *val)
+void val_free(struct val *val)
 {
+	ASSERT(val);
+	ASSERT3U(refcnt_read(&val->refcnt), ==, 0);
+
 	switch (val->type) {
 		case VT_INT:
 		case VT_BOOL:
@@ -81,42 +76,22 @@ static void __val_cleanup(struct val *val)
 			val_putref(val->cons.tail);
 			break;
 	}
-}
-
-struct val *val_alloc(enum val_type type)
-{
-	struct val *val;
-
-	val = umem_cache_alloc(val_cache, 0);
-	if (!val)
-		return val;
-
-	refcnt_init(&val->refcnt, 1);
-
-	__val_init(val, type);
-
-	return val;
-}
-
-void val_free(struct val *val)
-{
-	ASSERT(val);
-	ASSERT3U(refcnt_read(&val->refcnt), ==, 0);
-
-	__val_cleanup(val);
 
 	umem_cache_free(val_cache, val);
 }
 
 #define DEF_VAL_SET(fxn, vttype, valelem, ctype)		\
-int val_set_##fxn(struct val *val, ctype v)			\
+struct val *val_alloc_##fxn(ctype v)				\
 {								\
-	__val_cleanup(val);					\
+	struct val *val;					\
 								\
-	val->type = vttype;					\
+	val = __val_alloc(vttype);				\
+	if (!val)						\
+		return NULL;					\
+								\
 	val->valelem = v;					\
 								\
-	return 0;						\
+	return val;						\
 }
 
 DEF_VAL_SET(int, VT_INT, i, uint64_t)
@@ -125,15 +100,18 @@ DEF_VAL_SET(sym, VT_SYM, str, struct str *)
 DEF_VAL_SET(bool, VT_BOOL, b, bool)
 DEF_VAL_SET(char, VT_CHAR, i, uint64_t)
 
-int val_set_cons(struct val *val, struct val *head, struct val *tail)
+struct val *val_alloc_cons(struct val *head, struct val *tail)
 {
-	__val_cleanup(val);
+	struct val *val;
 
-	val->type = VT_CONS;
+	val = __val_alloc(VT_CONS);
+	if (!val)
+		return NULL;
+
 	val->cons.head = head;
 	val->cons.tail = tail;
 
-	return 0;
+	return val;
 }
 
 void val_dump(struct val *val, int indent)
