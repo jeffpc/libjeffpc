@@ -93,7 +93,7 @@ REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free, val_isstatic)
 	({					\
 		struct val *_x;			\
 		_x = val_alloc_sym(v);		\
-		ASSERT(_x);			\
+		ASSERT(!IS_ERR(_x));		\
 		_x;				\
 	})
 
@@ -104,7 +104,7 @@ REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free, val_isstatic)
 	({					\
 		struct val *_x;			\
 		_x = val_alloc_str(v);		\
-		ASSERT(_x);			\
+		ASSERT(!IS_ERR(_x));		\
 		_x;				\
 	})
 
@@ -115,7 +115,7 @@ REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free, val_isstatic)
 	({					\
 		struct val *_x;			\
 		_x = val_alloc_char(v);		\
-		ASSERT(_x);			\
+		ASSERT(!IS_ERR(_x));		\
 		_x;				\
 	})
 
@@ -123,7 +123,7 @@ REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free, val_isstatic)
 	({					\
 		struct val *_x;			\
 		_x = val_alloc_int(v);		\
-		ASSERT(_x);			\
+		ASSERT(!IS_ERR(_x));		\
 		_x;				\
 	})
 
@@ -134,7 +134,7 @@ REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free, val_isstatic)
 	({					\
 		struct val *_x;			\
 		_x = val_alloc_cons((head), (tail));\
-		ASSERT(_x);			\
+		ASSERT(!IS_ERR(_x));		\
 		_x;				\
 	})
 

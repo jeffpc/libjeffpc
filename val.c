@@ -70,7 +70,7 @@ static struct val *__val_alloc(enum val_type type)
 
 	val = mem_cache_alloc(val_cache);
 	if (!val)
-		return val;
+		return ERR_PTR(-ENOMEM);
 
 	val->type = type;
 	val->static_alloc = false;
@@ -109,8 +109,8 @@ struct val *val_alloc_##fxn(ctype v)				\
 	struct val *val;					\
 								\
 	val = __val_alloc(vttype);				\
-	if (!val)						\
-		return NULL;					\
+	if (IS_ERR(val))					\
+		return val;					\
 								\
 	val->_set_##valelem = v;				\
 								\
@@ -159,8 +159,8 @@ struct val *val_alloc_cons(struct val *head, struct val *tail)
 	struct val *val;
 
 	val = __val_alloc(VT_CONS);
-	if (!val)
-		return NULL;
+	if (IS_ERR(val))
+		return val;
 
 	val->_set_cons.head = head;
 	val->_set_cons.tail = tail;
