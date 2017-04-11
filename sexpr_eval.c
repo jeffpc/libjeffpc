@@ -120,6 +120,29 @@ static struct val *fxn_equal(struct val *args, struct sexpr_eval_env *env)
 	return VAL_ALLOC_BOOL(sexpr_equal(a, b));
 }
 
+static struct val *fxn_if(struct val *args, struct sexpr_eval_env *env)
+{
+	struct val *c;
+	struct val *t, *f;
+	struct val *ret;
+
+	c = sexpr_nth(val_getref(args), 1);
+	t = sexpr_nth(val_getref(args), 2);
+	f = sexpr_nth(args, 3);
+
+	c = sexpr_eval(c, env);
+
+	VERIFY3U(c->type, ==, VT_BOOL);
+
+	ret = c->b ? val_getref(t) : val_getref(f);
+
+	val_putref(c);
+	val_putref(t);
+	val_putref(f);
+
+	return sexpr_eval(ret, env);
+}
+
 static struct builtin_fxn builtins[] = {
 	{ "and",   fxn_and,   -1, },
 	{ "or",    fxn_or,    -1, },
@@ -132,6 +155,7 @@ static struct builtin_fxn builtins[] = {
 	{ "cdr",   fxn_cdr,    1, },
 	{ "=",     fxn_equal,  2, },
 	{ "==",    fxn_equal,  2, },
+	{ "if",    fxn_if,     3, },
 	{ NULL, },
 };
 
