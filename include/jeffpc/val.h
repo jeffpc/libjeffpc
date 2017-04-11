@@ -127,13 +127,8 @@ REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free, val_isstatic)
 		_x;				\
 	})
 
-#define VAL_ALLOC_BOOL(v)			\
-	({					\
-		struct val *_x;			\
-		_x = val_alloc_bool(v);		\
-		ASSERT(_x);			\
-		_x;				\
-	})
+/* never fails */
+#define VAL_ALLOC_BOOL(v)	val_alloc_bool(v)
 
 #define VAL_ALLOC_CONS(head, tail)		\
 	({					\

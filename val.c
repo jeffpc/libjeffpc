@@ -33,6 +33,16 @@
 #include <jeffpc/jeffpc.h>
 #include <jeffpc/error.h>
 
+#define INIT_STATIC_VAL(t, memb, val)				\
+		{						\
+			.type = (t),				\
+			.static_alloc = true,			\
+			.memb = (val),				\
+		}
+
+static const struct val val_true = INIT_STATIC_VAL(VT_BOOL, b, true);
+static const struct val val_false = INIT_STATIC_VAL(VT_BOOL, b, false);
+
 static umem_cache_t *val_cache;
 
 void init_val_subsys(void)
@@ -98,8 +108,23 @@ struct val *val_alloc_##fxn(ctype v)				\
 DEF_VAL_SET(int, VT_INT, i, uint64_t)
 DEF_VAL_SET(str, VT_STR, str, struct str *)
 DEF_VAL_SET(sym, VT_SYM, str, struct str *)
-DEF_VAL_SET(bool, VT_BOOL, b, bool)
 DEF_VAL_SET(char, VT_CHAR, i, uint64_t)
+
+struct val *val_alloc_bool(bool b)
+{
+	const struct val *ret;
+
+	ret = b ? &val_true : &val_false;
+
+	/*
+	 * Cast away the const - we define the static as const to get it
+	 * into .rodata, but we have to drop the const since everything
+	 * expects struct val to be writable (because refcounts modify it).
+	 * In this case, we won't get any modifications because we're marked
+	 * as static.
+	 */
+	return (struct val *) ret;
+}
 
 struct val *val_alloc_cons(struct val *head, struct val *tail)
 {
