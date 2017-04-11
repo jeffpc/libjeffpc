@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,8 @@
 
 #ifndef __JEFFPC_REFCNT_H
 #define __JEFFPC_REFCNT_H
+
+#include <stdbool.h>
 
 #include <jeffpc/atomic.h>
 #include <jeffpc/error.h>
@@ -56,21 +58,27 @@ static inline uint32_t __refcnt_dec(refcnt_t *x)
 extern type *name##_getref(type *);					\
 extern void name##_putref(type *);
 
-#define __REFCNT_FXNS(vol, type, name, member, freefxn)			\
+#define __REFCNT_FXNS(vol, type, name, member, freefxn, isstaticfxn)	\
 vol type *name##_getref(type *x)					\
 {									\
+	bool (*isstatic)(type *) = isstaticfxn;				\
+									\
 	if (!x)								\
 		return NULL;						\
 									\
-	ASSERT3U(refcnt_read(&x->member), >=, 1);			\
+	if (!isstatic || !isstatic(x)) {				\
+		ASSERT3U(refcnt_read(&x->member), >=, 1);		\
 									\
-	__refcnt_inc(&x->member);					\
+		__refcnt_inc(&x->member);				\
+	}								\
 									\
 	return x;							\
 }									\
 vol void name##_putref(type *x)						\
 {									\
-	if (!x)								\
+	bool (*isstatic)(type *) = isstaticfxn;				\
+									\
+	if (!x || (isstatic && isstatic(x)))				\
 		return;							\
 									\
 	ASSERT3S(refcnt_read(&x->member), >=, 1);			\
@@ -79,10 +87,10 @@ vol void name##_putref(type *x)						\
 		freefxn(x);						\
 }
 
-#define REFCNT_FXNS(type, name, member, freefxn)			\
-	__REFCNT_FXNS(, type, name, member, freefxn)
+#define REFCNT_FXNS(type, name, member, freefxn, isstaticfxn)		\
+	__REFCNT_FXNS(, type, name, member, freefxn, isstaticfxn)
 
-#define REFCNT_INLINE_FXNS(type, name, member, freefxn)			\
-	__REFCNT_FXNS(static inline, type, name, member, freefxn)
+#define REFCNT_INLINE_FXNS(type, name, member, freefxn, isstaticfxn)	\
+	__REFCNT_FXNS(static inline, type, name, member, freefxn, isstaticfxn)
 
 #endif

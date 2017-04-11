@@ -81,7 +81,7 @@ extern struct val *val_alloc_cons(struct val *head, struct val *tail);
 extern void val_free(struct val *v);
 extern void val_dump(struct val *v, int indent);
 
-REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free)
+REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free, NULL)
 
 #define VAL_ALLOC_SYM(v)			\
 	({					\
