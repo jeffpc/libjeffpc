@@ -24,6 +24,7 @@
 #define __JEFFPC_STR_H
 
 #include <string.h>
+#include <stdbool.h>
 
 #include <jeffpc/refcnt.h>
 
@@ -31,21 +32,17 @@
 
 #define STR_INLINE_LEN	14
 
-enum str_flags {
-	STR_FLAG_STATIC		= 0x01,
-};
-
 struct str {
 	char *str;
 	refcnt_t refcnt;
-	unsigned char flags;
+	bool static_alloc:1;
 	char inline_str[STR_INLINE_LEN + 1];
 };
 
 #define STR_STATIC_INITIALIZER(val)			\
 		{					\
 			.str = (val),			\
-			.flags = STR_FLAG_STATIC,	\
+			.static_alloc = true,		\
 		}
 
 extern struct str *str_alloc(char *s);
@@ -60,7 +57,7 @@ extern void str_free(struct str *str);
 
 static inline bool str_isstatic(struct str *x)
 {
-	return (x->flags & STR_FLAG_STATIC) == STR_FLAG_STATIC;
+	return x->static_alloc;
 }
 
 REFCNT_INLINE_FXNS(struct str, str, refcnt, str_free, str_isstatic)
