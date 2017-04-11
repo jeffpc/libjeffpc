@@ -146,8 +146,6 @@ static struct val *fxn_if(struct val *args, struct sexpr_eval_env *env)
 static struct builtin_fxn builtins[] = {
 	{ "and",   fxn_and,   -1, },
 	{ "or",    fxn_or,    -1, },
-	{ "&&",    fxn_and,   -1, },
-	{ "||",    fxn_or,    -1, },
 	{ "+",     fxn_add,   -1, },
 	{ "*",     fxn_mult,  -1, },
 	{ "quote", fxn_quote,  1, },
