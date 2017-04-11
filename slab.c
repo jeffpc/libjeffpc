@@ -35,15 +35,17 @@ struct mem_cache *mem_cache_create(char *name, size_t size, size_t align)
 {
 	struct mem_cache *cache;
 
-	if (!size || align)
+	if (!size)
 		return ERR_PTR(-EINVAL);
+
+	/* FIXME: check that the value is 0, or a power of 2 */
 
 	cache = malloc(sizeof(struct mem_cache));
 	if (!cache)
 		return ERR_PTR(-ENOMEM);
 
 	cache->size = size;
-	cache->align = align;
+	cache->align = (align < sizeof(void *)) ? sizeof(void *) : align;
 
 	return cache;
 }
@@ -60,7 +62,12 @@ void mem_cache_destroy(struct mem_cache *cache)
 #pragma weak mem_cache_alloc
 void *mem_cache_alloc(struct mem_cache *cache)
 {
-	return malloc(cache->size);
+	void *obj;
+	int ret;
+
+	ret = posix_memalign(&obj, cache->align, cache->size);
+
+	return ret ? ERR_PTR(-ret) : obj;
 }
 
 #pragma weak mem_cache_free
