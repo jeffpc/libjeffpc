@@ -80,7 +80,7 @@ static void inc_lineno(yyscan_t scanner);
 #\\[^ ]			{ yylval->i = yytext[2]; return CHAR; }
 	/* TODO: handle '#\<utf-8>' */
 [1-9][0-9]*		{ ASSERT0(str2u64(yytext, &yylval->i)); return NUMBER; }
-[a-zA-Z+=|&_-]?[a-zA-Z0-9+=|&_-]* { yylval->s = STR_DUP(yytext); return SYMBOL; }
+[a-zA-Z+=|&*_-]?[a-zA-Z0-9+=|&*_-]* { yylval->s = STR_DUP(yytext); return SYMBOL; }
 [ \r\t]			{ /* ignore */ }
 \n			{ inc_lineno(yyscanner); /* ignore */}
 ;[^\n]*			{ /* comment: ignore it */ }
