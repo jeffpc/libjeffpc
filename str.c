@@ -46,13 +46,12 @@ static struct str *__alloc(char *s, bool copy)
 
 	refcnt_init(&str->refcnt, 1);
 	str->static_alloc = false;
+	str->inline_alloc = copy;
 
-	if (copy) {
+	if (copy)
 		strcpy(str->inline_str, s);
-		str->str = str->inline_str;
-	} else {
+	else
 		str->str = s;
-	}
 
 	return str;
 }
@@ -75,12 +74,12 @@ struct str *str_alloc(char *s)
 
 size_t str_len(const struct str *s)
 {
-	return strlen(s->str);
+	return strlen(str_cstr(s));
 }
 
 int str_cmp(const struct str *a, const struct str *b)
 {
-	return strcmp(a->str, b->str);
+	return strcmp(str_cstr(a), str_cstr(b));
 }
 
 struct str *str_cat(int n, ...)
@@ -112,7 +111,7 @@ struct str *str_cat(int n, ...)
 		if (!str)
 			continue;
 
-		len[i] = strlen(str->str);
+		len[i] = strlen(str_cstr(str));
 
 		totallen += len[i];
 	}
@@ -130,7 +129,7 @@ struct str *str_cat(int n, ...)
 		if (!str)
 			continue;
 
-		strcpy(out, str->str);
+		strcpy(out, str_cstr(str));
 
 		out += len[i];
 
@@ -177,7 +176,7 @@ void str_free(struct str *str)
 
 	ASSERT3U(refcnt_read(&str->refcnt), ==, 0);
 
-	if (str->str != str->inline_str)
+	if (!str->inline_alloc)
 		free(str->str);
 	mem_cache_free(str_cache, str);
 }

@@ -30,13 +30,33 @@
 
 /* ref-counted string */
 
-#define STR_INLINE_LEN	14
+#define STR_INLINE_LEN	15
 
 struct str {
-	char *str;
-	refcnt_t refcnt;
+	union {
+		char *str;
+		char inline_str[STR_INLINE_LEN + 1];
+	};
+	/*
+	 * FIXME:
+	 * We need to somehow convince the compiler that the union can be a
+	 * strange number of bytes long (ideally 19).  Then, the bools below
+	 * would take up a byte leaving the refcnt at offset 20 - turning the
+	 * whole struct into 24-bytes with zero padding and 18 bytes for the
+	 * inline string (instead of the current 15).
+	 *
+	 * Instead, we get the union of 16 bytes, the bools byte, 3 bytes of
+	 * padding, and 4 bytes for the refcnt.
+	 *
+	 * We cannot simply add the packed attribute onto the union since
+	 * that would generate terrible code when trying to access the ->str
+	 * pointer.  Adding packed,aligned(8) or something like that
+	 * generates padding.  (Actually, aligned(8) makes the union a
+	 * multiple of 8 bytes creating tons of padding!)
+	 */
 	bool static_alloc:1;
-	char inline_str[STR_INLINE_LEN + 1];
+	bool inline_alloc:1;
+	refcnt_t refcnt;
 };
 
 #define STR_STATIC_INITIALIZER(val)			\
@@ -80,7 +100,9 @@ REFCNT_INLINE_FXNS(struct str, str, refcnt, str_free, str_isstatic)
 
 static inline const char *str_cstr(const struct str *str)
 {
-	return str ? str->str : NULL;
+	if (!str)
+		return NULL;
+	return str->inline_alloc ? str->inline_str : str->str;
 }
 
 #endif
