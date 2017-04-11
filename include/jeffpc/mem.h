@@ -31,7 +31,8 @@
  */
 
 struct mem_cache {
-	int dummy;
+	size_t size;
+	size_t align;
 };
 
 extern struct mem_cache *mem_cache_create(char *name, size_t size, size_t align);

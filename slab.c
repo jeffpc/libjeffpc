@@ -33,24 +33,34 @@
 #pragma weak mem_cache_create
 struct mem_cache *mem_cache_create(char *name, size_t size, size_t align)
 {
+	struct mem_cache *cache;
+
 	if (!size || align)
 		return ERR_PTR(-EINVAL);
 
-	return (struct mem_cache *)(uintptr_t) size;
+	cache = malloc(sizeof(struct mem_cache));
+	if (!cache)
+		return ERR_PTR(-ENOMEM);
+
+	cache->size = size;
+	cache->align = align;
+
+	return cache;
 }
 
 #pragma weak mem_cache_destroy
 void mem_cache_destroy(struct mem_cache *cache)
 {
-	/* nothing to do */
+	if (!cache)
+		return;
+
+	free(cache);
 }
 
 #pragma weak mem_cache_alloc
 void *mem_cache_alloc(struct mem_cache *cache)
 {
-	size_t size = (uintptr_t)cache;
-
-	return malloc(size);
+	return malloc(cache->size);
 }
 
 #pragma weak mem_cache_free
