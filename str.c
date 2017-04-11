@@ -22,26 +22,25 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
-#include <umem.h>
 #include <alloca.h>
 
 #include <jeffpc/str.h>
+#include <jeffpc/mem.h>
 #include <jeffpc/jeffpc.h>
 
-static umem_cache_t *str_cache;
+static struct mem_cache *str_cache;
 
 void init_str_subsys(void)
 {
-	str_cache = umem_cache_create("str-cache", sizeof(struct str),
-				      0, NULL, NULL, NULL, NULL, NULL, 0);
-	ASSERT(str_cache);
+	str_cache = mem_cache_create("str-cache", sizeof(struct str), 0);
+	ASSERT(!IS_ERR(str_cache));
 }
 
 static struct str *__alloc(char *s, bool copy)
 {
 	struct str *str;
 
-	str = umem_cache_alloc(str_cache, 0);
+	str = mem_cache_alloc(str_cache);
 	if (!str)
 		return NULL;
 
@@ -180,5 +179,5 @@ void str_free(struct str *str)
 
 	if (str->str != str->inline_str)
 		free(str->str);
-	umem_cache_free(str_cache, str);
+	mem_cache_free(str_cache, str);
 }
