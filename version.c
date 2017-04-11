@@ -22,7 +22,7 @@
 
 #include <jeffpc/version.h>
 
-#include "version.h"
+#include "hgversion.h"
 
 const char jeffpc_version[] = VERSION;
 const char jeffpc_hgrev[] = HG_COMMIT;

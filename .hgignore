@@ -24,6 +24,6 @@ test_sexpr_parser
 test_sexpr_eval
 test_version
 
-version.h
+hgversion.h
 
 subinclude:include/jeffpc/.hgignore
