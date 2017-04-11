@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2014-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -181,36 +181,4 @@ void str_free(struct str *str)
 	if (str->str != str->inline_str)
 		free(str->str);
 	umem_cache_free(str_cache, str);
-}
-
-/*
- * We are not using REFCNT_FXNS() here because we want to support statically
- * defined strings.
- */
-struct str *str_getref(struct str *x)
-{
-	if (!x)
-		return NULL;
-
-	if (!(x->flags & STR_FLAG_STATIC)) {
-		ASSERT3U(refcnt_read(&x->refcnt), >=, 1);
-
-		__refcnt_inc(&x->refcnt);
-	}
-
-	return x;
-}
-
-void str_putref(struct str *x)
-{
-	if (!x)
-		return;
-
-	if (x->flags & STR_FLAG_STATIC)
-		return;
-
-	ASSERT3S(refcnt_read(&x->refcnt), >=, 1);
-
-	if (!__refcnt_dec(&x->refcnt))
-		str_free(x);
 }

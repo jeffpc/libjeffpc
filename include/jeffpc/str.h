@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2014-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,7 +57,13 @@ extern struct str *str_printf(const char *fmt, ...)
 	__attribute__((format (printf, 1, 2)));
 extern struct str *str_vprintf(const char *fmt, va_list args);
 extern void str_free(struct str *str);
-REFCNT_PROTOTYPES(struct str, str)
+
+static inline bool str_isstatic(struct str *x)
+{
+	return (x->flags & STR_FLAG_STATIC) == STR_FLAG_STATIC;
+}
+
+REFCNT_INLINE_FXNS(struct str, str, refcnt, str_free, str_isstatic)
 
 #define STR_ALLOC(s)			\
 	({				\
