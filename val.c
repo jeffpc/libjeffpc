@@ -32,6 +32,7 @@
 #include <jeffpc/val.h>
 #include <jeffpc/jeffpc.h>
 #include <jeffpc/error.h>
+#include <jeffpc/types.h>
 
 #define INIT_STATIC_VAL(t, memb, val)				\
 		{						\
@@ -42,6 +43,18 @@
 
 static const struct val val_true = INIT_STATIC_VAL(VT_BOOL, b, true);
 static const struct val val_false = INIT_STATIC_VAL(VT_BOOL, b, false);
+static const struct val val_ints[10] = {
+	[0] = INIT_STATIC_VAL(VT_INT, i, 0),
+	[1] = INIT_STATIC_VAL(VT_INT, i, 1),
+	[2] = INIT_STATIC_VAL(VT_INT, i, 2),
+	[3] = INIT_STATIC_VAL(VT_INT, i, 3),
+	[4] = INIT_STATIC_VAL(VT_INT, i, 4),
+	[5] = INIT_STATIC_VAL(VT_INT, i, 5),
+	[6] = INIT_STATIC_VAL(VT_INT, i, 6),
+	[7] = INIT_STATIC_VAL(VT_INT, i, 7),
+	[8] = INIT_STATIC_VAL(VT_INT, i, 8),
+	[9] = INIT_STATIC_VAL(VT_INT, i, 9),
+};
 
 static umem_cache_t *val_cache;
 
@@ -105,10 +118,26 @@ struct val *val_alloc_##fxn(ctype v)				\
 	return val;						\
 }
 
-DEF_VAL_SET(int, VT_INT, i, uint64_t)
+static DEF_VAL_SET(int_heap, VT_INT, i, uint64_t)
 DEF_VAL_SET(str, VT_STR, str, struct str *)
 DEF_VAL_SET(sym, VT_SYM, str, struct str *)
 DEF_VAL_SET(char, VT_CHAR, i, uint64_t)
+
+struct val *val_alloc_int(uint64_t i)
+{
+	if (i < ARRAY_LEN(val_ints)) {
+		/*
+		 * Cast away the const - we define the static as const to get it
+		 * into .rodata, but we have to drop the const since everything
+		 * expects struct val to be writable (because refcounts modify it).
+		 * In this case, we won't get any modifications because we're marked
+		 * as static.
+		 */
+		return (struct val *) &val_ints[i];
+	}
+
+	return val_alloc_int_heap(i);
+}
 
 struct val *val_alloc_bool(bool b)
 {
