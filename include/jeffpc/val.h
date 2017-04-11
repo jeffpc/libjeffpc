@@ -43,13 +43,32 @@ struct val {
 	enum val_type type;
 	refcnt_t refcnt;
 	union {
-		uint64_t i;
-		bool b;
-		struct str *str;
-		struct {
+		const uint64_t i;
+		const bool b;
+		struct str * const str;
+		const struct {
 			struct val *head;
 			struct val *tail;
 		} cons;
+
+		/*
+		 * We want to keep the normal members const to catch
+		 * attempts to modify them, but at the same time we need to
+		 * initialize them after allocation.  Instead of venturing
+		 * into undefined behavior territory full of ugly casts, we
+		 * just duplicate the above members without the const and
+		 * with much uglier name.
+		 *
+		 * Do not use the following members unless you are the val
+		 * allocation function!
+		 */
+		uint64_t _set_i;
+		bool _set_b;
+		struct str *_set_str;
+		struct {
+			struct val *head;
+			struct val *tail;
+		} _set_cons;
 	};
 };
 

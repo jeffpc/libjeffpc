@@ -89,7 +89,7 @@ struct val *val_alloc_##fxn(ctype v)				\
 	if (!val)						\
 		return NULL;					\
 								\
-	val->valelem = v;					\
+	val->_set_##valelem = v;				\
 								\
 	return val;						\
 }
@@ -108,8 +108,8 @@ struct val *val_alloc_cons(struct val *head, struct val *tail)
 	if (!val)
 		return NULL;
 
-	val->cons.head = head;
-	val->cons.tail = tail;
+	val->_set_cons.head = head;
+	val->_set_cons.tail = tail;
 
 	return val;
 }
