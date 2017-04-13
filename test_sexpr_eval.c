@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,6 @@
 
 #include <jeffpc/types.h>
 #include <jeffpc/sexpr.h>
-#include <jeffpc/jeffpc.h>
 
 #include "test.c"
 
@@ -202,8 +201,6 @@ static void test_ints(void)
 
 void test(void)
 {
-	jeffpc_init(NULL);
-
 	test_bools();
 	test_ints();
 }

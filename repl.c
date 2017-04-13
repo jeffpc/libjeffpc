@@ -24,7 +24,6 @@
 
 #include <jeffpc/types.h>
 #include <jeffpc/sexpr.h>
-#include <jeffpc/jeffpc.h>
 
 static char *repl_read(GetLine *gl)
 {
@@ -65,8 +64,6 @@ static void repl_print(struct val *e)
 int main(int argc, char **argv)
 {
 	GetLine *gl;
-
-	jeffpc_init(NULL);
 
 	gl = new_GetLine(1024, 1000);
 	if (!gl) {

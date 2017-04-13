@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,6 @@
 #include <jeffpc/str.h>
 #include <jeffpc/val.h>
 #include <jeffpc/io.h>
-#include <jeffpc/jeffpc.h>
 
 static int onefile(char *ibuf, size_t len)
 {
@@ -50,8 +49,6 @@ int main(int argc, char **argv)
 	result = 0;
 
 	ASSERT0(putenv("UMEM_DEBUG=default,verbose"));
-
-	jeffpc_init(NULL);
 
 	for (i = 1; i < argc; i++) {
 		in = read_file(argv[i]);
