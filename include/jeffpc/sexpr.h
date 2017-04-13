@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -64,6 +64,7 @@ extern ssize_t sexpr_length(struct val *lv);
 extern struct val *sexpr_nth(struct val *val, uint64_t n);
 extern struct val *sexpr_assoc(struct val *val, const char *name);
 extern bool sexpr_equal(struct val *lhs, struct val *rhs);
+extern int sexpr_for_each(struct val *lv, int (*fxn)(struct val *));
 
 extern struct val *sexpr_eval(struct val *val, struct sexpr_eval_env *);
 
