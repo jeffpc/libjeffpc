@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,12 +39,20 @@ static inline uint64_t __gettime(int clock)
 	return (ts.tv_sec * 1000000000ull) + ts.tv_nsec;
 }
 
-static inline uint64_t gettime(void)
+/*
+ * Get the current "time" in ns.  The epoch is arbitrary (e.g., system
+ * boot).  This clock is not subject to resetting or drifting, making it
+ * ideal for performance measurements.
+ */
+static inline uint64_t gettick(void)
 {
 	return __gettime(CLOCK_MONOTONIC);
 }
 
-static inline uint64_t gettime_unix(void)
+/*
+ * Get the current time in ns.  The epoch is 1970-01-01 00:00:00 UTC.
+ */
+static inline uint64_t gettime(void)
 {
 	return __gettime(CLOCK_REALTIME);
 }
