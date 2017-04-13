@@ -373,7 +373,7 @@ struct val *sexpr_nth(struct val *lv, uint64_t n)
  * which really is:
  *   '((a . b) . ((c . d) . ()))
  *
- * So, to check it, we examite the car of the list, if that's not the right
+ * So, to check it, we examine the car of the list, if that's not the right
  * key, we recurse on cdr of the list.
  */
 struct val *sexpr_assoc(struct val *lv, const char *name)
