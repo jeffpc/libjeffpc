@@ -58,7 +58,7 @@ static const struct val val_ints[10] = {
 
 static struct mem_cache *val_cache;
 
-void init_val_subsys(void)
+static void __attribute__((constructor)) init_val_subsys(void)
 {
 	val_cache = mem_cache_create("val-cache", sizeof(struct val), 0);
 	ASSERT(!IS_ERR(val_cache));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,8 +54,4 @@ void jeffpc_init(struct jeffpc_ops *ops)
 	SET_OP(log,      default_log);
 	SET_OP(assfail,  default_assfail);
 	SET_OP(assfail3, default_assfail3);
-
-	init_str_subsys();
-	init_val_subsys();
-
 }

@@ -30,7 +30,7 @@
 
 static struct mem_cache *str_cache;
 
-void init_str_subsys(void)
+static void __attribute__((constructor)) init_str_subsys(void)
 {
 	str_cache = mem_cache_create("str-cache", sizeof(struct str), 0);
 	ASSERT(!IS_ERR(str_cache));

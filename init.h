@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,6 @@
 #define __INIT_H
 
 #include <jeffpc/jeffpc.h>
-
-extern void init_val_subsys(void);
-extern void init_str_subsys(void);
 
 extern struct jeffpc_ops libops;
 
