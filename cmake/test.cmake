@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+# Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,9 @@ function(simple_c_test type section bin data)
 		 COMMAND "${CMAKE_BINARY_DIR}/test_${bin}"
 			 "${CMAKE_CURRENT_SOURCE_DIR}/${data}"
 	)
+	set_tests_properties("${type}:${section}:${data}" PROPERTIES
+		ENVIRONMENT "UMEM_DEBUG=default,verbose"
+	)
 endfunction()
 
 macro(build_test_bin name)
@@ -41,5 +44,8 @@ macro(build_test_bin_and_run name)
 	build_test_bin(${name})
 	add_test(NAME "${name}"
 		 COMMAND "${CMAKE_BINARY_DIR}/test_${name}"
+	)
+	set_tests_properties("${name}" PROPERTIES
+		ENVIRONMENT "UMEM_DEBUG=default,verbose"
 	)
 endmacro()
