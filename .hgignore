@@ -26,4 +26,6 @@ test_version
 
 hgversion.h
 
+.*.swp
+
 subinclude:include/jeffpc/.hgignore
