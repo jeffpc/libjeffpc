@@ -22,8 +22,8 @@
 
 find_package(Hg)
 
-macro(gethgrev varname template)
-	set(${varname} "unknown")
+macro(gethgrev varname template defstr)
+	set(${varname} "${defstr}")
 
 	if(HG_FOUND)
 		execute_process(
@@ -33,18 +33,19 @@ macro(gethgrev varname template)
 			RESULT_VARIABLE res_var
 		)
 		if(NOT ${res_var} EQUAL 0)
-			set(${varname} "unknown")
+			set(${varname} "${defstr}")
 		endif()
 	endif()
 endmacro()
 
-gethgrev(HG_COMMIT "{node}")
+gethgrev(HG_COMMIT "{node}" "0000000000000000000000000000000000000000")
 
 # TODO: if there are uncommitted changes, append -dirty
 gethgrev(VERSION
-	"{ifeq(latesttagdistance,0,\"{latesttag}\",\"{latesttag}-{latesttagdistance}-{node|short}\")}")
+	"{ifeq(latesttagdistance,0,\"{latesttag}\",\"{latesttag}-{latesttagdistance}-{node|short}\")}"
+	"unknown")
 
-if(${HG_COMMIT} EQUAL "unknown")
+if(${HG_COMMIT} EQUAL "0000000000000000000000000000000000000000")
 	message(WARNING "Failed to get revision info from Mercurial.")
 endif()
 
