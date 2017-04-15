@@ -115,6 +115,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/int.h
 		include/jeffpc/io.h
 		include/jeffpc/jeffpc.h
+		include/jeffpc/list.h
 		include/jeffpc/mem.h
 		include/jeffpc/padding.h
 		include/jeffpc/rand.h
