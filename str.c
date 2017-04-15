@@ -35,6 +35,16 @@ static struct str one_char[128] = {
 	['-'] = STR_STATIC_INITIALIZER("-"),
 	['.'] = STR_STATIC_INITIALIZER("."),
 	['/'] = STR_STATIC_INITIALIZER("/"),
+	['0'] = STR_STATIC_INITIALIZER("0"),
+	['1'] = STR_STATIC_INITIALIZER("1"),
+	['2'] = STR_STATIC_INITIALIZER("2"),
+	['3'] = STR_STATIC_INITIALIZER("3"),
+	['4'] = STR_STATIC_INITIALIZER("4"),
+	['5'] = STR_STATIC_INITIALIZER("5"),
+	['6'] = STR_STATIC_INITIALIZER("6"),
+	['7'] = STR_STATIC_INITIALIZER("7"),
+	['8'] = STR_STATIC_INITIALIZER("8"),
+	['9'] = STR_STATIC_INITIALIZER("9"),
 };
 
 static struct mem_cache *str_cache;
