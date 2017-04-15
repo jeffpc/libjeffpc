@@ -29,7 +29,9 @@
 #include <jeffpc/jeffpc.h>
 
 static struct str empty_string = STR_STATIC_INITIALIZER("");
-static struct str one_char[128];
+static struct str one_char[128] = {
+	[' '] = STR_STATIC_INITIALIZER(" "),
+};
 
 static struct mem_cache *str_cache;
 
