@@ -68,7 +68,8 @@ include_directories(
 
 # include the current source dir but only for: #include "foo.h"
 add_compile_options(
-	-iquote ${CMAKE_CURRENT_SOURCE_DIR}
+	-iquote${CMAKE_CURRENT_SOURCE_DIR}
+	-iquote${CMAKE_CURRENT_BINARY_DIR}
 )
 
 BISON_TARGET(sexpr sexpr.y ${CMAKE_CURRENT_BINARY_DIR}/sexpr.tab.c
