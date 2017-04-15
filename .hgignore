@@ -18,6 +18,7 @@ sexpr-repl
 test_array
 test_atomic-single-thread
 test_bswap
+test_container_of
 test_hexdump
 test_padding
 test_sexpr_parser
