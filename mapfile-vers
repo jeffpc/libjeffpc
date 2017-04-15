@@ -48,6 +48,10 @@ JEFFPC_0.10 {
 		xread;
 		xwrite;
 
+		# list
+		list_create;
+		list_destroy;
+
 		# mem
 		mem_cache_create;
 		mem_cache_destroy;

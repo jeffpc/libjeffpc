@@ -83,6 +83,7 @@ add_library(jeffpc SHARED
 	hexdump.c
 	init.c
 	io.c
+	list.c
 	padding.c
 	rand.c
 	sexpr.c
