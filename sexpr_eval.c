@@ -221,7 +221,7 @@ found:
 
 		if (got != fxn->arglen)
 			panic("'%s' not given the right number of arguments "
-			      "(expected %d, got %d)", fxn->name, fxn->arglen,
+			      "(expected %zd, got %zu)", fxn->name, fxn->arglen,
 			      got);
 	}
 
