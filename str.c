@@ -28,6 +28,7 @@
 #include <jeffpc/mem.h>
 #include <jeffpc/jeffpc.h>
 
+static struct str empty_string = STR_STATIC_INITIALIZER("");
 static struct mem_cache *str_cache;
 
 static void __attribute__((constructor)) init_str_subsys(void)
@@ -59,7 +60,7 @@ static struct str *__alloc(char *s, bool copy)
 struct str *str_dup(const char *s)
 {
 	if (!s)
-		return __alloc("", true);
+		return &empty_string;
 
 	if (strlen(s) <= STR_INLINE_LEN)
 		return __alloc((char *) s, true);
