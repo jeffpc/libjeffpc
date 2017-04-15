@@ -20,9 +20,12 @@
  * SOFTWARE.
  */
 
+#include <stdint.h>
+
 #include <jeffpc/version.h>
 
 #include "hgversion.h"
 
 const char jeffpc_version[] = VERSION;
-const char jeffpc_hgrev[] = HG_COMMIT;
+const char jeffpc_hgrev[] = HG_COMMIT_STR;
+const uint8_t jeffpc_hgrev_binary[] = HG_COMMIT_BIN;

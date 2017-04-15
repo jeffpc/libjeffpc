@@ -140,6 +140,7 @@ JEFFPC_0.10 {
 
 		# version
 		jeffpc_hgrev;
+		jeffpc_hgrev_binary;
 		jeffpc_version;
 
 	local:
