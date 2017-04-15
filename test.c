@@ -26,6 +26,8 @@
 #include <alloca.h>
 #include <string.h>
 
+#include <jeffpc/version.h>
+
 static void test(void);
 
 /*
@@ -49,6 +51,7 @@ void fail(const char *fmt, ...)
 
 int main(int argc, char **argv)
 {
+	fprintf(stderr, "libjeffpc.so version %s\n", jeffpc_version);
 	fprintf(stderr, "Running tests (%s)\n", argv[0]);
 
 	test();
