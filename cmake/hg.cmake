@@ -43,7 +43,7 @@ gethgrev(HG_COMMIT "{node}" "0000000000000000000000000000000000000000")
 # TODO: if there are uncommitted changes, append -dirty
 gethgrev(VERSION
 	"{ifeq(latesttagdistance,0,\"{latesttag}\",\"{latesttag}-{latesttagdistance}-{node|short}\")}"
-	"unknown")
+	"${JEFFPC_VERSION}")
 
 if(${HG_COMMIT} EQUAL "0000000000000000000000000000000000000000")
 	message(WARNING "Failed to get revision info from Mercurial.")
