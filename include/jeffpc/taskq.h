@@ -25,12 +25,13 @@
 
 #include <jeffpc/thread.h>
 #include <jeffpc/synch.h>
+#include <jeffpc/list.h>
 
 struct taskq_item {
 	void (*fxn)(void *);
 	void *arg;
 
-	struct taskq_item *next;
+	struct list_node node;
 };
 
 struct taskq {
@@ -43,8 +44,7 @@ struct taskq {
 	struct cond cond_worker2parent;
 	struct cond cond_parent2worker;
 
-	struct taskq_item *first;
-	struct taskq_item *last;
+	struct list queue;
 	unsigned long queue_len;
 
 	bool shutdown;

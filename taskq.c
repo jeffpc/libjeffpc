@@ -27,20 +27,7 @@
 
 static void enqueue(struct taskq *tq, struct taskq_item *item)
 {
-	item->next = NULL;
-
-	if (!tq->first) {
-		VERIFY3P(tq->first, ==, NULL);
-		VERIFY3P(tq->last, ==, NULL);
-		tq->first = item;
-	} else {
-		VERIFY3P(tq->first, !=, NULL);
-		VERIFY3P(tq->last, !=, NULL);
-		tq->last->next = item;
-	}
-
-	tq->last = item;
-
+	list_insert_tail(&tq->queue, item);
 	tq->queue_len++;
 }
 
@@ -48,19 +35,9 @@ static struct taskq_item *dequeue(struct taskq *tq)
 {
 	struct taskq_item *item;
 
-	item = tq->first;
-	if (!item) {
-		VERIFY3P(tq->last, ==, NULL);
+	item = list_remove_head(&tq->queue);
+	if (!item)
 		return NULL;
-	}
-
-	VERIFY3P(tq->last, !=, NULL);
-
-	tq->first = item->next;
-	if (tq->last == item)
-		tq->last = NULL;
-
-	item->next = NULL;
 
 	tq->queue_len--;
 
@@ -163,12 +140,12 @@ struct taskq *taskq_create_fixed(const char *name, long nthreads)
 	strlcpy(tq->name, name, sizeof(tq->name));
 	tq->nthreads = nthreads;
 	tq->nstarted_threads = 0;
-	tq->first = NULL;
-	tq->last = NULL;
 	tq->queue_len = 0;
 	tq->shutdown = false;
 	tq->processed = 0;
 
+	list_create(&tq->queue, sizeof(struct taskq_item),
+		    offsetof(struct taskq_item, node));
 	mxinit(&tq->lock);
 	condinit(&tq->cond_worker2parent);
 	condinit(&tq->cond_parent2worker);
@@ -217,10 +194,10 @@ void taskq_wait(struct taskq *tq)
 {
 	mxlock(&tq->lock);
 
-	while (tq->first)
+	while (!list_is_empty(&tq->queue))
 		condwait(&tq->cond_worker2parent, &tq->lock);
 
-	VERIFY3P(tq->last, ==, NULL);
+	VERIFY(list_is_empty(&tq->queue));
 
 	mxunlock(&tq->lock);
 }
@@ -235,8 +212,7 @@ void taskq_destroy(struct taskq *tq)
 	mxlock(&tq->lock);
 
 	/* the queue should be empty */
-	VERIFY3P(tq->first, ==, NULL);
-	VERIFY3P(tq->last, ==, NULL);
+	VERIFY(list_is_empty(&tq->queue));
 
 	/* make everyone aware that we are shutting down */
 	tq->shutdown = true;
@@ -249,6 +225,10 @@ void taskq_destroy(struct taskq *tq)
 		xthr_join(tq->threads[i], NULL);
 
 	/* free */
+	conddestroy(&tq->cond_parent2worker);
+	conddestroy(&tq->cond_worker2parent);
+	mxdestroy(&tq->lock);
+	list_destroy(&tq->queue);
 	free(tq->threads);
 	free(tq);
 }
