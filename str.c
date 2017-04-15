@@ -68,7 +68,7 @@ struct str *str_dup(const char *s)
 {
 	unsigned char first_char;
 
-	if (!s)
+	if (!s || (s[0] == '\0'))
 		return &empty_string;
 
 	first_char = s[0];
