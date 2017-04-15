@@ -23,6 +23,8 @@
 cmake_minimum_required(VERSION 2.8.12.2)
 project(libjeffpc)
 
+set(JEFFPC_VERSION 0.10-rc5)
+
 enable_testing()
 
 add_definitions(
