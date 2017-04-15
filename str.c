@@ -29,6 +29,8 @@
 #include <jeffpc/jeffpc.h>
 
 static struct str empty_string = STR_STATIC_INITIALIZER("");
+static struct str one_char[128];
+
 static struct mem_cache *str_cache;
 
 static void __attribute__((constructor)) init_str_subsys(void)
@@ -59,8 +61,17 @@ static struct str *__alloc(char *s, bool copy)
 
 struct str *str_dup(const char *s)
 {
+	unsigned char first_char;
+
 	if (!s)
 		return &empty_string;
+
+	first_char = s[0];
+
+	/* preallocated one-char long strings of 7-bit ASCII */
+	if ((first_char > '\0') && (first_char < '\x7f') &&
+	    (s[1] == '\0') && one_char[first_char].static_alloc)
+		return &one_char[first_char];
 
 	if (strlen(s) <= STR_INLINE_LEN)
 		return __alloc((char *) s, true);
