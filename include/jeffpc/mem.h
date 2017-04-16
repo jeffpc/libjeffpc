@@ -25,6 +25,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 /*
  * slab allocator
@@ -40,5 +41,16 @@ extern void mem_cache_destroy(struct mem_cache *cache);
 
 extern void *mem_cache_alloc(struct mem_cache *cache);
 extern void mem_cache_free(struct mem_cache *cache, void *buf);
+
+static inline void *zalloc(size_t len)
+{
+	void *buf;
+
+	buf = malloc(len);
+	if (buf)
+		memset(buf, 0, len);
+
+	return buf;
+}
 
 #endif
