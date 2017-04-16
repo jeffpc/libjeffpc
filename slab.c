@@ -67,7 +67,7 @@ void *mem_cache_alloc(struct mem_cache *cache)
 
 	ret = posix_memalign(&obj, cache->align, cache->size);
 
-	return ret ? ERR_PTR(-ret) : obj;
+	return ret ? NULL : obj;
 }
 
 #pragma weak mem_cache_free
