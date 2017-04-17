@@ -28,6 +28,9 @@ JEFFPC_0.10 {
 		array_size;
 		array_truncate;
 
+		# cstr
+		strcpy_safe;
+
 		# error
 		cmn_err;
 		cmn_verr;
