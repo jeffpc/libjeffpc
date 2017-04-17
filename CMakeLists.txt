@@ -81,6 +81,7 @@ FLEX_TARGET(sexpr sexpr.l ${CMAKE_CURRENT_BINARY_DIR}/sexpr.lex.c
 ADD_FLEX_BISON_DEPENDENCY(sexpr sexpr)
 
 add_library(jeffpc SHARED
+	array.c
 	error.c
 	hexdump.c
 	init.c

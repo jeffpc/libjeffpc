@@ -22,6 +22,12 @@
 
 JEFFPC_0.10 {
 	global:
+		# array
+		array_alloc;
+		array_free;
+		array_size;
+		array_truncate;
+
 		# error
 		cmn_err;
 		cmn_verr;

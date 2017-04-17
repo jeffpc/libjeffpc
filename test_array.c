@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,87 +20,98 @@
  * SOFTWARE.
  */
 
-#include <jeffpc/types.h>
+#include <jeffpc/array.h>
+#include <jeffpc/error.h>
 
 #include "test.c"
 
-struct foo {
-	int a;
-	char b;
-};
-
-union bar {
-	int a;
-	char b;
-};
-
-#define TEST_ONE(type, nelem)					\
-	do {							\
-		type test_array[nelem];				\
-		size_t res = ARRAY_LEN(test_array);		\
-								\
-		fprintf(stderr, "   %-16s test_array[%lu]\t=> %zu...",\
-			#type, nelem, res);			\
-								\
-		if (res != nelem)				\
-			fail("expected %zu, got %zu", nelem,	\
-			     res);				\
-								\
-		fprintf(stderr, "ok.\n");			\
-	} while (0)
-
-#define TEST_TYPES(nelem)					\
-	do {							\
-		TEST_ONE(int8_t, nelem);			\
-		TEST_ONE(int16_t, nelem);			\
-		TEST_ONE(int32_t, nelem);			\
-		TEST_ONE(int64_t, nelem);			\
-		TEST_ONE(uint8_t, nelem);			\
-		TEST_ONE(uint16_t, nelem);			\
-		TEST_ONE(uint32_t, nelem);			\
-		TEST_ONE(uint64_t, nelem);			\
-		TEST_ONE(char, nelem);				\
-		TEST_ONE(signed char, nelem);			\
-		TEST_ONE(unsigned char, nelem);			\
-		TEST_ONE(short, nelem);				\
-		TEST_ONE(signed short, nelem);			\
-		TEST_ONE(unsigned short, nelem);			\
-		TEST_ONE(int, nelem);				\
-		TEST_ONE(signed int, nelem);			\
-		TEST_ONE(unsigned int, nelem);			\
-		TEST_ONE(long, nelem);				\
-		TEST_ONE(signed long, nelem);			\
-		TEST_ONE(unsigned long, nelem);			\
-		TEST_ONE(void *, nelem);			\
-		TEST_ONE(intptr_t, nelem);			\
-		TEST_ONE(uintptr_t, nelem);			\
-		TEST_ONE(ptrdiff_t, nelem);			\
-		TEST_ONE(struct foo, nelem);			\
-		TEST_ONE(struct foo *, nelem);			\
-		TEST_ONE(union bar, nelem);			\
-		TEST_ONE(union bar *, nelem);			\
-	} while (0)
-
-static void test_array_len(void)
+static void test_alloc_free(void)
 {
-	int i;
+	int *arr;
 
-	fprintf(stderr, "testing ARRAY_LEN with various types & lengths\n");
+	arr = array_alloc(sizeof(int), 0);
+	if (!arr)
+		fail("array_alloc returned NULL");
 
-	/*
-	 * Note:
-	 *
-	 * We try to create arrays up to 2**24 (16777216) elements in size
-	 * right on the stack.  This can make the process size huge in no
-	 * time if we feed TEST_ONE a type that is large to begin with.
-	 */
-	for (i = 0; i <= 24; i++)
-		TEST_TYPES(1UL << i);
+	array_free(arr);
+}
 
-	fprintf(stderr, "All ARRAY_LEN tests passed.\n");
+#define CHECK_SIZE(arr, expected_size)					\
+	do {								\
+		size_t got;						\
+									\
+		fprintf(stderr, "checking array size; expect %zu...",	\
+			(expected_size));				\
+									\
+		got = array_size(arr);					\
+									\
+		fprintf(stderr, "got %zu - ", got);			\
+									\
+		if (got != (expected_size))				\
+			fail("size mismatch! expected %zu, got %zu",	\
+			     (expected_size), got);			\
+									\
+		fprintf(stderr, "ok\n");				\
+	} while (0)
+
+#define CHECK_VAL(arr, idx, expected_val)				\
+	do {								\
+		fprintf(stderr, "checking array idx %d; expect %u...",	\
+			(idx), (expected_val));				\
+									\
+		if (arr[idx] != (expected_val))				\
+			fail("value mismatch! expected %u, got %u",	\
+			     (expected_val), arr[i]);			\
+									\
+		fprintf(stderr, "ok\n");				\
+	} while (0)
+
+#define GEN_VAL(i)	((i) * 10 + 7)
+
+static void test_size(void)
+{
+	unsigned int *arr;
+	int i, j, k;
+
+	for (i = 0; i < 3; i++) {
+		fprintf(stderr, "prealloc %d\n", i * 10);
+
+		arr = array_alloc(sizeof(int), i * 10);
+		if (!arr)
+			fail("array_alloc_returned NULL");
+
+		CHECK_SIZE(arr, 0);
+
+		for (j = 0; j < 20; j++) {
+			int ret;
+
+			fprintf(stderr, "truncating to %d\n", j);
+
+			ret = array_truncate(&arr, j);
+			if (ret)
+				fail("truncate failed: %s", xstrerror(ret));
+
+			CHECK_SIZE(arr, j);
+
+			if (j) {
+				/* check the padding */
+				CHECK_VAL(arr, j - 1, 0);
+
+				/* set the newly allocated value */
+				arr[j - 1] = GEN_VAL(j - 1);
+			}
+
+			/* check that the previous values are still there */
+			for (k = 0; k < j; k++)
+				CHECK_VAL(arr, k, GEN_VAL(k));
+		}
+
+		array_free(arr);
+	}
 }
 
 void test(void)
 {
-	test_array_len();
+	test_alloc_free();
+	test_size();
 }
