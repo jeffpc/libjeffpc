@@ -24,6 +24,7 @@
 
 #include <jeffpc/error.h>
 #include <jeffpc/taskq.h>
+#include <jeffpc/cstr.h>
 
 static void enqueue(struct taskq *tq, struct taskq_item *item)
 {
@@ -137,7 +138,7 @@ struct taskq *taskq_create_fixed(const char *name, long nthreads)
 	if (!tq->threads)
 		goto err_free;
 
-	strlcpy(tq->name, name, sizeof(tq->name));
+	strcpy_safe(tq->name, name, sizeof(tq->name));
 	tq->nthreads = nthreads;
 	tq->nstarted_threads = 0;
 	tq->queue_len = 0;
