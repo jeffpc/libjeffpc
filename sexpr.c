@@ -474,35 +474,6 @@ out:
 	return ret;
 }
 
-/*
- * For each entry on the list lv, call the fxn function.  If the function
- * returns non-zero, we stop processing and propagate the error upward.
- */
-int sexpr_for_each(struct val *lv, int (*fxn)(struct val *))
-{
-	if (!fxn)
-		return -EINVAL;
-
-	while (lv) {
-		int ret;
-
-		if (lv->type != VT_CONS) {
-			val_putref(lv);
-			return -EINVAL;
-		}
-
-		ret = fxn(val_getref(lv->cons.head));
-		if (ret) {
-			val_putref(lv);
-			return ret;
-		}
-
-		lv = sexpr_cdr(lv);
-	}
-
-	return 0;
-}
-
 struct val *sexpr_alist_lookup_val(struct val *lv, const char *name)
 {
 	if (!lv || !name)

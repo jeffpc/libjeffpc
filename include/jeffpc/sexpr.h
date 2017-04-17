@@ -64,7 +64,6 @@ extern ssize_t sexpr_length(struct val *lv);
 extern struct val *sexpr_nth(struct val *val, uint64_t n);
 extern struct val *sexpr_assoc(struct val *val, const char *name);
 extern bool sexpr_equal(struct val *lhs, struct val *rhs);
-extern int sexpr_for_each(struct val *lv, int (*fxn)(struct val *));
 
 extern struct val *sexpr_eval(struct val *val, struct sexpr_eval_env *);
 
@@ -76,5 +75,28 @@ extern struct str *sexpr_alist_lookup_str(struct val *lv, const char *name);
 extern uint64_t sexpr_alist_lookup_int(struct val *lv, const char *name,
 				       bool *found);
 extern struct val *sexpr_alist_lookup_list(struct val *lv, const char *name);
+
+static inline struct val *__sexpr_for_each_first(struct val *list)
+{
+	if (!list || list->type != VT_CONS)
+		return NULL;
+
+	return list->cons.head;
+}
+
+static inline struct val *__sexpr_for_each_next(struct val *list)
+{
+	if (!list || list->type != VT_CONS)
+		return NULL;
+
+	return list->cons.tail;
+}
+
+#define sexpr_for_each(v, tmp, list) \
+	for (v = __sexpr_for_each_first(list), \
+	     tmp = __sexpr_for_each_next(v); \
+	     v; \
+	     v = __sexpr_for_each_first(tmp), \
+	     tmp = __sexpr_for_each_next(tmp))
 
 #endif
