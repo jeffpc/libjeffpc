@@ -45,7 +45,7 @@ gethgrev(VERSION
 	"{ifeq(latesttagdistance,0,\"{latesttag}\",\"{latesttag}-{latesttagdistance}-{node|short}\")}"
 	"${JEFFPC_VERSION}")
 
-if(${HG_COMMIT_STR} EQUAL "0000000000000000000000000000000000000000")
+if(${HG_COMMIT_STR} STREQUAL "0000000000000000000000000000000000000000")
 	message(WARNING "Failed to get revision info from Mercurial.")
 endif()
 
