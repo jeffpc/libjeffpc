@@ -26,6 +26,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <jeffpc/int.h>
 #include <jeffpc/str.h>
 #include <jeffpc/refcnt.h>
 #include <jeffpc/error.h>
