@@ -38,30 +38,33 @@ static void test_alloc_free(void)
 
 #define CHECK_SIZE(arr, expected_size)					\
 	do {								\
+		size_t exp = (expected_size);				\
 		size_t got;						\
 									\
 		fprintf(stderr, "checking array size; expect %zu...",	\
-			(expected_size));				\
+			exp);						\
 									\
 		got = array_size(arr);					\
 									\
 		fprintf(stderr, "got %zu - ", got);			\
 									\
-		if (got != (expected_size))				\
+		if (got != exp)						\
 			fail("size mismatch! expected %zu, got %zu",	\
-			     (expected_size), got);			\
+			     exp, got);					\
 									\
 		fprintf(stderr, "ok\n");				\
 	} while (0)
 
 #define CHECK_VAL(arr, idx, expected_val)				\
 	do {								\
-		fprintf(stderr, "checking array idx %d; expect %u...",	\
-			(idx), (expected_val));				\
+		size_t exp = (expected_val);				\
+									\
+		fprintf(stderr, "checking array idx %zu; expect %zu...",\
+			(idx), exp);					\
 									\
 		if (arr[idx] != (expected_val))				\
-			fail("value mismatch! expected %u, got %u",	\
-			     (expected_val), arr[i]);			\
+			fail("value mismatch! expected %zu, got %u",	\
+			     exp, arr[i]);				\
 									\
 		fprintf(stderr, "ok\n");				\
 	} while (0)
@@ -71,10 +74,10 @@ static void test_alloc_free(void)
 static void test_size(void)
 {
 	unsigned int *arr;
-	int i, j, k;
+	size_t i, j, k;
 
 	for (i = 0; i < 3; i++) {
-		fprintf(stderr, "prealloc %d\n", i * 10);
+		fprintf(stderr, "prealloc %zu\n", i * 10);
 
 		arr = array_alloc(sizeof(int), i * 10);
 		if (!arr)
@@ -85,7 +88,7 @@ static void test_size(void)
 		for (j = 0; j < 20; j++) {
 			int ret;
 
-			fprintf(stderr, "truncating to %d\n", j);
+			fprintf(stderr, "truncating to %zu\n", j);
 
 			ret = array_truncate(&arr, j);
 			if (ret)
