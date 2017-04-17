@@ -53,8 +53,8 @@ include(cmake/paths.cmake)
 
 # handle missing libumem
 if(NOT UMEM_FOUND)
-	set(UMEM_LIBRARY)
-	set(UMEM_INCLUDE_DIR)
+	set(UMEM_LIBRARY "")
+	set(UMEM_INCLUDE_DIR "")
 	set(UMEM_EXTRA_SOURCE)
 else()
 	set(UMEM_EXTRA_SOURCE slab_umem.c)
