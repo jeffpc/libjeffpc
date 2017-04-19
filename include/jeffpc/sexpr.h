@@ -74,6 +74,8 @@ extern struct val *sexpr_alist_lookup_val(struct val *lv, const char *name);
 extern struct str *sexpr_alist_lookup_str(struct val *lv, const char *name);
 extern uint64_t sexpr_alist_lookup_int(struct val *lv, const char *name,
 				       bool *found);
+extern bool sexpr_alist_lookup_bool(struct val *lv, const char *name, bool def,
+				    bool *found);
 extern struct val *sexpr_alist_lookup_list(struct val *lv, const char *name);
 
 static inline struct val *__sexpr_for_each_first(struct val *list)

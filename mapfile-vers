@@ -75,6 +75,7 @@ JEFFPC_0.10 {
 		rand64;
 
 		# sexpr
+		sexpr_alist_lookup_bool;
 		sexpr_alist_lookup_int;
 		sexpr_alist_lookup_list;
 		sexpr_alist_lookup_str;

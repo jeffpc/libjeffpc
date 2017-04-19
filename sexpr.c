@@ -529,6 +529,35 @@ uint64_t sexpr_alist_lookup_int(struct val *lv, const char *name, bool *found)
 	return ret;
 }
 
+bool sexpr_alist_lookup_bool(struct val *lv, const char *name, bool def,
+			     bool *found)
+{
+	struct val *v;
+	bool ret;
+	bool ok;
+
+	if (!lv || !name) {
+		if (found)
+			*found = false;
+		return def;
+	}
+
+	v = sexpr_cdr(sexpr_assoc(lv, name));
+	ok = v && (v->type == VT_BOOL);
+
+	if (!ok)
+		ret = def;
+	else
+		ret = v->b;
+
+	val_putref(v);
+
+	if (found)
+		*found = ok;
+
+	return ret;
+}
+
 struct val *sexpr_alist_lookup_list(struct val *lv, const char *name)
 {
 	struct val *ret;
