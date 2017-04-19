@@ -60,6 +60,7 @@ JEFFPC_0.10 {
 		# list
 		list_create;
 		list_destroy;
+		list_move_tail;
 
 		# mem
 		mem_cache_create;

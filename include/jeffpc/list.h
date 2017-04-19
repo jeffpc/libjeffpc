@@ -98,6 +98,20 @@ static inline void slist_remove(struct list_node *node)
 	slist_init(node);
 }
 
+static inline void slist_move_tail(struct list_node *dst,
+				   struct list_node *src)
+{
+	if (slist_is_empty(src))
+		return;
+
+	dst->prev->next = src->next;
+	src->next->prev = dst->prev;
+	src->prev->next = dst;
+	dst->prev = src->prev;
+
+	slist_init(src);
+}
+
 #define slist_head(node)	((node)->next)
 #define slist_tail(node)	((node)->prev)
 
@@ -138,6 +152,7 @@ static inline void slist_remove(struct list_node *node)
 
 extern void list_create(struct list *list, size_t size, size_t offset);
 extern void list_destroy(struct list *list);
+extern void list_move_tail(struct list *dst, struct list *src);
 
 /* hepler function - not for consumer use */
 static inline struct list_node *_list_obj2node(struct list *list, void *obj)
@@ -264,5 +279,15 @@ static inline void *list_remove_tail(struct list *list)
 	for (node = list_head(list), next = list_next(list, node); \
 	     node != NULL; \
 	     node = next, next = list_next(list, next))
+
+#define list_for_each_reverse(node, list) \
+	for (node = list_tail(list); \
+	     node != NULL; \
+	     node = list_prev(list, node))
+
+#define list_for_each_safe_reverse(node, next, list) \
+	for (node = list_tail(list), next = list_prev(list, node); \
+	     node != NULL; \
+	     node = next, next = list_prev(list, next))
 
 #endif

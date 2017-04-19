@@ -45,3 +45,11 @@ void list_destroy(struct list *list)
 	list->head.next = NULL;
 	list->head.prev = NULL;
 }
+
+void list_move_tail(struct list *dst, struct list *src)
+{
+	VERIFY3U(dst->size, ==, src->size);
+	VERIFY3U(dst->offset, ==, src->offset);
+
+	slist_move_tail(&dst->head, &src->head);
+}
