@@ -113,6 +113,13 @@ static inline int xmkdir(const char *path, mode_t mode)
 	return 0;
 }
 
+static inline int xmkdirat(int dirfd, const char *path, mode_t mode)
+{
+	if (mkdirat(dirfd, path, mode) == -1)
+		return -errno;
+	return 0;
+}
+
 static inline int xrename(const char *old, const char *new)
 {
 	if (rename(old, new) == -1)
