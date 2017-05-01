@@ -57,6 +57,7 @@ void sexpr_error2(const char *e, const char *yytext)
 %token <s> SYMBOL STRING
 %token <i> NUMBER CHAR
 %token <b> BOOL
+%token ERROR
 
 %type <lv> document tok list toklist
 

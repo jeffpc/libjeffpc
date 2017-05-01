@@ -52,7 +52,7 @@ static int getint(const char *str, uint64_t *i, int base, const char *type,
 
 		sexpr_error2(err, str);
 
-		return YY_NULL; /* same as yyterminate() */
+		return ERROR;
 	}
 
 	return okretval;
