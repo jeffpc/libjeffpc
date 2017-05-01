@@ -94,6 +94,7 @@ static struct str *__alloc(char *s, bool copy)
 	return str;
 }
 
+/* passed in str cannot be freed */
 struct str *str_dup(const char *s)
 {
 	struct str *str;
@@ -108,6 +109,7 @@ struct str *str_dup(const char *s)
 	return str_alloc(strdup(s));
 }
 
+/* passed in str must be freed */
 struct str *str_alloc(char *s)
 {
 	return __alloc(s, false);
