@@ -55,6 +55,25 @@ static void __attribute__((constructor)) init_str_subsys(void)
 	ASSERT(!IS_ERR(str_cache));
 }
 
+static struct str *__get_preallocated(const char *s)
+{
+	unsigned char first_char;
+
+	/* NULL or empty string */
+	if (!s || (s[0] == '\0'))
+		return &empty_string;
+
+	first_char = s[0];
+
+	/* preallocated one-char long strings of 7-bit ASCII */
+	if ((first_char > '\0') && (first_char < '\x7f') &&
+	    (s[1] == '\0') && one_char[first_char].static_alloc)
+		return &one_char[first_char];
+
+	/* nothing pre-allocated */
+	return NULL;
+}
+
 static struct str *__alloc(char *s, bool copy)
 {
 	struct str *str;
@@ -77,17 +96,11 @@ static struct str *__alloc(char *s, bool copy)
 
 struct str *str_dup(const char *s)
 {
-	unsigned char first_char;
+	struct str *str;
 
-	if (!s || (s[0] == '\0'))
-		return &empty_string;
-
-	first_char = s[0];
-
-	/* preallocated one-char long strings of 7-bit ASCII */
-	if ((first_char > '\0') && (first_char < '\x7f') &&
-	    (s[1] == '\0') && one_char[first_char].static_alloc)
-		return &one_char[first_char];
+	str = __get_preallocated(s);
+	if (str)
+		return str;
 
 	if (strlen(s) <= STR_INLINE_LEN)
 		return __alloc((char *) s, true);
