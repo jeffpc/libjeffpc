@@ -31,9 +31,11 @@
 
 #define scanner data->scanner
 
+#define YYERROR_VERBOSE
+
 extern int sexpr_reader_lex(void *, void *);
 
-void yyerror(void *scan, char *e)
+void yyerror(void *scan, const char *e)
 {
 	cmn_err(CE_ERROR, "Error: %s", e);
 }
