@@ -67,6 +67,17 @@ struct str {
 			.static_alloc = true,		\
 		}
 
+/* evaluates to a struct str *, so it can be used as a value */
+#define STATIC_STR(s)					\
+	({						\
+		static struct str _s = {		\
+			.str = (s),			\
+			.static_struct = true,		\
+			.static_alloc = true,		\
+		};					\
+		&_s;					\
+	})
+
 extern struct str *str_alloc(char *s);
 extern struct str *str_alloc_static(const char *s);
 extern size_t str_len(const struct str *str);
