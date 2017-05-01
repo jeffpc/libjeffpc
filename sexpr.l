@@ -30,7 +30,7 @@
 #include "sexpr_impl.h"
 #include "sexpr.tab.h"
 
-extern void sexpr_error2(char *, char *);
+extern void sexpr_error2(const char *e, const char *text);
 
 #define YY_INPUT(buf, result, max_size)	\
 	result = sexpr_reader_input_proc(buf, max_size, yyscanner)

@@ -38,7 +38,7 @@ void yyerror(void *scan, char *e)
 	cmn_err(CE_ERROR, "Error: %s", e);
 }
 
-void sexpr_error2(char *e, char *yytext)
+void sexpr_error2(const char *e, const char *yytext)
 {
 	cmn_err(CE_ERROR, "Error: %s (%s)", e, yytext);
 }
