@@ -106,7 +106,7 @@ struct str *str_dup(const char *s)
 	if (strlen(s) <= STR_INLINE_LEN)
 		return __alloc((char *) s, true);
 
-	return str_alloc(strdup(s));
+	return __alloc(strdup(s), false);
 }
 
 /* passed in str must be freed */
