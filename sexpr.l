@@ -37,6 +37,25 @@ extern void sexpr_error2(const char *e, const char *text);
 int sexpr_reader_input_proc(char *buf, int size, yyscan_t scanner);
 
 static void inc_lineno(yyscan_t scanner);
+
+static bool getint(const char *str, uint64_t *i, int base, const char *type)
+{
+	int ret;
+
+	ret = __str2u64(str, i, base);
+	if (ret) {
+		char err[256];
+
+		snprintf(err, sizeof(err), "base %d %s lexing error: %s",
+			 base, type, xstrerror(ret));
+
+		sexpr_error2(err, str);
+
+		return false;
+	}
+
+	return true;
+}
 %}
 
 %x string
@@ -73,13 +92,33 @@ static void inc_lineno(yyscan_t scanner);
 
 [().']			{ return *yytext; }
 #[tf]			{ yylval->b = (yytext[1] == 't'); return BOOL; }
-0[0-7]*			{ ASSERT0(__str2u64(yytext, &yylval->i, 8)); return NUMBER; }
-0x[0-9a-fA-F]*		{ ASSERT0(__str2u64(yytext, &yylval->i, 16)); return NUMBER; }
-#x[0-9a-fA-F]+		{ ASSERT0(__str2u64(yytext + 2, &yylval->i, 16)); return NUMBER; }
-#\\u[0-9a-fA-F]+	{ ASSERT0(__str2u64(yytext + 3, &yylval->i, 16)); return CHAR; }
+0[0-7]*			{
+				if (!getint(yytext, &yylval->i, 8, "integer"))
+					yyterminate();
+				return NUMBER;
+			}
+0x[0-9a-fA-F]*		{
+				if (!getint(yytext, &yylval->i, 16, "integer"))
+					yyterminate();
+				return NUMBER;
+			}
+#x[0-9a-fA-F]+		{
+				if (!getint(yytext + 2, &yylval->i, 16, "integer"))
+					yyterminate();
+				return NUMBER;
+			}
+#\\u[0-9a-fA-F]+	{
+				if (!getint(yytext + 3, &yylval->i, 16, "character"))
+					yyterminate();
+				return CHAR;
+			}
 #\\[^ ]			{ yylval->i = yytext[2]; return CHAR; }
 	/* TODO: handle '#\<utf-8>' */
-[1-9][0-9]*		{ ASSERT0(str2u64(yytext, &yylval->i)); return NUMBER; }
+[1-9][0-9]*		{
+				if (!getint(yytext, &yylval->i, 10, "integer"))
+					yyterminate();
+				return NUMBER;
+			}
 [a-zA-Z+=|&*?_-]?[a-zA-Z0-9+=|&*?_-]* { yylval->s = STR_DUP(yytext); return SYMBOL; }
 [ \r\t]			{ /* ignore */ }
 \n			{ inc_lineno(yyscanner); /* ignore */}
