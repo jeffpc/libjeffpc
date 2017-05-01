@@ -44,7 +44,7 @@ extern int sexpr_list_to_array(struct val *list, struct val **array, int alen);
 static inline struct val *sexpr_parse_str(struct str *str)
 {
 	if (!str)
-		return NULL;
+		return ERR_PTR(-EINVAL);
 
 	return sexpr_parse(str_cstr(str), str_len(str));
 }
@@ -52,7 +52,7 @@ static inline struct val *sexpr_parse_str(struct str *str)
 static inline struct val *sexpr_parse_cstr(const char *str)
 {
 	if (!str)
-		return NULL;
+		return ERR_PTR(-EINVAL);
 
 	return sexpr_parse(str, strlen(str));
 }

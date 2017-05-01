@@ -100,6 +100,7 @@ static char *escape_str(const char *in)
 struct val *sexpr_parse(const char *str, size_t len)
 {
 	struct sexpr_parser_state x;
+	int ret;
 
 	x.input = str;
 	x.len   = len;
@@ -108,11 +109,11 @@ struct val *sexpr_parse(const char *str, size_t len)
 	sexpr_reader_lex_init(&x.scanner);
 	sexpr_reader_set_extra(&x, x.scanner);
 
-	ASSERT(sexpr_reader_parse(&x) == 0);
+	ret = sexpr_reader_parse(&x);
 
 	sexpr_reader_lex_destroy(x.scanner);
 
-	return x.output;
+	return ret ? ERR_PTR(-EINVAL) : x.output;
 }
 
 static struct str *dump_cons(struct val *lv, bool raw)

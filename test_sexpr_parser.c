@@ -33,9 +33,13 @@ static int onefile(char *ibuf, size_t len)
 	struct val *lv;
 
 	lv = sexpr_parse(ibuf, len);
+	if (IS_ERR(lv))
+		return PTR_ERR(lv);
 
-	sexpr_dump_file(stderr, lv, false);
-	fprintf(stderr, "\n");
+	sexpr_dump_file(stdout, lv, false);
+	printf("\n");
+
+	val_putref(lv);
 
 	return 0;
 }
@@ -49,11 +53,26 @@ int main(int argc, char **argv)
 	result = 0;
 
 	for (i = 1; i < argc; i++) {
-		in = read_file(argv[i]);
-		ASSERT(!IS_ERR(in));
+		int ret;
 
-		if (onefile(in, strlen(in)))
+		fprintf(stderr, "Checking %s...", argv[i]);
+
+		in = read_file(argv[i]);
+		if (IS_ERR(in)) {
+			fprintf(stderr, "failed to read input (%s)\n",
+				xstrerror(PTR_ERR(in)));
 			result = 1;
+			continue;
+		}
+
+		ret = onefile(in, strlen(in));
+		if (ret) {
+			fprintf(stderr, "failed to parse (%s)\n",
+				xstrerror(ret));
+			result = 1;
+		} else {
+			fprintf(stderr, "ok.\n");
+		}
 
 		free(in);
 	}

@@ -83,6 +83,11 @@ int main(int argc, char **argv)
 			continue;
 
 		e = sexpr_parse(line, strlen(line));
+		if (IS_ERR(e)) {
+			fprintf(stderr, "Failed to parse input: %s\n",
+				xstrerror(PTR_ERR(e)));
+			continue;
+		}
 
 		e = sexpr_eval(e, NULL);
 
