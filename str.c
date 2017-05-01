@@ -74,45 +74,81 @@ static struct str *__get_preallocated(const char *s)
 	return NULL;
 }
 
-static struct str *__alloc(char *s, bool copy)
+static struct str *__alloc(char *s, bool heapalloc, bool mustdup)
 {
 	struct str *str;
+	bool copy;
+
+	/* sanity check */
+	if (mustdup)
+		ASSERT(!heapalloc);
+
+	/* check preallocated strings */
+	str = __get_preallocated(s);
+	if (str)
+		goto out;
+
+	/* can we inline it? */
+	copy = (strlen(s) <= STR_INLINE_LEN);
+
+	/* we'll be storing a pointer - strdup as necessary */
+	if (!copy && mustdup) {
+		s = strdup(s);
+		if (!s)
+			goto out;
+
+		/* we're now using the heap */
+		heapalloc = true;
+	}
 
 	str = mem_cache_alloc(str_cache);
 	if (!str)
-		return NULL;
+		goto out;
 
 	refcnt_init(&str->refcnt, 1);
 	str->static_struct = false;
+	str->static_alloc = copy || !heapalloc;
 	str->inline_alloc = copy;
 
-	if (copy)
+	if (copy) {
 		strcpy(str->inline_str, s);
-	else
+		if (heapalloc)
+			free(s);
+	} else {
 		str->str = s;
+	}
+
+	return str;
+
+out:
+	if (heapalloc)
+		free(s);
 
 	return str;
 }
 
-/* passed in str cannot be freed */
+/*
+ * Passed in str cannot be freed, and it must be dup'd.  (E.g., it could be
+ * a string on the stack.)
+ */
 struct str *str_dup(const char *s)
 {
-	struct str *str;
-
-	str = __get_preallocated(s);
-	if (str)
-		return str;
-
-	if (strlen(s) <= STR_INLINE_LEN)
-		return __alloc((char *) s, true);
-
-	return __alloc(strdup(s), false);
+	return __alloc((char *) s, false, true);
 }
 
-/* passed in str must be freed */
+/* Passed in str must be freed. */
 struct str *str_alloc(char *s)
 {
-	return __alloc(s, false);
+	return __alloc(s, true, false);
+}
+
+/*
+ * Passed in str cannot be freed, and it doesn't have to be dup'd.  (E.g.,
+ * it could be a string in .rodata.)
+ */
+struct str *str_alloc_static(const char *s)
+{
+	return __alloc((char *) s, false, false);
 }
 
 size_t str_len(const struct str *s)
@@ -219,7 +255,7 @@ void str_free(struct str *str)
 
 	ASSERT3U(refcnt_read(&str->refcnt), ==, 0);
 
-	if (!str->inline_alloc)
+	if (!str->inline_alloc && !str->static_alloc)
 		free(str->str);
 	mem_cache_free(str_cache, str);
 }

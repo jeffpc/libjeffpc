@@ -55,6 +55,7 @@ struct str {
 	 * multiple of 8 bytes creating tons of padding!)
 	 */
 	bool static_struct:1;	/* struct str is static */
+	bool static_alloc:1;	/* char * is static */
 	bool inline_alloc:1;	/* char * is inline */
 	refcnt_t refcnt;
 };
@@ -63,9 +64,11 @@ struct str {
 		{					\
 			.str = (val),			\
 			.static_struct = true,		\
+			.static_alloc = true,		\
 		}
 
 extern struct str *str_alloc(char *s);
+extern struct str *str_alloc_static(const char *s);
 extern size_t str_len(const struct str *str);
 extern int str_cmp(const struct str *a, const struct str *b);
 extern struct str *str_dup(const char *s);
@@ -86,6 +89,14 @@ REFCNT_INLINE_FXNS(struct str, str, refcnt, str_free, str_isstatic)
 	({				\
 		struct str *_s;		\
 		_s = str_alloc(s);	\
+		ASSERT(_s);		\
+		_s;			\
+	})
+
+#define STR_ALLOC_STATIC(s)		\
+	({				\
+		struct str *_s;		\
+		_s = str_alloc_static(s);\
 		ASSERT(_s);		\
 		_s;			\
 	})
