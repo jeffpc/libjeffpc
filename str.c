@@ -67,7 +67,7 @@ static struct str *__get_preallocated(const char *s)
 
 	/* preallocated one-char long strings of 7-bit ASCII */
 	if ((first_char > '\0') && (first_char < '\x7f') &&
-	    (s[1] == '\0') && one_char[first_char].static_alloc)
+	    (s[1] == '\0') && one_char[first_char].static_struct)
 		return &one_char[first_char];
 
 	/* nothing pre-allocated */
@@ -83,7 +83,7 @@ static struct str *__alloc(char *s, bool copy)
 		return NULL;
 
 	refcnt_init(&str->refcnt, 1);
-	str->static_alloc = false;
+	str->static_struct = false;
 	str->inline_alloc = copy;
 
 	if (copy)

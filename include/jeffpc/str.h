@@ -54,15 +54,15 @@ struct str {
 	 * generates padding.  (Actually, aligned(8) makes the union a
 	 * multiple of 8 bytes creating tons of padding!)
 	 */
-	bool static_alloc:1;
-	bool inline_alloc:1;
+	bool static_struct:1;	/* struct str is static */
+	bool inline_alloc:1;	/* char * is inline */
 	refcnt_t refcnt;
 };
 
 #define STR_STATIC_INITIALIZER(val)			\
 		{					\
 			.str = (val),			\
-			.static_alloc = true,		\
+			.static_struct = true,		\
 		}
 
 extern struct str *str_alloc(char *s);
@@ -77,7 +77,7 @@ extern void str_free(struct str *str);
 
 static inline bool str_isstatic(struct str *x)
 {
-	return x->static_alloc;
+	return x->static_struct;
 }
 
 REFCNT_INLINE_FXNS(struct str, str, refcnt, str_free, str_isstatic)
