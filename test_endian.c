@@ -149,10 +149,49 @@ static void __test_read(int iter, const struct unaligned_run *run)
 	fprintf(stderr, "R %d: ok.\n", iter);
 }
 
+#define __CHECK_WRITE(iter, size, pfx, in, fxn, exp)			\
+	do {								\
+		char exp_str[2 * size / 8 + 1];				\
+		char got_str[2 * size / 8 + 1];				\
+		uint8_t got[size / 8];					\
+									\
+		fxn(in, got);						\
+									\
+		hexdumpz(exp_str, exp, size / 8, false);		\
+		hexdumpz(got_str, got, size / 8, false);		\
+									\
+		fprintf(stderr, "W %d: %-3s expected: %s\n", iter, pfx,	\
+			exp_str);					\
+		fprintf(stderr, "W %d: %-3s got:      %s\n", iter, pfx,	\
+			got_str);					\
+									\
+		if (memcmp(got, exp, sizeof(got)))			\
+			fail("mismatch!");				\
+	} while (0)
+
+#define CHECK_WRITE(iter, size, fmt, out, be_in)			\
+	do {								\
+		fprintf(stderr, "W %d: input: %#"fmt"\n", iter, be_in);	\
+									\
+		__CHECK_WRITE(iter, size, "BE", be_in,			\
+			      cpu##size##_to_be_unaligned, out);	\
+	} while (0)
+
+static void __test_write(int iter, const struct unaligned_run *run)
+{
+	CHECK_WRITE(iter, 8, PRIx8, run->in, run->be8);
+	CHECK_WRITE(iter, 16, PRIx16, run->in, run->be16);
+	CHECK_WRITE(iter, 32, PRIx32, run->in, run->be32);
+	CHECK_WRITE(iter, 64, PRIx64, run->in, run->be64);
+}
+
 void test(void)
 {
 	int i;
 
 	for (i = 0; i < ARRAY_LEN(uruns) ; i++)
 		__test_read(i, &uruns[i]);
+
+	for (i = 0; i < ARRAY_LEN(uruns) ; i++)
+		__test_write(i, &uruns[i]);
 }

@@ -119,6 +119,20 @@ static inline uint64_t be64_to_cpu_unaligned(const void *in)
 		((uint64_t) p[7]));
 }
 
+static inline void cpu64_to_be_unaligned(uint64_t in, void *out)
+{
+	uint8_t *p = out;
+
+	p[0] = (in >> 56) & 0xff;
+	p[1] = (in >> 48) & 0xff;
+	p[2] = (in >> 40) & 0xff;
+	p[3] = (in >> 32) & 0xff;
+	p[4] = (in >> 24) & 0xff;
+	p[5] = (in >> 16) & 0xff;
+	p[6] = (in >> 8) & 0xff;
+	p[7] = in & 0xff;
+}
+
 static inline uint32_t be32_to_cpu_unaligned(const void *in)
 {
 	const uint8_t *p = in;
@@ -129,6 +143,16 @@ static inline uint32_t be32_to_cpu_unaligned(const void *in)
 		((uint32_t) p[3]));
 }
 
+static inline void cpu32_to_be_unaligned(uint32_t in, void *out)
+{
+	uint8_t *p = out;
+
+	p[0] = (in >> 24) & 0xff;
+	p[1] = (in >> 16) & 0xff;
+	p[2] = (in >> 8) & 0xff;
+	p[3] = in & 0xff;
+}
+
 static inline uint16_t be16_to_cpu_unaligned(const void *in)
 {
 	const uint8_t *p = in;
@@ -137,9 +161,24 @@ static inline uint16_t be16_to_cpu_unaligned(const void *in)
 		((uint16_t) p[1]));
 }
 
+static inline void cpu16_to_be_unaligned(uint16_t in, void *out)
+{
+	uint8_t *p = out;
+
+	p[0] = (in >> 8) & 0xff;
+	p[1] = in & 0xff;
+}
+
 static inline uint8_t be8_to_cpu_unaligned(const void *in)
 {
 	return *((const uint8_t *) in);
+}
+
+static inline void cpu8_to_be_unaligned(uint8_t in, void *out)
+{
+	uint8_t *p = out;
+
+	*p = in;
 }
 
 /*
