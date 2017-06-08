@@ -160,9 +160,8 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 			return str_getref(lv->str);
 		case VT_STR:
 			tmpstr = escape_str(str_cstr(lv->str));
-			/* TODO: we leak tmpstr */
 
-			return str_cat(3, &dquote, STR_DUP(tmpstr), &dquote);
+			return str_cat(3, &dquote, STR_ALLOC(tmpstr), &dquote);
 		case VT_BOOL:
 			return lv->b ? &poundt : &poundf;
 		case VT_CHAR:
