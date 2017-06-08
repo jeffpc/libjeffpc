@@ -169,20 +169,22 @@ static void __test_read(int iter, const struct unaligned_run *run)
 			fail("mismatch!");				\
 	} while (0)
 
-#define CHECK_WRITE(iter, size, fmt, out, be_in)			\
+#define CHECK_WRITE(iter, size, fmt, out, be_in, le_in)			\
 	do {								\
 		fprintf(stderr, "W %d: input: %#"fmt"\n", iter, be_in);	\
 									\
 		__CHECK_WRITE(iter, size, "BE", be_in,			\
 			      cpu##size##_to_be_unaligned, out);	\
+		__CHECK_WRITE(iter, size, "LE", le_in,			\
+			      cpu##size##_to_le_unaligned, out);	\
 	} while (0)
 
 static void __test_write(int iter, const struct unaligned_run *run)
 {
-	CHECK_WRITE(iter, 8, PRIx8, run->in, run->be8);
-	CHECK_WRITE(iter, 16, PRIx16, run->in, run->be16);
-	CHECK_WRITE(iter, 32, PRIx32, run->in, run->be32);
-	CHECK_WRITE(iter, 64, PRIx64, run->in, run->be64);
+	CHECK_WRITE(iter, 8, PRIx8, run->in, run->be8, run->le8);
+	CHECK_WRITE(iter, 16, PRIx16, run->in, run->be16, run->le16);
+	CHECK_WRITE(iter, 32, PRIx32, run->in, run->be32, run->le32);
+	CHECK_WRITE(iter, 64, PRIx64, run->in, run->be64, run->le64);
 }
 
 void test(void)

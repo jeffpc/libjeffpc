@@ -191,6 +191,12 @@ static inline uint##size##_t le##size##_to_cpu_unaligned(const void *in)\
 	/* we read a LE int as BE, so we always have to byte swap */	\
 	return bswap_##size(x);						\
 }									\
+static inline void cpu##size##_to_le_unaligned(uint##size##_t in,	\
+					       void *out)		\
+{									\
+	/* we'll be writing in BE, so we always have to byte swap */	\
+	cpu##size##_to_be_unaligned(bswap_##size(in), out);		\
+}									\
 static inline uint##size##_t cpu##size##_to_cpu_unaligned(const void *in)\
 {									\
 	uint##size##_t x = be##size##_to_cpu_unaligned(in);		\
