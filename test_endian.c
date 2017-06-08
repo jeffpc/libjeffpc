@@ -112,36 +112,41 @@ static const struct unaligned_run uruns[] = {
 	},
 };
 
-#define __CHECK(iter, size, pfx, fmt, in, fxn, exp)			\
+#define __CHECK_READ(iter, size, pfx, fmt, in, fxn, exp)		\
 	do {								\
 		uint##size##_t got = fxn(in);				\
 									\
-		fprintf(stderr, "%d: %-3s expected: %#"fmt"\n", iter, pfx, exp);\
-		fprintf(stderr, "%d: %-3s got:      %#"fmt"\n", iter, pfx, got);\
+		fprintf(stderr, "R %d: %-3s expected: %#"fmt"\n", iter,	\
+			pfx, exp);					\
+		fprintf(stderr, "R %d: %-3s got:      %#"fmt"\n", iter, \
+			pfx, got);					\
 									\
 		if (got != exp)						\
 			fail("mismatch!");				\
 	} while (0)
 
-#define CHECK(iter, size, fmt, in, be_exp, le_exp, cpu_exp)		\
+#define CHECK_READ(iter, size, fmt, in, be_exp, le_exp, cpu_exp)	\
 	do {								\
-		__CHECK(iter, size, "BE", fmt, in, be##size##_to_cpu_unaligned, be_exp);\
-		__CHECK(iter, size, "LE", fmt, in, le##size##_to_cpu_unaligned, le_exp);\
-		__CHECK(iter, size, "CPU", fmt, in, cpu##size##_to_cpu_unaligned, cpu_exp);\
+		__CHECK_READ(iter, size, "BE", fmt, in,			\
+			     be##size##_to_cpu_unaligned, be_exp);	\
+		__CHECK_READ(iter, size, "LE", fmt, in,			\
+			     le##size##_to_cpu_unaligned, le_exp);	\
+		__CHECK_READ(iter, size, "CPU", fmt, in,		\
+			     cpu##size##_to_cpu_unaligned, cpu_exp);	\
 	} while (0)
 
-static void __test(int iter, const struct unaligned_run *run)
+static void __test_read(int iter, const struct unaligned_run *run)
 {
 	char dumped[sizeof(run->in) * 2 + 1];
 
 	hexdumpz(dumped, run->in, sizeof(run->in), false);
 
-	fprintf(stderr, "%d: input:        %s\n", iter, dumped);
-	CHECK(iter, 8, PRIx8, run->in, run->be8, run->le8, run->cpu8);
-	CHECK(iter, 16, PRIx16, run->in, run->be16, run->le16, run->cpu16);
-	CHECK(iter, 32, PRIx32, run->in, run->be32, run->le32, run->cpu32);
-	CHECK(iter, 64, PRIx64, run->in, run->be64, run->le64, run->cpu64);
-	fprintf(stderr, "%d: ok.\n", iter);
+	fprintf(stderr, "R %d: input:        %s\n", iter, dumped);
+	CHECK_READ(iter, 8, PRIx8, run->in, run->be8, run->le8, run->cpu8);
+	CHECK_READ(iter, 16, PRIx16, run->in, run->be16, run->le16, run->cpu16);
+	CHECK_READ(iter, 32, PRIx32, run->in, run->be32, run->le32, run->cpu32);
+	CHECK_READ(iter, 64, PRIx64, run->in, run->be64, run->le64, run->cpu64);
+	fprintf(stderr, "R %d: ok.\n", iter);
 }
 
 void test(void)
@@ -149,5 +154,5 @@ void test(void)
 	int i;
 
 	for (i = 0; i < ARRAY_LEN(uruns) ; i++)
-		__test(i, &uruns[i]);
+		__test_read(i, &uruns[i]);
 }
