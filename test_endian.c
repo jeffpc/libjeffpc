@@ -34,6 +34,11 @@ struct unaligned_run {
 	uint16_t be16;
 	uint32_t be32;
 	uint64_t be64;
+
+	uint8_t le8;
+	uint16_t le16;
+	uint32_t le32;
+	uint64_t le64;
 };
 
 static const struct unaligned_run uruns[] = {
@@ -46,6 +51,10 @@ static const struct unaligned_run uruns[] = {
 		.be16	= 0,
 		.be32	= 0,
 		.be64	= 0,
+		.le8	= 0,
+		.le16	= 0,
+		.le32	= 0,
+		.le64	= 0,
 	},
 	{
 		.in	= {
@@ -56,6 +65,10 @@ static const struct unaligned_run uruns[] = {
 		.be16	= 0xffff,
 		.be32	= 0xffffffff,
 		.be64	= 0xffffffffffffffff,
+		.le8	= 0xff,
+		.le16	= 0xffff,
+		.le32	= 0xffffffff,
+		.le64	= 0xffffffffffffffff,
 	},
 	{
 		.in	= {
@@ -66,6 +79,10 @@ static const struct unaligned_run uruns[] = {
 		.be16	= 0x1234,
 		.be32	= 0x12345678,
 		.be64	= 0x123456789abcdef0,
+		.le8	= 0x12,
+		.le16	= 0x3412,
+		.le32	= 0x78563412,
+		.le64	= 0xf0debc9a78563412,
 	},
 	{
 		.in	= {
@@ -76,6 +93,10 @@ static const struct unaligned_run uruns[] = {
 		.be16	= 0x8080,
 		.be32	= 0x80808080,
 		.be64	= 0x8080808080808080,
+		.le8	= 0x80,
+		.le16	= 0x8080,
+		.le32	= 0x80808080,
+		.le64	= 0x8080808080808080,
 	},
 };
 
@@ -90,9 +111,10 @@ static const struct unaligned_run uruns[] = {
 			fail("mismatch!");				\
 	} while (0)
 
-#define CHECK(iter, size, fmt, in, be_exp)				\
+#define CHECK(iter, size, fmt, in, be_exp, le_exp)			\
 	do {								\
 		__CHECK(iter, size, "BE", fmt, in, be##size##_to_cpu_unaligned, be_exp);\
+		__CHECK(iter, size, "LE", fmt, in, le##size##_to_cpu_unaligned, le_exp);\
 	} while (0)
 
 static void __test(int iter, const struct unaligned_run *run)
@@ -102,10 +124,10 @@ static void __test(int iter, const struct unaligned_run *run)
 	hexdumpz(dumped, run->in, sizeof(run->in), false);
 
 	fprintf(stderr, "%d: input:        %s\n", iter, dumped);
-	CHECK(iter, 8, PRIx8, run->in, run->be8);
-	CHECK(iter, 16, PRIx16, run->in, run->be16);
-	CHECK(iter, 32, PRIx32, run->in, run->be32);
-	CHECK(iter, 64, PRIx64, run->in, run->be64);
+	CHECK(iter, 8, PRIx8, run->in, run->be8, run->le8);
+	CHECK(iter, 16, PRIx16, run->in, run->be16, run->le16);
+	CHECK(iter, 32, PRIx32, run->in, run->be32, run->le32);
+	CHECK(iter, 64, PRIx64, run->in, run->be64, run->le64);
 	fprintf(stderr, "%d: ok.\n", iter);
 }
 
