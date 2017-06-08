@@ -249,14 +249,14 @@ int str_cmp(const struct str *a, const struct str *b)
 	return strcmp(str_cstr(a), str_cstr(b));
 }
 
-struct str *str_cat(int n, ...)
+struct str *str_cat(size_t n, ...)
 {
 	size_t totallen;
 	struct str *ret;
 	char *buf, *out;
 	size_t *len;
 	va_list ap;
-	int i;
+	size_t i;
 
 	if (!n)
 		return NULL;
