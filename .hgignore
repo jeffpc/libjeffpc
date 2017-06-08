@@ -19,6 +19,7 @@ test_array
 test_atomic-single-thread
 test_bswap
 test_container_of
+test_endian
 test_hexdump
 test_list
 test_padding

@@ -103,6 +103,46 @@ static inline uint8_t bswap_8(uint8_t in)
 }
 
 /*
+ * unaligned big-endian integer
+ */
+static inline uint64_t be64_to_cpu_unaligned(const void *in)
+{
+	const uint8_t *p = in;
+
+	return (((uint64_t) p[0] << 56) |
+		((uint64_t) p[1] << 48) |
+		((uint64_t) p[2] << 40) |
+		((uint64_t) p[3] << 32) |
+		((uint64_t) p[4] << 24) |
+		((uint64_t) p[5] << 16) |
+		((uint64_t) p[6] << 8) |
+		((uint64_t) p[7]));
+}
+
+static inline uint32_t be32_to_cpu_unaligned(const void *in)
+{
+	const uint8_t *p = in;
+
+	return (((uint32_t) p[0] << 24) |
+		((uint32_t) p[1] << 16) |
+		((uint32_t) p[2] << 8) |
+		((uint32_t) p[3]));
+}
+
+static inline uint16_t be16_to_cpu_unaligned(const void *in)
+{
+	const uint8_t *p = in;
+
+	return (((uint16_t) p[0] << 8) |
+		((uint16_t) p[1]));
+}
+
+static inline uint8_t be8_to_cpu_unaligned(const void *in)
+{
+	return *((const uint8_t *) in);
+}
+
+/*
  * byte ordering
  */
 #define ___GEN(from, size, to, bswap)					\
