@@ -39,6 +39,18 @@ struct unaligned_run {
 	uint16_t le16;
 	uint32_t le32;
 	uint64_t le64;
+
+#ifdef CPU_BIG_ENDIAN
+#define cpu8 be8
+#define cpu16 be16
+#define cpu32 be32
+#define cpu64 be64
+#else
+#define cpu8 le8
+#define cpu16 le16
+#define cpu32 le32
+#define cpu64 le64
+#endif
 };
 
 static const struct unaligned_run uruns[] = {
@@ -111,10 +123,11 @@ static const struct unaligned_run uruns[] = {
 			fail("mismatch!");				\
 	} while (0)
 
-#define CHECK(iter, size, fmt, in, be_exp, le_exp)			\
+#define CHECK(iter, size, fmt, in, be_exp, le_exp, cpu_exp)		\
 	do {								\
 		__CHECK(iter, size, "BE", fmt, in, be##size##_to_cpu_unaligned, be_exp);\
 		__CHECK(iter, size, "LE", fmt, in, le##size##_to_cpu_unaligned, le_exp);\
+		__CHECK(iter, size, "CPU", fmt, in, cpu##size##_to_cpu_unaligned, cpu_exp);\
 	} while (0)
 
 static void __test(int iter, const struct unaligned_run *run)
@@ -124,10 +137,10 @@ static void __test(int iter, const struct unaligned_run *run)
 	hexdumpz(dumped, run->in, sizeof(run->in), false);
 
 	fprintf(stderr, "%d: input:        %s\n", iter, dumped);
-	CHECK(iter, 8, PRIx8, run->in, run->be8, run->le8);
-	CHECK(iter, 16, PRIx16, run->in, run->be16, run->le16);
-	CHECK(iter, 32, PRIx32, run->in, run->be32, run->le32);
-	CHECK(iter, 64, PRIx64, run->in, run->be64, run->le64);
+	CHECK(iter, 8, PRIx8, run->in, run->be8, run->le8, run->cpu8);
+	CHECK(iter, 16, PRIx16, run->in, run->be16, run->le16, run->cpu16);
+	CHECK(iter, 32, PRIx32, run->in, run->be32, run->le32, run->cpu32);
+	CHECK(iter, 64, PRIx64, run->in, run->be64, run->le64, run->cpu64);
 	fprintf(stderr, "%d: ok.\n", iter);
 }
 

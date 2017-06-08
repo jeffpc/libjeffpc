@@ -145,18 +145,23 @@ static inline uint8_t be8_to_cpu_unaligned(const void *in)
 /*
  * unaligned little-endian integers
  */
-#define __GEN(size)							\
+#define __GEN(size, bswap)						\
 static inline uint##size##_t le##size##_to_cpu_unaligned(const void *in)\
 {									\
 	uint##size##_t x = be##size##_to_cpu_unaligned(in);		\
 	/* we read a LE int as BE, so we always have to byte swap */	\
 	return bswap_##size(x);						\
+}									\
+static inline uint##size##_t cpu##size##_to_cpu_unaligned(const void *in)\
+{									\
+	uint##size##_t x = be##size##_to_cpu_unaligned(in);		\
+	return bswap;							\
 }
 
 #ifdef CPU_BIG_ENDIAN
-#define GEN(size)	__GEN(size)
+#define GEN(size)	__GEN(size, x)
 #else
-#define GEN(size)	__GEN(size)
+#define GEN(size)	__GEN(size, bswap_##size(x))
 #endif
 
 GEN(64)
