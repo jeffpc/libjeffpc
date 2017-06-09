@@ -245,7 +245,7 @@ static inline void cpu8_to_be_unaligned(uint8_t in, void *out)
 }
 
 /*
- * unaligned little-endian integers
+ * unaligned little-endian & cpu-endian integers
  */
 #define __GEN(size, bswap)						\
 static inline uint##size##_t le##size##_to_cpu_unaligned(const void *in)\
