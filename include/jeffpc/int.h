@@ -69,6 +69,69 @@ STR_TO_INT(64, 0xffffffffffffffffull)
 #define str2u16(s, i)	__str2u16((s), (i), 10)
 
 /*
+ * These prototypes exist to catch bugs in the code generating macros below.
+ */
+/* return byte swapped input */
+static inline uint64_t bswap_64(uint64_t in);
+static inline uint32_t bswap_32(uint32_t in);
+static inline uint16_t bswap_16(uint16_t in);
+static inline uint8_t bswap_8(uint8_t in);
+
+/* load an unaligned cpu native endian number from memory */
+static inline uint64_t cpu64_to_cpu_unaligned(const void *in);
+static inline uint32_t cpu32_to_cpu_unaligned(const void *in);
+static inline uint16_t cpu16_to_cpu_unaligned(const void *in);
+static inline uint8_t cpu8_to_cpu_unaligned(const void *in);
+
+/* load an unaligned big endian number from memory */
+static inline uint64_t be64_to_cpu_unaligned(const void *in);
+static inline uint32_t be32_to_cpu_unaligned(const void *in);
+static inline uint16_t be16_to_cpu_unaligned(const void *in);
+static inline uint8_t be8_to_cpu_unaligned(const void *in);
+
+/* load an unaligned little endian number from memory */
+static inline uint64_t le64_to_cpu_unaligned(const void *in);
+static inline uint32_t le32_to_cpu_unaligned(const void *in);
+static inline uint16_t le16_to_cpu_unaligned(const void *in);
+static inline uint8_t le8_to_cpu_unaligned(const void *in);
+
+/* store into memory a cpu native endian number as a big endian number */
+static inline void cpu64_to_be_unaligned(uint64_t in, void *out);
+static inline void cpu32_to_be_unaligned(uint32_t in, void *out);
+static inline void cpu16_to_be_unaligned(uint16_t in, void *out);
+static inline void cpu8_to_be_unaligned(uint8_t in, void *out);
+
+/* store into memory a cpu native endian number as a little endian number */
+static inline void cpu64_to_le_unaligned(uint64_t in, void *out);
+static inline void cpu32_to_le_unaligned(uint32_t in, void *out);
+static inline void cpu16_to_le_unaligned(uint16_t in, void *out);
+static inline void cpu8_to_le_unaligned(uint8_t in, void *out);
+
+/* convert a big endian input into cpu native endian */
+static inline uint64_t be64_to_cpu(uint64_t in);
+static inline uint32_t be32_to_cpu(uint32_t in);
+static inline uint16_t be16_to_cpu(uint16_t in);
+static inline uint8_t be8_to_cpu(uint8_t in);
+
+/* convert a cpu native endian input into big endian */
+static inline uint64_t cpu64_to_be(uint64_t in);
+static inline uint32_t cpu32_to_be(uint32_t in);
+static inline uint16_t cpu16_to_be(uint16_t in);
+static inline uint8_t cpu8_to_be(uint8_t in);
+
+/* convert a little endian input into cpu native endian */
+static inline uint64_t le64_to_cpu(uint64_t in);
+static inline uint32_t le32_to_cpu(uint32_t in);
+static inline uint16_t le16_to_cpu(uint16_t in);
+static inline uint8_t le8_to_cpu(uint8_t in);
+
+/* convert a cpu native endian input into little endian */
+static inline uint64_t cpu64_to_le(uint64_t in);
+static inline uint32_t cpu32_to_le(uint32_t in);
+static inline uint16_t cpu16_to_le(uint16_t in);
+static inline uint8_t cpu8_to_le(uint8_t in);
+
+/*
  * byte swapping
  */
 static inline uint64_t bswap_64(uint64_t in)
