@@ -103,24 +103,26 @@ void val_free(struct val *val)
 	mem_cache_free(val_cache, val);
 }
 
-#define DEF_VAL_SET(fxn, vttype, valelem, ctype)		\
+#define DEF_VAL_SET(fxn, vttype, valelem, ctype, putref)	\
 struct val *val_alloc_##fxn(ctype v)				\
 {								\
 	struct val *val;					\
 								\
 	val = __val_alloc(vttype);				\
-	if (IS_ERR(val))					\
+	if (IS_ERR(val)) {					\
+		putref(v);					\
 		return val;					\
+	}							\
 								\
 	val->_set_##valelem = v;				\
 								\
 	return val;						\
 }
 
-static DEF_VAL_SET(int_heap, VT_INT, i, uint64_t)
-DEF_VAL_SET(str, VT_STR, str, struct str *)
-DEF_VAL_SET(sym, VT_SYM, str, struct str *)
-DEF_VAL_SET(char, VT_CHAR, i, uint64_t)
+static DEF_VAL_SET(int_heap, VT_INT, i, uint64_t, (void))
+DEF_VAL_SET(str, VT_STR, str, struct str *, str_putref)
+DEF_VAL_SET(sym, VT_SYM, str, struct str *, str_putref)
+DEF_VAL_SET(char, VT_CHAR, i, uint64_t, (void))
 
 struct val *val_alloc_int(uint64_t i)
 {
@@ -159,8 +161,11 @@ struct val *val_alloc_cons(struct val *head, struct val *tail)
 	struct val *val;
 
 	val = __val_alloc(VT_CONS);
-	if (IS_ERR(val))
+	if (IS_ERR(val)) {
+		val_putref(head);
+		val_putref(tail);
 		return val;
+	}
 
 	val->_set_cons.head = head;
 	val->_set_cons.tail = tail;

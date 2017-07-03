@@ -77,6 +77,7 @@ struct val {
 extern struct val *val_alloc_bool(bool v);
 extern struct val *val_alloc_char(uint64_t v);
 extern struct val *val_alloc_int(uint64_t v);
+/* val_alloc_{str,sym,cons} always consume the passed in references */
 extern struct val *val_alloc_str(struct str *v);
 extern struct val *val_alloc_sym(struct str *v);
 extern struct val *val_alloc_cons(struct val *head, struct val *tail);
