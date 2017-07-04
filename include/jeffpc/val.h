@@ -82,7 +82,12 @@ extern struct val *val_alloc_str(struct str *v);
 extern struct val *val_alloc_sym(struct str *v);
 extern struct val *val_alloc_cons(struct val *head, struct val *tail);
 extern void val_free(struct val *v);
-extern void val_dump(struct val *v, int indent);
+extern void val_dump_file(FILE *out, struct val *v, int indent);
+
+static inline void val_dump(struct val *v, int indent)
+{
+	val_dump_file(stderr, v, indent);
+}
 
 static inline bool val_isstatic(struct val *x)
 {

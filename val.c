@@ -173,7 +173,7 @@ struct val *val_alloc_cons(struct val *head, struct val *tail)
 	return val;
 }
 
-void val_dump(struct val *val, int indent)
+void val_dump_file(FILE *out, struct val *val, int indent)
 {
 	if (!val)
 		return;
@@ -181,31 +181,31 @@ void val_dump(struct val *val, int indent)
 	switch (val->type) {
 		case VT_STR:
 		case VT_SYM:
-			fprintf(stderr, "%*s'%s'\n", indent, "", str_cstr(val->str));
+			fprintf(out, "%*s'%s'\n", indent, "", str_cstr(val->str));
 			break;
 		case VT_INT:
-			fprintf(stderr, "%*s%"PRIu64"\n", indent, "", val->i);
+			fprintf(out, "%*s%"PRIu64"\n", indent, "", val->i);
 			break;
 		case VT_BOOL:
-			fprintf(stderr, "%*s%s\n", indent, "",
+			fprintf(out, "%*s%s\n", indent, "",
 				val->b ? "true" : "false");
 			break;
 		case VT_CHAR:
 			if (isprint(val->i))
-				fprintf(stderr, "%*s\\u%04"PRIX64": '%c'\n",
+				fprintf(out, "%*s\\u%04"PRIX64": '%c'\n",
 					indent, "", val->i, (char) val->i);
 			else
-				fprintf(stderr, "%*s\\u%04"PRIX64"\n", indent,
+				fprintf(out, "%*s\\u%04"PRIX64"\n", indent,
 					"", val->i);
 			break;
 		case VT_CONS:
-			fprintf(stderr, "%*scons head:\n", indent, "");
+			fprintf(out, "%*scons head:\n", indent, "");
 			val_dump(val->cons.head, indent + 2);
-			fprintf(stderr, "%*scons tail:\n", indent, "");
+			fprintf(out, "%*scons tail:\n", indent, "");
 			val_dump(val->cons.tail, indent + 2);
 			break;
 		default:
-			fprintf(stderr, "Unknown type %d\n", val->type);
+			fprintf(out, "Unknown type %d\n", val->type);
 			break;
 	}
 }

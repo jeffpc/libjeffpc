@@ -140,7 +140,7 @@ JEFFPC_0.10 {
 		xuuid_generate;
 
 		# val
-		val_dump;
+		val_dump_file;
 		val_free;
 		val_alloc_bool;
 		val_alloc_char;
