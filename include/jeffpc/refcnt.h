@@ -154,7 +154,9 @@ vol type *name##_getref(type *x)					\
 		return NULL;						\
 									\
 	if (!isstatic || !isstatic(x)) {				\
-		ASSERT3U(refcnt_read(&x->member), >=, 1);		\
+		if (refcnt_read(&x->member) <= 0)			\
+			panic("%s(%p) called with zero refcount",	\
+			      __func__, x);				\
 									\
 		__refcnt_inc(&x->member);				\
 	}								\
@@ -168,7 +170,8 @@ vol void name##_putref(type *x)						\
 	if (!x || (isstatic && isstatic(x)))				\
 		return;							\
 									\
-	ASSERT3S(refcnt_read(&x->member), >=, 1);			\
+	if (refcnt_read(&x->member) <= 0)				\
+		panic("%s(%p) called with zero refcount", __func__, x);	\
 									\
 	if (!__refcnt_dec(&x->member))					\
 		freefxn(x);						\
