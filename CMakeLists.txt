@@ -95,6 +95,7 @@ add_library(jeffpc SHARED
 	nvl.c
 	nvl_convert.c
 	nvl_dump.c
+	nvl_fmt_cbor.c
 	nvl_fmt_json.c
 	nvl_pack.c
 	nvl_unpack.c

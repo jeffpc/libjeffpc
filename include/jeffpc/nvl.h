@@ -47,6 +47,7 @@ enum nvtype {
 
 /* serialization formats */
 enum nvformat {
+	NVF_CBOR,	/* RFC 7049 */
 	NVF_JSON,	/* RFC 7159 */
 };
 
