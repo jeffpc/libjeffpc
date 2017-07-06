@@ -37,6 +37,18 @@ static inline void check_data(struct buffer *buffer)
 		     xstrerror(PTR_ERR(ptr)));
 }
 
+static inline void check_data_null(struct buffer *buffer)
+{
+	const void *ptr;
+
+	ptr = buffer_data(buffer);
+	if (IS_ERR(ptr))
+		fail("buffer_data() returned error: %s",
+		     xstrerror(PTR_ERR(ptr)));
+	if (ptr)
+		fail("buffer_data() returned non-NULL: %p", ptr);
+}
+
 static inline void check_used(struct buffer *buffer, size_t expected)
 {
 	size_t got;
@@ -79,11 +91,32 @@ static void test_alloc_free(void)
 	}
 }
 
+static void inner_loop(size_t niter, struct buffer *buffer, uint8_t *data,
+		       void (*check)(struct buffer *))
+{
+	size_t i;
+
+	for (i = 0; i < niter; i++) {
+		uint8_t byte = i;
+
+		if (data)
+			data[i] = i;
+
+		check(buffer);
+		check_used(buffer, i);
+		check_append(buffer, &byte, 1);
+		check(buffer);
+		check_used(buffer, i + 1);
+	}
+
+	check(buffer);
+	check_used(buffer, i);
+}
+
 static void test_append(void)
 {
 	struct buffer *buffer;
 	size_t startsize;
-	size_t i;
 
 	for (startsize = 0; startsize < 300; startsize++) {
 		uint8_t data[256];
@@ -92,23 +125,10 @@ static void test_append(void)
 
 		buffer = buffer_alloc(startsize);
 		if (IS_ERR(buffer))
-			fail("buffer_alloc(%zu) failed: %s", i,
+			fail("buffer_alloc(%zu) failed: %s", startsize,
 			     xstrerror(PTR_ERR(buffer)));
 
-		for (i = 0; i < 256; i++) {
-			uint8_t byte = i;
-
-			data[i] = i;
-
-			check_data(buffer);
-			check_used(buffer, i);
-			check_append(buffer, &byte, 1);
-			check_data(buffer);
-			check_used(buffer, i + 1);
-		}
-
-		check_data(buffer);
-		check_used(buffer, i);
+		inner_loop(256, buffer, data, check_data);
 
 		if (memcmp(data, buffer_data(buffer), sizeof(data)))
 			fail("buffered data mismatches expectations");
@@ -121,8 +141,39 @@ static void test_append(void)
 	}
 }
 
+static void test_sink(void)
+{
+	struct buffer buffer;
+	size_t maxsize;
+
+	for (maxsize = 0; maxsize < 270; maxsize++) {
+		buffer_init_sink(&buffer);
+
+		fprintf(stderr, "%s: iter = %3d...", __func__, maxsize);
+
+		inner_loop(256, &buffer, NULL, check_data_null);
+
+		memset(&buffer, 0, sizeof(struct buffer));
+
+		fprintf(stderr, "\n");
+	}
+
+	for (maxsize = 300; maxsize < 300000; maxsize += 10000) {
+		buffer_init_sink(&buffer);
+
+		fprintf(stderr, "%s: iter = %3d...", __func__, maxsize);
+
+		inner_loop(256, &buffer, NULL, check_data_null);
+
+		memset(&buffer, 0, sizeof(struct buffer));
+
+		fprintf(stderr, "\n");
+	}
+}
+
 void test(void)
 {
 	test_alloc_free();
 	test_append();
+	test_sink();
 }

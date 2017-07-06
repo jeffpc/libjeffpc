@@ -32,6 +32,7 @@ JEFFPC_0.10 {
 		buffer_alloc;
 		buffer_append;
 		buffer_free;
+		buffer_init_sink;
 
 		# cstr
 		strcpy_safe;

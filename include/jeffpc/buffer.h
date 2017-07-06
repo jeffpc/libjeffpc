@@ -24,6 +24,7 @@
 #define __JEFFPC_BUFFER_H
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include <jeffpc/error.h>
 
@@ -31,10 +32,14 @@ struct buffer {
 	void *data;		/* the data itself */
 	size_t used;		/* bytes filled */
 	size_t allocsize;	/* allocated buffer size */
+	bool sink:1;		/* no actual data is stored */
 };
 
 extern struct buffer *buffer_alloc(size_t expected_size);
 extern void buffer_free(struct buffer *buffer);
+
+/* a buffer that behaves similarly to /dev/null - all appends are lost */
+extern void buffer_init_sink(struct buffer *buffer);
 
 /* returns number of bytes appended */
 extern int buffer_append(struct buffer *buffer, const void *data, size_t size);
@@ -46,6 +51,9 @@ static inline size_t buffer_used(struct buffer *buffer)
 
 static inline const void *buffer_data(struct buffer *buffer)
 {
+	if (buffer->sink)
+		return NULL;
+
 	return buffer->data;
 }
 

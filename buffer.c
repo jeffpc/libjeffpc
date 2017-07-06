@@ -40,6 +40,7 @@ struct buffer *buffer_alloc(size_t expected_size)
 
 	buffer->used = 0;
 	buffer->allocsize = expected_size;
+	buffer->sink = false;
 
 	return buffer;
 }
@@ -53,9 +54,19 @@ void buffer_free(struct buffer *buffer)
 	free(buffer);
 }
 
+void buffer_init_sink(struct buffer *buffer)
+{
+	buffer->data = NULL;
+	buffer->used = 0;
+	buffer->allocsize = SIZE_MAX;
+	buffer->sink = true;
+}
+
 static int resize(struct buffer *buffer, size_t newsize)
 {
 	void *tmp;
+
+	ASSERT(!buffer->sink);
 
 	if (newsize <= buffer->allocsize)
 		return 0;
@@ -82,11 +93,13 @@ int buffer_append(struct buffer *buffer, const void *data, size_t size)
 	if (!data || !size)
 		return -EINVAL;
 
-	ret = resize(buffer, buffer->used + size);
-	if (ret)
-		return ret;
+	if (!buffer->sink) {
+		ret = resize(buffer, buffer->used + size);
+		if (ret)
+			return ret;
 
-	memcpy(buffer->data + buffer->used, data, size);
+		memcpy(buffer->data + buffer->used, data, size);
+	}
 
 	buffer->used += size;
 
