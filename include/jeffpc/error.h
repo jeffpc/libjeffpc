@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2013-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -105,6 +105,10 @@ extern void print_stacktrace(enum errlevel level, struct stack *stack);
 #define ASSERT3S(l, op, r)	VERIFY3S(l, op, r)
 #define ASSERT(c)		VERIFY(c)
 #define ASSERT0(c)		VERIFY0(c)
+
+/* TODO: provide a pre-C11 implementation */
+#define STATIC_ASSERT(c)	_Static_assert(c, #c)
+#define STATIC_ASSERT0(c)	_Static_assert(!(c), #c)
 
 #define FIXME(fmt, ...)	cmn_err(CE_ERROR, "FIXME @ " __FILE__":%d: " fmt, \
 				__LINE__, ##__VA_ARGS__)
