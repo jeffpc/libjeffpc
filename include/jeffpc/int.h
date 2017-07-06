@@ -24,6 +24,7 @@
 #define __JEFFPC_INT_H
 
 #include <inttypes.h>
+#include <limits.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
