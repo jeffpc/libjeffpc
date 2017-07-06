@@ -118,7 +118,7 @@ extern void print_stacktrace(enum errlevel level, struct stack *stack);
  */
 #define MAX_ERRNO	1023
 
-static inline int PTR_ERR(void *ptr)
+static inline int PTR_ERR(const void *ptr)
 {
 	return (intptr_t) ptr;
 }
@@ -129,16 +129,16 @@ static inline void *ERR_PTR(int err)
 	return (void *)(intptr_t) err;
 }
 
-static inline int IS_ERR(void *ptr)
+static inline int IS_ERR(const void *ptr)
 {
 	intptr_t err = (intptr_t) ptr;
 
 	return (err < 0) && (err >= -MAX_ERRNO);
 }
 
-static inline void *ERR_CAST(void *ptr)
+static inline void *ERR_CAST(const void *ptr)
 {
-	return ptr;
+	return (void *) ptr;
 }
 
 static inline const char *xstrerror(int e)
