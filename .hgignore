@@ -24,6 +24,7 @@ test_endian
 test_errno
 test_hexdump
 test_list
+test_nvl
 test_padding
 test_sexpr_parser
 test_sexpr_eval

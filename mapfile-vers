@@ -77,6 +77,39 @@ JEFFPC_0.10 {
 		mem_cache_alloc;
 		mem_cache_free;
 
+		# nvlist
+		nvl_alloc;
+		nvl_dump_file;
+		nvl_free;
+		nvl_iter_next;
+		nvl_lookup;
+		nvl_lookup_array;
+		nvl_lookup_blob;
+		nvl_lookup_bool;
+		nvl_lookup_int;
+		nvl_lookup_null;
+		nvl_lookup_nvl;
+		nvl_lookup_str;
+		nvl_set_array;
+		nvl_set_array_copy;
+		nvl_set_blob;
+		nvl_set_blob_copy;
+		nvl_set_bool;
+		nvl_set_int;
+		nvl_set_null;
+		nvl_set_nvl;
+		nvl_set_str;
+		nvl_unset;
+		nvl_unset_type;
+		nvpair_value_array;
+		nvpair_value_blob;
+		nvpair_value_bool;
+		nvpair_value_int;
+		nvpair_value_null;
+		nvpair_value_nvl;
+		nvpair_value_str;
+		nvval_release_array;
+
 		# padding
 		check_padding;
 

@@ -92,6 +92,8 @@ add_library(jeffpc SHARED
 	init.c
 	io.c
 	list.c
+	nvl.c
+	nvl_dump.c
 	padding.c
 	rand.c
 	sexpr.c
@@ -128,6 +130,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/jeffpc.h
 		include/jeffpc/list.h
 		include/jeffpc/mem.h
+		include/jeffpc/nvl.h
 		include/jeffpc/padding.h
 		include/jeffpc/rand.h
 		include/jeffpc/refcnt.h
@@ -185,6 +188,7 @@ build_test_bin_and_run(endian)
 build_test_bin_and_run(errno)
 build_test_bin_and_run(hexdump)
 build_test_bin_and_run(list)
+build_test_bin_and_run(nvl)
 build_test_bin_and_run(padding)
 build_test_bin_and_run(sexpr_eval)
 build_test_bin_and_run(version)
