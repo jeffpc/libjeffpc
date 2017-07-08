@@ -22,6 +22,8 @@
 
 #include <stdbool.h>
 
+#include <jeffpc/int.h>
+
 #include "buffer_impl.h"
 
 struct buffer *buffer_alloc(size_t expected_size)
@@ -38,6 +40,7 @@ struct buffer *buffer_alloc(size_t expected_size)
 		return ERR_PTR(-ENOMEM);
 	}
 
+	buffer->off = 0;
 	buffer->used = 0;
 	buffer->allocsize = expected_size;
 	buffer->ops = &heap_buffer;
@@ -59,6 +62,7 @@ void buffer_free(struct buffer *buffer)
 void buffer_init_sink(struct buffer *buffer)
 {
 	buffer->data = NULL;
+	buffer->off = 0;
 	buffer->used = 0;
 	buffer->allocsize = SIZE_MAX;
 	buffer->ops = &sink_buffer;
@@ -67,6 +71,7 @@ void buffer_init_sink(struct buffer *buffer)
 void buffer_init_const(struct buffer *buffer, const void *data, size_t size)
 {
 	buffer->data = (void *) data;
+	buffer->off = 0;
 	buffer->used = size;
 	buffer->allocsize = size;
 	buffer->ops = &const_buffer;
@@ -120,6 +125,51 @@ int buffer_append(struct buffer *buffer, const void *data, size_t size)
 	buffer->used += size;
 
 	return 0;
+}
+
+ssize_t buffer_seek(struct buffer *buffer, off_t offset, int whence)
+{
+	size_t newoff;
+
+	if (!buffer)
+		return -EINVAL;
+
+	switch (whence) {
+		case SEEK_SET:
+			if (offset < 0)
+				return -EINVAL;
+			if (offset > buffer->used)
+				return -EINVAL;
+
+			newoff = offset;
+			break;
+		case SEEK_CUR:
+			if ((offset > 0) &&
+			    (offset > buffer->used - buffer->off))
+				return -EINVAL;
+			if ((offset < 0) && (-offset > buffer->off))
+				return -EINVAL;
+
+			newoff = buffer->off + offset;
+			break;
+		case SEEK_END:
+			if (offset > 0)
+				return -EINVAL;
+			if (-offset > buffer->used)
+				return -EINVAL;
+
+			newoff = buffer->off + offset;
+			break;
+		default:
+			return -EINVAL;
+	}
+
+	if (newoff > SSIZE_MAX)
+		return -EOVERFLOW;
+
+	buffer->off = newoff;
+
+	return newoff;
 }
 
 /*

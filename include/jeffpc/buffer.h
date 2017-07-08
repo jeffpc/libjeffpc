@@ -25,6 +25,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <fcntl.h>
 
 #include <jeffpc/error.h>
 
@@ -42,6 +43,7 @@ struct buffer_ops {
 
 struct buffer {
 	void *data;		/* the data itself */
+	size_t off;		/* current pointer */
 	size_t used;		/* bytes filled */
 	size_t allocsize;	/* allocated buffer size */
 	const struct buffer_ops *ops;
@@ -58,6 +60,7 @@ extern void buffer_init_const(struct buffer *buffer, const void *data,
 
 /* returns number of bytes appended */
 extern int buffer_append(struct buffer *buffer, const void *data, size_t size);
+extern ssize_t buffer_seek(struct buffer *buffer, off_t offset, int whence);
 
 static inline size_t buffer_used(struct buffer *buffer)
 {
@@ -67,6 +70,15 @@ static inline size_t buffer_used(struct buffer *buffer)
 static inline const void *buffer_data(struct buffer *buffer)
 {
 	return buffer->data;
+}
+
+static inline const void *buffer_data_current(struct buffer *buffer)
+{
+	if (!buffer->data)
+		return NULL;
+	if (buffer->off == buffer->used)
+		return NULL;
+	return buffer->data + buffer->off;
 }
 
 static inline int buffer_append_c(struct buffer *buffer, char c)
