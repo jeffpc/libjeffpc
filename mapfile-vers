@@ -28,6 +28,11 @@ JEFFPC_0.10 {
 		array_size;
 		array_truncate;
 
+		# buffer
+		buffer_alloc;
+		buffer_append;
+		buffer_free;
+
 		# cstr
 		strcpy_safe;
 

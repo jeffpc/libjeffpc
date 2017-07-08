@@ -82,6 +82,7 @@ ADD_FLEX_BISON_DEPENDENCY(sexpr sexpr)
 
 add_library(jeffpc SHARED
 	array.c
+	buffer.c
 	cstr.c
 	error.c
 	hexdump.c
@@ -115,6 +116,7 @@ target_apply_mapfile(jeffpc mapfile-vers)
 install(TARGETS	jeffpc DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 install(FILES	include/jeffpc/atomic.h
+		include/jeffpc/buffer.h
 		include/jeffpc/cstr.h
 		include/jeffpc/error.h
 		include/jeffpc/hexdump.h
@@ -174,6 +176,7 @@ build_test_bin(sexpr_parser)
 build_test_bin_and_run(array)
 build_test_bin_and_run(atomic-single-thread)
 build_test_bin_and_run(bswap)
+build_test_bin_and_run(buffer)
 build_test_bin_and_run(container_of)
 build_test_bin_and_run(endian)
 build_test_bin_and_run(errno)
