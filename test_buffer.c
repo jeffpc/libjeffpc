@@ -137,7 +137,7 @@ static void test_append(void)
 
 		memset(data, 0, sizeof(data));
 
-		fprintf(stderr, "\n");
+		fprintf(stderr, "ok.\n");
 	}
 }
 
@@ -155,7 +155,7 @@ static void test_sink(void)
 
 		memset(&buffer, 0, sizeof(struct buffer));
 
-		fprintf(stderr, "\n");
+		fprintf(stderr, "ok.\n");
 	}
 
 	for (maxsize = 300; maxsize < 300000; maxsize += 10000) {
@@ -167,7 +167,7 @@ static void test_sink(void)
 
 		memset(&buffer, 0, sizeof(struct buffer));
 
-		fprintf(stderr, "\n");
+		fprintf(stderr, "ok.\n");
 	}
 }
 
