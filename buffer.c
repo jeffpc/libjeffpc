@@ -41,6 +41,7 @@ struct buffer *buffer_alloc(size_t expected_size)
 	buffer->used = 0;
 	buffer->allocsize = expected_size;
 	buffer->sink = false;
+	buffer->heap = true;
 
 	return buffer;
 }
@@ -60,6 +61,17 @@ void buffer_init_sink(struct buffer *buffer)
 	buffer->used = 0;
 	buffer->allocsize = SIZE_MAX;
 	buffer->sink = true;
+	buffer->heap = false;
+
+}
+
+void buffer_init_const(struct buffer *buffer, const void *data, size_t size)
+{
+	buffer->data = (void *) data;
+	buffer->used = size;
+	buffer->allocsize = size;
+	buffer->sink = false;
+	buffer->heap = false;
 }
 
 static int resize(struct buffer *buffer, size_t newsize)
@@ -67,6 +79,7 @@ static int resize(struct buffer *buffer, size_t newsize)
 	void *tmp;
 
 	ASSERT(!buffer->sink);
+	ASSERT(buffer->heap);
 
 	if (newsize <= buffer->allocsize)
 		return 0;
@@ -84,7 +97,7 @@ int buffer_append(struct buffer *buffer, const void *data, size_t size)
 {
 	int ret;
 
-	if (!buffer)
+	if (!buffer || (!buffer->sink && !buffer->heap))
 		return -EINVAL;
 
 	if (!data && !size)

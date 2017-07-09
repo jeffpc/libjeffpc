@@ -196,9 +196,34 @@ static void test_sink(void)
 	}
 }
 
+void test_const(void)
+{
+	const char rawdata[] = "759f7e2d-67ec-4e72-8f61-86a3fd93b1be"
+			       "60e9149e-d039-e32b-b25d-c995b28bf890"
+			       "40f0fddc-ddca-4ff5-cd81-b0ae4c7d6123";
+	struct buffer buffer;
+	int i;
+
+	buffer_init_const(&buffer, rawdata, strlen(rawdata));
+
+	check_used(&buffer, strlen(rawdata));
+	check_data_ptr(&buffer, rawdata);
+
+	for (i = 0; i < 10; i++) {
+		fprintf(stderr, "%s: iter = %d...", __func__, i);
+
+		check_append_err(&buffer, "abc", 3, -EINVAL);
+		check_used(&buffer, strlen(rawdata));
+		check_data_ptr(&buffer, rawdata);
+
+		fprintf(stderr, "ok.\n");
+	}
+}
+
 void test(void)
 {
 	test_alloc_free();
 	test_append();
 	test_sink();
+	test_const();
 }

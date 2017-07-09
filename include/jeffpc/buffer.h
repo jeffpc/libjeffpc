@@ -33,6 +33,7 @@ struct buffer {
 	size_t used;		/* bytes filled */
 	size_t allocsize;	/* allocated buffer size */
 	bool sink:1;		/* no actual data is stored */
+	bool heap:1;		/* the void data is borrowed */
 };
 
 extern struct buffer *buffer_alloc(size_t expected_size);
@@ -40,6 +41,9 @@ extern void buffer_free(struct buffer *buffer);
 
 /* a buffer that behaves similarly to /dev/null - all appends are lost */
 extern void buffer_init_sink(struct buffer *buffer);
+/* a buffer that wraps a const data pointer */
+extern void buffer_init_const(struct buffer *buffer, const void *data,
+			      size_t size);
 
 /* returns number of bytes appended */
 extern int buffer_append(struct buffer *buffer, const void *data, size_t size);
