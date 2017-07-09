@@ -37,16 +37,23 @@ static inline void check_data(struct buffer *buffer)
 		     xstrerror(PTR_ERR(ptr)));
 }
 
-static inline void check_data_null(struct buffer *buffer)
+static inline void check_data_ptr(struct buffer *buffer, const void *expected)
 {
 	const void *ptr;
 
 	ptr = buffer_data(buffer);
+	if (ptr == expected)
+		return;
+
 	if (IS_ERR(ptr))
-		fail("buffer_data() returned error: %s",
-		     xstrerror(PTR_ERR(ptr)));
-	if (ptr)
-		fail("buffer_data() returned non-NULL: %p", ptr);
+		fail("buffer_data() returned error: %s (%p expected)",
+		     xstrerror(PTR_ERR(ptr)), expected);
+	fail("buffer_data() returned %p, but %p was expected", ptr, expected);
+}
+
+static inline void check_data_null(struct buffer *buffer)
+{
+	check_data_ptr(buffer, NULL);
 }
 
 static inline void check_used(struct buffer *buffer, size_t expected)
@@ -58,15 +65,33 @@ static inline void check_used(struct buffer *buffer, size_t expected)
 		fail("buffer_used() == %zu, should be %zu", got, expected);
 }
 
-static inline void check_append(struct buffer *buffer, const void *ptr,
-				size_t len)
+static inline void check_append_err(struct buffer *buffer, const void *ptr,
+				    size_t len, int expected_ret)
 {
 	int ret;
 
 	ret = buffer_append(buffer, ptr, len);
-	if (ret)
-		fail("buffer_append(..., %p, %zu) failed: %s", ptr, len,
-		     xstrerror(ret));
+	if (ret == expected_ret)
+		return;
+
+	if (ret && expected_ret)
+		fail("buffer_append(..., %p, %zu) failed with wrong error: "
+		     "got %s, expected %s", ptr, len, xstrerror(ret),
+		     xstrerror(expected_ret));
+	if (ret && !expected_ret)
+		fail("buffer_append(..., %p, %zu) failed but it wasn't "
+		     "supposed to: %s", ptr, len, xstrerror(ret));
+	if (!ret && expected_ret)
+		fail("buffer_append(..., %p, %zu) succeeded but it wasn't "
+		     "supposed to. Expected error: %s", ptr, len,
+		     xstrerror(expected_ret));
+	fail("impossible condition occured");
+}
+
+static inline void check_append(struct buffer *buffer, const void *ptr,
+				size_t len)
+{
+	check_append_err(buffer, ptr, len, 0);
 }
 
 static void test_alloc_free(void)
