@@ -212,7 +212,7 @@ void test_const(void)
 	for (i = 0; i < 10; i++) {
 		fprintf(stderr, "%s: iter = %d...", __func__, i);
 
-		check_append_err(&buffer, "abc", 3, -EINVAL);
+		check_append_err(&buffer, "abc", 3, -EROFS);
 		check_used(&buffer, strlen(rawdata));
 		check_data_ptr(&buffer, rawdata);
 

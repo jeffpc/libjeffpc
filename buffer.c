@@ -22,7 +22,7 @@
 
 #include <stdbool.h>
 
-#include <jeffpc/buffer.h>
+#include "buffer_impl.h"
 
 struct buffer *buffer_alloc(size_t expected_size)
 {
@@ -40,8 +40,7 @@ struct buffer *buffer_alloc(size_t expected_size)
 
 	buffer->used = 0;
 	buffer->allocsize = expected_size;
-	buffer->sink = false;
-	buffer->heap = true;
+	buffer->ops = &heap_buffer;
 
 	return buffer;
 }
@@ -51,7 +50,9 @@ void buffer_free(struct buffer *buffer)
 	if (!buffer)
 		return;
 
-	free(buffer->data);
+	if (buffer->ops->free)
+		buffer->ops->free(buffer->data);
+
 	free(buffer);
 }
 
@@ -60,9 +61,7 @@ void buffer_init_sink(struct buffer *buffer)
 	buffer->data = NULL;
 	buffer->used = 0;
 	buffer->allocsize = SIZE_MAX;
-	buffer->sink = true;
-	buffer->heap = false;
-
+	buffer->ops = &sink_buffer;
 }
 
 void buffer_init_const(struct buffer *buffer, const void *data, size_t size)
@@ -70,25 +69,25 @@ void buffer_init_const(struct buffer *buffer, const void *data, size_t size)
 	buffer->data = (void *) data;
 	buffer->used = size;
 	buffer->allocsize = size;
-	buffer->sink = false;
-	buffer->heap = false;
+	buffer->ops = &const_buffer;
 }
 
 static int resize(struct buffer *buffer, size_t newsize)
 {
 	void *tmp;
 
-	ASSERT(!buffer->sink);
-	ASSERT(buffer->heap);
-
 	if (newsize <= buffer->allocsize)
 		return 0;
 
-	tmp = realloc(buffer->data, newsize);
+	if (!buffer->ops->realloc)
+		return -ENOTSUP;
+
+	tmp = buffer->ops->realloc(buffer->data, newsize);
 	if (!tmp)
 		return -ENOMEM;
 
 	buffer->data = tmp;
+	buffer->allocsize = newsize;
 
 	return 0;
 }
@@ -97,24 +96,50 @@ int buffer_append(struct buffer *buffer, const void *data, size_t size)
 {
 	int ret;
 
-	if (!buffer || (!buffer->sink && !buffer->heap))
+	if (!buffer)
 		return -EINVAL;
+
+	if ((data && !size) || (!data && size))
+		return -EINVAL;
+
+	if (buffer->ops->check_append) {
+		ret = buffer->ops->check_append(buffer, data, size);
+		if (ret)
+			return ret;
+	}
 
 	if (!data && !size)
 		return 0; /* append(..., NULL, 0) is a no-op */
 
-	if (!data || !size)
-		return -EINVAL;
+	ret = resize(buffer, buffer->used + size);
+	if (ret)
+		return ret;
 
-	if (!buffer->sink) {
-		ret = resize(buffer, buffer->used + size);
-		if (ret)
-			return ret;
-
-		memcpy(buffer->data + buffer->used, data, size);
-	}
+	buffer->ops->copyin(buffer, buffer->used, data, size);
 
 	buffer->used += size;
 
 	return 0;
+}
+
+/*
+ * Generic implementations
+ */
+
+/* copyin implementations */
+void generic_buffer_copyin_memcpy(struct buffer *buffer, size_t off,
+				  const void *newdata, size_t newdatalen)
+{
+	memcpy(buffer->data + off, newdata, newdatalen);
+}
+
+void generic_buffer_copyin_nop(struct buffer *buffer, size_t off,
+			       const void *newdata, size_t newdatalen)
+{
+}
+
+void generic_buffer_copyin_panic(struct buffer *buffer, size_t off,
+				 const void *newdata, size_t newdatalen)
+{
+	panic("buffer copyin called");
 }

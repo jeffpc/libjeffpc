@@ -28,12 +28,23 @@
 
 #include <jeffpc/error.h>
 
+struct buffer;
+
+struct buffer_ops {
+	/* op checking */
+	int (*check_append)(struct buffer *, const void *, size_t);
+
+	/* data manipulation */
+	void *(*realloc)(void *, size_t);
+	void (*free)(void *);
+	void (*copyin)(struct buffer *, size_t, const void *, size_t);
+};
+
 struct buffer {
 	void *data;		/* the data itself */
 	size_t used;		/* bytes filled */
 	size_t allocsize;	/* allocated buffer size */
-	bool sink:1;		/* no actual data is stored */
-	bool heap:1;		/* the void data is borrowed */
+	const struct buffer_ops *ops;
 };
 
 extern struct buffer *buffer_alloc(size_t expected_size);
@@ -55,9 +66,6 @@ static inline size_t buffer_used(struct buffer *buffer)
 
 static inline const void *buffer_data(struct buffer *buffer)
 {
-	if (buffer->sink)
-		return NULL;
-
 	return buffer->data;
 }
 

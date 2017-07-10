@@ -83,6 +83,9 @@ ADD_FLEX_BISON_DEPENDENCY(sexpr sexpr)
 add_library(jeffpc SHARED
 	array.c
 	buffer.c
+	buffer_const.c
+	buffer_heap.c
+	buffer_sink.c
 	cstr.c
 	error.c
 	hexdump.c
