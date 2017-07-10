@@ -29,5 +29,6 @@ const struct buffer_ops sink_buffer = {
 	 *  - free since there is nothing to free
 	 */
 
+	.clear = generic_buffer_clear_nop,
 	.copyin = generic_buffer_copyin_nop,
 };

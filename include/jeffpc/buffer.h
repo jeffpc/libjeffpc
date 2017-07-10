@@ -34,10 +34,12 @@ struct buffer;
 struct buffer_ops {
 	/* op checking */
 	int (*check_append)(struct buffer *, const void *, size_t);
+	int (*check_truncate)(struct buffer *, size_t);
 
 	/* data manipulation */
 	void *(*realloc)(void *, size_t);
 	void (*free)(void *);
+	void (*clear)(struct buffer *, size_t, size_t);
 	void (*copyin)(struct buffer *, size_t, const void *, size_t);
 };
 
@@ -61,6 +63,7 @@ extern void buffer_init_const(struct buffer *buffer, const void *data,
 /* returns number of bytes appended */
 extern int buffer_append(struct buffer *buffer, const void *data, size_t size);
 extern ssize_t buffer_seek(struct buffer *buffer, off_t offset, int whence);
+extern int buffer_truncate(struct buffer *buffer, size_t size);
 
 static inline size_t buffer_used(struct buffer *buffer)
 {

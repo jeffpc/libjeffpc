@@ -35,6 +35,7 @@ JEFFPC_0.10 {
 		buffer_init_const;
 		buffer_init_sink;
 		buffer_seek;
+		buffer_truncate;
 
 		# cstr
 		strcpy_safe;

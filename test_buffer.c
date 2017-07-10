@@ -22,8 +22,30 @@
 
 #include <jeffpc/buffer.h>
 #include <jeffpc/error.h>
+#include <jeffpc/rand.h>
 
 #include "test.c"
+
+static inline void check_data_zeroes(struct buffer *buffer, size_t startoff)
+{
+	const uint8_t *data;
+	size_t len;
+	size_t i;
+
+	data = buffer_data(buffer);
+	len = buffer_used(buffer);
+
+	if (startoff > len)
+		fail("%s startoff > len (%zu > %zu)", __func__, startoff, len);
+
+	for (i = startoff; i < len; i++) {
+		if (data[i] == '\0')
+			continue;
+
+		fail("buffer contains %#02x @ offset %zu (should be '\\0')",
+		     data[i], i);
+	}
+}
 
 static inline void check_data(struct buffer *buffer)
 {
@@ -94,6 +116,34 @@ static inline void check_append(struct buffer *buffer, const void *ptr,
 	check_append_err(buffer, ptr, len, 0);
 }
 
+static inline void check_truncate_err(struct buffer *buffer, size_t newsize,
+				      int expected_ret)
+{
+	int ret;
+
+	ret = buffer_truncate(buffer, newsize);
+	if (ret == expected_ret)
+		return;
+
+	if (ret && expected_ret)
+		fail("buffer_truncate(..., %zu) failed with wrong error: "
+		     "got %s, expected %s", newsize, xstrerror(ret),
+		     xstrerror(expected_ret));
+	if (ret && !expected_ret)
+		fail("buffer_truncate(..., %zu) failed but it wasn't "
+		     "supposed to: %s", newsize, xstrerror(ret));
+	if (!ret && expected_ret)
+		fail("buffer_truncate(..., %zu) succeeded but it wasn't "
+		     "supposed to. Expected error: %s", newsize,
+		     xstrerror(expected_ret));
+	fail("impossible condition occured");
+}
+
+static inline void check_truncate(struct buffer *buffer, size_t newsize)
+{
+	check_truncate_err(buffer, newsize, 0);
+}
+
 static void test_alloc_free(void)
 {
 	struct buffer *buffer;
@@ -132,6 +182,11 @@ static void inner_loop(size_t niter, struct buffer *buffer, uint8_t *data,
 		check_append(buffer, &byte, 1);
 		check(buffer);
 		check_used(buffer, i + 1);
+
+		/* truncate to same size */
+		check_truncate(buffer, buffer_used(buffer));
+		check(buffer);
+		check_used(buffer, i + 1);
 	}
 
 	check(buffer);
@@ -164,6 +219,64 @@ static void test_append(void)
 
 		fprintf(stderr, "ok.\n");
 	}
+}
+
+static void test_truncate_grow(void)
+{
+	struct buffer *buffer;
+	size_t i;
+
+	buffer = buffer_alloc(0);
+	if (IS_ERR(buffer))
+		fail("buffer_alloc(%zu) failed: %s", 0,
+		     xstrerror(PTR_ERR(buffer)));
+
+	for (i = 0; i < 50000; i += 13) {
+		fprintf(stderr, "%s: iter = %3d...", __func__, i);
+
+		check_truncate(buffer, i);
+		check_used(buffer, i);
+		check_data_zeroes(buffer, 0);
+
+		fprintf(stderr, "ok.\n");
+	}
+
+	buffer_free(buffer);
+}
+
+static void test_truncate_shrink(void)
+{
+	const size_t maxsize = 5000 * sizeof(uint64_t);
+	struct buffer *buffer;
+	size_t i;
+
+	buffer = buffer_alloc(maxsize);
+	if (IS_ERR(buffer))
+		fail("buffer_alloc(%zu) failed: %s", maxsize,
+		     xstrerror(PTR_ERR(buffer)));
+
+	/* append some random data */
+	for (i = 0; i < maxsize; i += sizeof(uint64_t)) {
+		uint64_t tmp;
+
+		tmp = rand64();
+
+		check_append(buffer, &tmp, sizeof(tmp));
+	}
+
+	/* sanity check the size */
+	check_used(buffer, maxsize);
+
+	for (i = maxsize; i > 0; i -= sizeof(uint64_t)) {
+		fprintf(stderr, "%s: iter = %3d...", __func__, i);
+
+		check_truncate(buffer, i);
+		check_used(buffer, i);
+
+		fprintf(stderr, "ok.\n");
+	}
+
+	buffer_free(buffer);
 }
 
 static void test_sink(void)
@@ -216,6 +329,10 @@ void test_const(void)
 		check_used(&buffer, strlen(rawdata));
 		check_data_ptr(&buffer, rawdata);
 
+		check_truncate_err(&buffer, i * strlen(rawdata) / 5, -EROFS);
+		check_used(&buffer, strlen(rawdata));
+		check_data_ptr(&buffer, rawdata);
+
 		fprintf(stderr, "ok.\n");
 	}
 }
@@ -224,6 +341,8 @@ void test(void)
 {
 	test_alloc_free();
 	test_append();
+	test_truncate_grow();
+	test_truncate_shrink();
 	test_sink();
 	test_const();
 }

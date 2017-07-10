@@ -25,5 +25,6 @@
 const struct buffer_ops heap_buffer = {
 	.realloc = realloc,
 	.free = free,
+	.clear = generic_buffer_clear_memset,
 	.copyin = generic_buffer_copyin_memcpy,
 };

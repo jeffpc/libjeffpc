@@ -172,9 +172,49 @@ ssize_t buffer_seek(struct buffer *buffer, off_t offset, int whence)
 	return newoff;
 }
 
+int buffer_truncate(struct buffer *buffer, size_t size)
+{
+	int ret;
+
+	if (!buffer)
+		return -EINVAL;
+
+	if (buffer->ops->check_truncate) {
+		ret = buffer->ops->check_truncate(buffer, size);
+		if (ret)
+			return ret;
+	}
+
+	ret = resize(buffer, size);
+	if (ret)
+		return ret;
+
+	if (buffer->used < size)
+		buffer->ops->clear(buffer, buffer->used, size - buffer->used);
+
+	buffer->used = size;
+
+	return 0;
+}
+
 /*
  * Generic implementations
  */
+
+/* clear implementations */
+void generic_buffer_clear_memset(struct buffer *buffer, size_t off, size_t len)
+{
+	memset(buffer->data + off, 0, len);
+}
+
+void generic_buffer_clear_nop(struct buffer *buffer, size_t off, size_t len)
+{
+}
+
+void generic_buffer_clear_panic(struct buffer *buffer, size_t off, size_t len)
+{
+	panic("buffer clear called");
+}
 
 /* copyin implementations */
 void generic_buffer_copyin_memcpy(struct buffer *buffer, size_t off,

@@ -28,8 +28,14 @@ static int const_buffer_check_append(struct buffer *buffer, const void *data,
 	return -EROFS;
 }
 
+static int const_buffer_check_truncate(struct buffer *buffer, size_t size)
+{
+	return -EROFS;
+}
+
 const struct buffer_ops const_buffer = {
 	.check_append = const_buffer_check_append,
+	.check_truncate = const_buffer_check_truncate,
 
 	/*
 	 * no need for:
@@ -37,5 +43,6 @@ const struct buffer_ops const_buffer = {
 	 *  - free since we have a borrowed const buffer
 	 */
 
+	.clear = generic_buffer_clear_panic,
 	.copyin = generic_buffer_copyin_panic,
 };

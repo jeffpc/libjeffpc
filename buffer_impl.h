@@ -29,6 +29,14 @@ extern const struct buffer_ops heap_buffer;
 extern const struct buffer_ops sink_buffer;
 extern const struct buffer_ops const_buffer;
 
+/* clear implementations */
+extern void generic_buffer_clear_memset(struct buffer *buffer, size_t off,
+					size_t len);
+extern void generic_buffer_clear_nop(struct buffer *buffer, size_t off,
+				     size_t len);
+extern void generic_buffer_clear_panic(struct buffer *buffer, size_t off,
+				       size_t len);
+
 /* copyin implementations */
 extern void generic_buffer_copyin_memcpy(struct buffer *buffer, size_t off,
 					 const void *newdata, size_t newdatalen);
