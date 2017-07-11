@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,15 @@
 
 #include "buffer_impl.h"
 
+static int sink_buffer_check_read(struct buffer *buffer, void *data, size_t len,
+				  size_t off)
+{
+	return -ENOTSUP;
+}
+
 const struct buffer_ops sink_buffer = {
+	.check_read = sink_buffer_check_read,
+
 	/*
 	 * no need for:
 	 *  - realloc since we use SIZE_MAX alloc size
@@ -31,4 +39,5 @@ const struct buffer_ops sink_buffer = {
 
 	.clear = generic_buffer_clear_nop,
 	.copyin = generic_buffer_copyin_nop,
+	.copyout = generic_buffer_copyout_panic,
 };

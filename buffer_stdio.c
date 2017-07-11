@@ -45,6 +45,14 @@ static void stdio_buffer_copyin(struct buffer *buffer, size_t off,
 		      strerror(errno));
 }
 
+static void stdio_buffer_copyout(struct buffer *buffer, size_t off,
+				 void *data, size_t datalen)
+{
+	if (fread(data, datalen, 1, buffer->private) != 1)
+		panic("%s: failed to read data from buffer: %s", __func__,
+		      strerror(errno));
+}
+
 const struct buffer_ops stdio_buffer = {
 	.check_truncate = stdio_buffer_check_truncate,
 	.check_seek = stdio_buffer_check_seek,
@@ -57,4 +65,5 @@ const struct buffer_ops stdio_buffer = {
 
 	.clear = generic_buffer_clear_panic,
 	.copyin = stdio_buffer_copyin,
+	.copyout = stdio_buffer_copyout,
 };

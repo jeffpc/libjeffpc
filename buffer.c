@@ -216,6 +216,57 @@ int buffer_truncate(struct buffer *buffer, size_t size)
 	return 0;
 }
 
+ssize_t buffer_pread(struct buffer *buffer, void *buf, size_t len, size_t off)
+{
+	ssize_t ret;
+
+	if (!buffer || !buf)
+		return -EINVAL;
+
+	if (buffer->ops->check_read) {
+		ret = buffer->ops->check_read(buffer, buf, len, off);
+		if (ret)
+			return ret;
+	}
+
+	if (off >= buffer->used)
+		ret = 0;
+	else if ((off + len) > buffer->used)
+		ret = buffer->used - off;
+	else
+		ret = len;
+
+	if (ret)
+		buffer->ops->copyout(buffer, off, buf, ret);
+
+	return ret;
+}
+
+ssize_t buffer_pwrite(struct buffer *buffer, const void *buf, size_t len,
+		      size_t off)
+{
+	ssize_t ret;
+
+	if (!buffer || !buf)
+		return -EINVAL;
+
+	if (buffer->ops->check_write) {
+		ret = buffer->ops->check_write(buffer, buf, len, off);
+		if (ret)
+			return ret;
+	}
+
+	ret = resize(buffer, off + len);
+	if (ret)
+		return ret;
+
+	buffer->ops->copyin(buffer, off, buf, len);
+
+	buffer->used = MAX(buffer->used, off + len);
+
+	return len;
+}
+
 /*
  * Generic implementations
  */
@@ -251,4 +302,22 @@ void generic_buffer_copyin_panic(struct buffer *buffer, size_t off,
 				 const void *newdata, size_t newdatalen)
 {
 	panic("buffer copyin called");
+}
+
+/* copyout implementations */
+void generic_buffer_copyout_memcpy(struct buffer *buffer, size_t off,
+				   void *data, size_t datalen)
+{
+	memcpy(data, buffer->data + off, datalen);
+}
+
+void generic_buffer_copyout_nop(struct buffer *buffer, size_t off, void *data,
+				size_t datalen)
+{
+}
+
+void generic_buffer_copyout_panic(struct buffer *buffer, size_t off, void *data,
+				  size_t datalen)
+{
+	panic("buffer copyout called");
 }

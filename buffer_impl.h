@@ -47,4 +47,12 @@ extern void generic_buffer_copyin_nop(struct buffer *buffer, size_t off,
 extern void generic_buffer_copyin_panic(struct buffer *buffer, size_t off,
 					const void *newdata, size_t newdatalen);
 
+/* copyout implementations */
+extern void generic_buffer_copyout_memcpy(struct buffer *buffer, size_t off,
+					  void *data, size_t datalen);
+extern void generic_buffer_copyout_nop(struct buffer *buffer, size_t off,
+				       void *data, size_t datalen);
+extern void generic_buffer_copyout_panic(struct buffer *buffer, size_t off,
+					 void *data, size_t datalen);
+
 #endif

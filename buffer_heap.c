@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,4 +27,5 @@ const struct buffer_ops heap_buffer = {
 	.free = free,
 	.clear = generic_buffer_clear_memset,
 	.copyin = generic_buffer_copyin_memcpy,
+	.copyout = generic_buffer_copyout_memcpy,
 };

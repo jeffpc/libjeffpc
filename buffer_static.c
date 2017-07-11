@@ -69,20 +69,39 @@ static int static_buffer_check_truncate_rw(struct buffer *buffer, size_t size)
 	return -ENOSPC;
 }
 
+static int static_buffer_check_write_ro(struct buffer *buffer, const void *buf,
+				        size_t len, size_t off)
+{
+	return -EROFS;
+}
+
+static int static_buffer_check_write_rw(struct buffer *buffer, const void *buf,
+				        size_t len, size_t off)
+{
+	if ((off + len) <= buffer->allocsize)
+		return 0;
+
+	return -ENOSPC;
+}
+
 /* a read-only static buffer */
 const struct buffer_ops static_buffer_ro = {
 	.check_append = static_buffer_check_append_ro,
 	.check_truncate = static_buffer_check_truncate_ro,
+	.check_write = static_buffer_check_write_ro,
 
 	.clear = generic_buffer_clear_panic,
 	.copyin = generic_buffer_copyin_panic,
+	.copyout = generic_buffer_copyout_memcpy,
 };
 
 /* a read-write static buffer */
 const struct buffer_ops static_buffer_rw = {
 	.check_append = static_buffer_check_append_rw,
 	.check_truncate = static_buffer_check_truncate_rw,
+	.check_write = static_buffer_check_write_rw,
 
 	.clear = generic_buffer_clear_memset,
 	.copyin = generic_buffer_copyin_memcpy,
+	.copyout = generic_buffer_copyout_memcpy,
 };

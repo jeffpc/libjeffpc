@@ -36,7 +36,9 @@ struct buffer;
 struct buffer_ops {
 	/* op checking */
 	int (*check_append)(struct buffer *, const void *, size_t);
+	int (*check_read)(struct buffer *, void *, size_t, size_t);
 	int (*check_truncate)(struct buffer *, size_t);
+	int (*check_write)(struct buffer *, const void *, size_t, size_t);
 	ssize_t (*check_seek)(struct buffer *, off_t, int, size_t);
 
 	/* data manipulation */
@@ -44,6 +46,7 @@ struct buffer_ops {
 	void (*free)(void *);
 	void (*clear)(struct buffer *, size_t, size_t);
 	void (*copyin)(struct buffer *, size_t, const void *, size_t);
+	void (*copyout)(struct buffer *, size_t, void *, size_t);
 };
 
 struct buffer {
@@ -73,6 +76,10 @@ extern void buffer_init_stdio(struct buffer *buffer, FILE *f);
 extern int buffer_append(struct buffer *buffer, const void *data, size_t size);
 extern ssize_t buffer_seek(struct buffer *buffer, off_t offset, int whence);
 extern int buffer_truncate(struct buffer *buffer, size_t size);
+extern ssize_t buffer_pread(struct buffer *buffer, void *data, size_t len,
+			    size_t off);
+extern ssize_t buffer_pwrite(struct buffer *buffer, const void *data, size_t len,
+			     size_t off);
 
 static inline size_t buffer_used(struct buffer *buffer)
 {
@@ -117,6 +124,33 @@ static inline int buffer_append_str(struct buffer *buffer, const struct str *s)
 		return 0;
 
 	return buffer_append_cstr(buffer, str);
+}
+
+/* same as buffer_pread(), but it uses and updates current offset */
+static inline ssize_t buffer_read(struct buffer *buffer, void *buf, size_t len)
+{
+	ssize_t ret;
+
+	ret = buffer_pread(buffer, buf, len, buffer->off);
+
+	if (ret >= 0)
+		buffer->off += ret;
+
+	return ret;
+}
+
+/* same as buffer_pwrite(), but it uses and updates current offset */
+static inline ssize_t buffer_write(struct buffer *buffer, const void *buf,
+				   size_t len)
+{
+	ssize_t ret;
+
+	ret = buffer_pwrite(buffer, buf, len, buffer->off);
+
+	if (ret >= 0)
+		buffer->off += ret;
+
+	return ret;
 }
 
 #endif
