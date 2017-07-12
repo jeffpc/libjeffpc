@@ -338,9 +338,7 @@ struct str *str_printf(const char *fmt, ...)
 
 void str_free(struct str *str)
 {
-	if (!str)
-		return;
-
+	ASSERT(str);
 	ASSERT3U(refcnt_read(&str->refcnt), ==, 0);
 
 	if (!str->inline_alloc && !str->static_alloc)
