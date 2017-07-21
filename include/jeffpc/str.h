@@ -70,8 +70,9 @@ struct str {
 /* evaluates to a struct str *, so it can be used as a value */
 #define STATIC_STR(s)					\
 	({						\
+		const char *_type_check __attribute__((__unused__)) = (s); \
 		static struct str _s = {		\
-			.str = (s),			\
+			.str = (char *) (s),		\
 			.static_struct = true,		\
 			.static_alloc = true,		\
 		};					\
