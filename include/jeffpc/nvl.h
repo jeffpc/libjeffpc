@@ -71,6 +71,7 @@ struct nvpair {
 
 extern struct nvlist *nvl_alloc(void);
 extern void nvl_free(struct nvlist *nvl);
+extern int nvl_merge(struct nvlist *dest, struct nvlist *src);
 extern void nvl_dump_file(FILE *out, struct nvlist *nvl);
 
 /* iteration */

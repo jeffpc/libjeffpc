@@ -35,6 +35,15 @@ static inline struct nvlist *alloc(void)
 	return nvl;
 }
 
+static inline void merge(struct nvlist *dest, struct nvlist *src)
+{
+	int ret;
+
+	ret = nvl_merge(dest, src);
+	if (ret)
+		fail("nvl_merge() failed: %s", xstrerror(ret));
+}
+
 static inline void set_bool(struct nvlist *nvl, const char *key, bool b)
 {
 	int ret;
@@ -270,10 +279,92 @@ static void test_lookup_simple(void)
 	fprintf(stderr, "ok.\n");
 }
 
+static inline void check_merge_set(struct nvlist *nvl, unsigned imask,
+				   unsigned bmask)
+{
+	static const char *names[] = {
+		"abc", "def", "ghi", "jkl",
+	};
+	const unsigned mask = imask | bmask;
+	int i;
+
+	for (i = 0; i < 4; i++) {
+		const char *name = names[i];
+		unsigned bit = 1 << i;
+
+		if ((mask & bit) == 0)
+			check_key_not_exists(nvl, name);
+		else if (imask & bit)
+			check_key_exists(nvl, name, NVT_INT);
+		else if (bmask & bit)
+			check_key_exists(nvl, name, NVT_BOOL);
+	}
+}
+
+static void test_merge(void)
+{
+	struct nvlist *a, *b;
+
+	fprintf(stderr, "%s...", __func__);
+
+	a = alloc();
+	b = alloc();
+
+	check_merge_set(a, 0, 0);
+	check_merge_set(b, 0, 0);
+
+	fprintf(stderr, "1...");
+
+	set_int(a, "abc", 1);
+	set_int(a, "ghi", 2);
+	set_bool(b, "abc", true);
+	set_int(b, "def", 4);
+
+	fprintf(stderr, "2...");
+
+	check_merge_set(a, 0x5, 0x0);
+	check_merge_set(b, 0x2, 0x1);
+
+	fprintf(stderr, "3...");
+
+	merge(a, b);
+
+	fprintf(stderr, "4...");
+
+	check_merge_set(a, 0x6, 0x1);
+	check_merge_set(b, 0x2, 0x1);
+
+	fprintf(stderr, "5...");
+
+	merge(a, b);
+
+	fprintf(stderr, "6...");
+
+	check_merge_set(a, 0x6, 0x1);
+	check_merge_set(b, 0x2, 0x1);
+
+	fprintf(stderr, "7...");
+
+	merge(b, a);
+
+	fprintf(stderr, "8...");
+
+	check_merge_set(a, 0x6, 0x1);
+	check_merge_set(b, 0x6, 0x1);
+
+	fprintf(stderr, "9...");
+
+	nvl_putref(a);
+	nvl_putref(b);
+
+	fprintf(stderr, "ok.\n");
+}
+
 void test(void)
 {
 	test_alloc_free();
 	test_refs();
 	test_lookup_empty();
 	test_lookup_simple();
+	test_merge();
 }

@@ -205,6 +205,51 @@ static void nvpair_free(struct nvpair *pair)
 	mem_cache_free(nvpair_cache, pair);
 }
 
+int nvl_merge(struct nvlist *dest, struct nvlist *src)
+{
+	const struct nvpair *spair;
+
+	nvl_for_each(spair, src) {
+		const struct nvval *val = &spair->value;
+		int ret;
+
+		switch (spair->value.type) {
+			case NVT_ARRAY:
+				ret = nvl_set_array_copy(dest, spair->name,
+							 val->array.vals,
+							 val->array.nelem);
+				break;
+			case NVT_BLOB:
+				ret = nvl_set_blob_copy(dest, spair->name,
+							val->blob.ptr,
+							val->blob.size);
+				break;
+			case NVT_BOOL:
+				ret = nvl_set_bool(dest, spair->name, val->b);
+				break;
+			case NVT_INT:
+				ret = nvl_set_int(dest, spair->name, val->i);
+				break;
+			case NVT_NULL:
+				ret = nvl_set_null(dest, spair->name);
+				break;
+			case NVT_NVL:
+				ret = nvl_set_nvl(dest, spair->name,
+						  nvl_getref(val->nvl));
+				break;
+			case NVT_STR:
+				ret = nvl_set_str(dest, spair->name,
+						  str_getref(val->str));
+				break;
+		}
+
+		if (ret)
+			return ret;
+	}
+
+	return 0;
+}
+
 static struct nvpair *find(struct nvlist *nvl, const char *name)
 {
 	struct nvpair *cur;

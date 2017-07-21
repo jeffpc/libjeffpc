@@ -90,6 +90,7 @@ JEFFPC_0.10 {
 		nvl_lookup_null;
 		nvl_lookup_nvl;
 		nvl_lookup_str;
+		nvl_merge;
 		nvl_set_array;
 		nvl_set_array_copy;
 		nvl_set_blob;
