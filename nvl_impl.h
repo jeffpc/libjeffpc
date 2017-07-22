@@ -115,12 +115,13 @@ struct nvops {
 	const struct nvunpackops unpack;
 };
 
+extern const struct nvops nvops_json;
+
 static inline const struct nvops *select_ops(enum nvformat format)
 {
 	switch (format) {
-		default:
-			/* nothing */
-			break;
+		case NVF_JSON:
+			return &nvops_json;
 	}
 
 	return NULL;

@@ -47,7 +47,7 @@ enum nvtype {
 
 /* serialization formats */
 enum nvformat {
-	_NVF_DUMMY,
+	NVF_JSON,	/* RFC 7159 */
 };
 
 /* do not access these directly */
