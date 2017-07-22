@@ -91,6 +91,7 @@ JEFFPC_0.10 {
 		nvl_lookup_nvl;
 		nvl_lookup_str;
 		nvl_merge;
+		nvl_pack;
 		nvl_set_array;
 		nvl_set_array_copy;
 		nvl_set_blob;
@@ -100,6 +101,8 @@ JEFFPC_0.10 {
 		nvl_set_null;
 		nvl_set_nvl;
 		nvl_set_str;
+		nvl_size;
+		nvl_unpack;
 		nvl_unset;
 		nvl_unset_type;
 		nvpair_value_array;

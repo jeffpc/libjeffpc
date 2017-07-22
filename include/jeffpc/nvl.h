@@ -45,6 +45,11 @@ enum nvtype {
 	NVT_STR,
 };
 
+/* serialization formats */
+enum nvformat {
+	_NVF_DUMMY,
+};
+
 /* do not access these directly */
 struct nvpair {
 	struct list_node node;
@@ -73,6 +78,12 @@ extern struct nvlist *nvl_alloc(void);
 extern void nvl_free(struct nvlist *nvl);
 extern int nvl_merge(struct nvlist *dest, struct nvlist *src);
 extern void nvl_dump_file(FILE *out, struct nvlist *nvl);
+
+/* serialization & deserialization */
+extern ssize_t nvl_size(struct nvlist *nvl, enum nvformat format);
+extern struct buffer *nvl_pack(struct nvlist *nvl, enum nvformat format);
+extern struct nvlist *nvl_unpack(const void *ptr, size_t len,
+				 enum nvformat format);
 
 /* iteration */
 extern const struct nvpair *nvl_iter_next(struct nvlist *nvl,
