@@ -29,6 +29,7 @@
 #cmakedefine HAVE_ASSFAIL
 #cmakedefine HAVE_ADDRTOSYMSTR
 #cmakedefine HAVE_PTHREAD_COND_RELTIMEDWAIT_NP
+#cmakedefine HAVE_REALLOCARRAY
 #cmakedefine HAVE_SYS_DEBUG_H
 #cmakedefine HAVE_UMEM
 

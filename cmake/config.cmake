@@ -31,6 +31,7 @@ check_function_exists(assfail HAVE_ASSFAIL)
 check_function_exists(addrtosymstr HAVE_ADDRTOSYMSTR)
 check_function_exists(pthread_cond_reltimedwait_np
 	HAVE_PTHREAD_COND_RELTIMEDWAIT_NP)
+check_function_exists(reallocarray HAVE_REALLOCARRAY)
 check_include_files(sys/debug.h HAVE_SYS_DEBUG_H)
 
 include("${CMAKE_DIR}/config-gnu-ld.cmake")

@@ -112,7 +112,11 @@ static struct nvval *val_dup_array(const struct nvval *user_vals, size_t nelem)
 	struct nvval *vals;
 	size_t i;
 
+#ifdef HAVE_REALLOCARRAY
 	vals = reallocarray(NULL, nelem, sizeof(struct nvval));
+#else
+	vals = malloc(nelem * sizeof(struct nvval));
+#endif
 	if (!vals)
 		return NULL;
 
