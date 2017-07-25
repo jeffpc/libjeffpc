@@ -74,10 +74,16 @@ struct nvpair {
 	} value;
 };
 
+struct nvl_convert_info {
+	const char *name;
+	enum nvtype tgt_type;
+};
+
 extern struct nvlist *nvl_alloc(void);
 extern void nvl_free(struct nvlist *nvl);
 extern int nvl_merge(struct nvlist *dest, struct nvlist *src);
 extern void nvl_dump_file(FILE *out, struct nvlist *nvl);
+extern int nvl_convert(struct nvlist *nvl, const struct nvl_convert_info *table);
 
 /* serialization & deserialization */
 extern ssize_t nvl_size(struct nvlist *nvl, enum nvformat format);

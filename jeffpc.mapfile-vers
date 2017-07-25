@@ -79,6 +79,7 @@ JEFFPC_0.10 {
 
 		# nvlist
 		nvl_alloc;
+		nvl_convert;
 		nvl_dump_file;
 		nvl_free;
 		nvl_iter_next;

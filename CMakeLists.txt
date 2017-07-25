@@ -93,6 +93,7 @@ add_library(jeffpc SHARED
 	io.c
 	list.c
 	nvl.c
+	nvl_convert.c
 	nvl_dump.c
 	nvl_fmt_json.c
 	nvl_pack.c
