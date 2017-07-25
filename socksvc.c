@@ -33,6 +33,7 @@
 #include <jeffpc/atomic.h>
 #include <jeffpc/error.h>
 #include <jeffpc/types.h>
+#include <jeffpc/io.h>
 #include <jeffpc/socksvc.h>
 
 /*
@@ -252,6 +253,7 @@ static void accept_conns(struct state *state)
 			cb = malloc(sizeof(struct cb));
 			if (!cb) {
 				cmn_err(CE_INFO, "Failed to allocate cb data");
+				xclose(fd);
 				continue;
 			}
 
