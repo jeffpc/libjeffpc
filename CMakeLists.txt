@@ -119,7 +119,7 @@ target_link_libraries(jeffpc
 	uuid
 )
 
-target_apply_mapfile(jeffpc mapfile-vers)
+target_apply_mapfile(jeffpc jeffpc.mapfile-vers)
 
 install(TARGETS	jeffpc DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
