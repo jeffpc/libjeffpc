@@ -25,7 +25,7 @@
 
 #include <inttypes.h>
 
-extern int socksvc(const char *host, uint16_t port,
+extern int socksvc(const char *host, uint16_t port, int nthreads,
 		   void (*func)(int fd, void *), void *private);
 
 #endif

@@ -273,8 +273,8 @@ static void accept_conns(struct state *state)
 	}
 }
 
-int socksvc(const char *host, uint16_t port, void (*func)(int fd, void *),
-	    void *private)
+int socksvc(const char *host, uint16_t port, int nthreads,
+	    void (*func)(int fd, void *), void *private)
 {
 	char name[128];
 	struct state state;
@@ -288,7 +288,7 @@ int socksvc(const char *host, uint16_t port, void (*func)(int fd, void *),
 	snprintf(name, sizeof(name), "socksvc: %s:%d", host ? host : "<any>",
 		 port);
 
-	state.taskq = taskq_create_fixed(name, -1);
+	state.taskq = taskq_create_fixed(name, nthreads);
 	if (IS_ERR(state.taskq)) {
 		ret = PTR_ERR(state.taskq);
 		goto err;
