@@ -22,6 +22,9 @@
 
 JEFFPC_COMM_0.10 {
 	global:
+		# scgisvc
+		scgisvc;
+
 		# socksvc
 		socksvc;
 

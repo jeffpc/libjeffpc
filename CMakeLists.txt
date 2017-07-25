@@ -121,6 +121,7 @@ target_link_libraries(jeffpc
 )
 
 add_library(jeffpc-comm SHARED
+	scgisvc.c
 	socksvc.c
 )
 
