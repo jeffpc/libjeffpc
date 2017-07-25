@@ -21,6 +21,10 @@
 #
 
 JEFFPC_COMM_0.10 {
+	global:
+		# socksvc
+		socksvc;
+
 	local:
 		*;
 };

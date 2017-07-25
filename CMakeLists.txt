@@ -121,7 +121,7 @@ target_link_libraries(jeffpc
 )
 
 add_library(jeffpc-comm SHARED
-	version.c
+	socksvc.c
 )
 
 target_link_libraries(jeffpc-comm
@@ -149,6 +149,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/refcnt.h
 		include/jeffpc/sexpr.h
 		include/jeffpc/sock.h
+		include/jeffpc/socksvc.h
 		include/jeffpc/str.h
 		include/jeffpc/synch.h
 		include/jeffpc/taskq.h
