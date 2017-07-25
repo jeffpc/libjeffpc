@@ -25,6 +25,14 @@
 
 #include <jeffpc/int.h>
 
+#ifndef MIN
+#define MIN(a, b)	(((a) < (b)) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#define MAX(a, b)	(((a) > (b)) ? (a) : (b))
+#endif
+
 #define ARRAY_LEN(x)		((size_t) (sizeof(x) / sizeof(x[0])))
 
 #ifndef container_of
