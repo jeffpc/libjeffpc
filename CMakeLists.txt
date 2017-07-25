@@ -120,7 +120,16 @@ target_link_libraries(jeffpc
 	uuid
 )
 
+add_library(jeffpc-comm SHARED
+	version.c
+)
+
+target_link_libraries(jeffpc-comm
+	jeffpc
+)
+
 target_apply_mapfile(jeffpc jeffpc.mapfile-vers)
+target_apply_mapfile(jeffpc-comm jeffpc-comm.mapfile-vers)
 
 install(TARGETS	jeffpc DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)

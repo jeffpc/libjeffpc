@@ -14,6 +14,7 @@ sexpr.tab.c
 sexpr.tab.h
 
 libjeffpc.so
+libjeffpc-comm.so
 sexpr-repl
 test_array
 test_atomic-single-thread
