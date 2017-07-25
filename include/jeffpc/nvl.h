@@ -137,6 +137,8 @@ extern int nvl_set_blob(struct nvlist *nvl, const char *name, void *ptr,
 extern int nvl_set_blob_copy(struct nvlist *nvl, const char *name,
 			     const void *ptr, size_t size);
 extern int nvl_set_bool(struct nvlist *nvl, const char *name, bool val);
+extern int nvl_set_cstr_dup(struct nvlist *nvl, const char *name,
+			    const char *val);
 extern int nvl_set_int(struct nvlist *nvl, const char *name, uint64_t val);
 extern int nvl_set_null(struct nvlist *nvl, const char *name);
 extern int nvl_set_nvl(struct nvlist *nvl, const char *name, struct nvlist *val);

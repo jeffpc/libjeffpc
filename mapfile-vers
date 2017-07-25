@@ -97,6 +97,7 @@ JEFFPC_0.10 {
 		nvl_set_blob;
 		nvl_set_blob_copy;
 		nvl_set_bool;
+		nvl_set_cstr_dup;
 		nvl_set_int;
 		nvl_set_null;
 		nvl_set_nvl;

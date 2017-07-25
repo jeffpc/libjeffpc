@@ -438,6 +438,18 @@ int nvl_set_blob_copy(struct nvlist *nvl, const char *name, const void *ptr,
 }
 
 SET(nvl_set_bool, bool, NVT_BOOL, b, (void));
+
+int nvl_set_cstr_dup(struct nvlist *nvl, const char *name, const char *val)
+{
+	struct str *str;
+
+	str = str_dup(val);
+	if (!str)
+		return -ENOMEM;
+
+	return nvl_set_str(nvl, name, str);
+}
+
 SET(nvl_set_int, uint64_t, NVT_INT, i, (void));
 
 int nvl_set_null(struct nvlist *nvl, const char *name)
