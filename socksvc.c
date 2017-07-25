@@ -34,6 +34,7 @@
 #include <jeffpc/error.h>
 #include <jeffpc/types.h>
 #include <jeffpc/io.h>
+#include <jeffpc/mem.h>
 #include <jeffpc/socksvc.h>
 
 /*
@@ -61,12 +62,20 @@ struct state {
 	int nfds;
 };
 
-struct cb {
+struct socksvc {
 	struct state *state;
 	int fd;
 };
 
+static struct mem_cache *socksvc_cache;
 static atomic_t server_shutdown;
+
+static void __attribute__((constructor)) init_socksvc_subsys(void)
+{
+	socksvc_cache = mem_cache_create("socksvc-cache",
+					 sizeof(struct socksvc), 0);
+	ASSERT(!IS_ERR(socksvc_cache));
+}
 
 static void sigterm_handler(int signum, siginfo_t *info, void *unused)
 {
@@ -200,12 +209,12 @@ static void stop_listening(struct state *state)
 
 static void wrap_taskq_callback(void *arg)
 {
-	struct cb *cb = arg;
+	struct socksvc *cb = arg;
 
 	cb->state->func(cb->fd, cb->state->private);
 
 	close(cb->fd);
-	free(cb);
+	mem_cache_free(socksvc_cache, cb);
 }
 
 static void accept_conns(struct state *state)
@@ -237,7 +246,7 @@ static void accept_conns(struct state *state)
 				strerror(errno));
 
 		for (i = 0; (i < state->nfds) && (ret > 0); i++) {
-			struct cb *cb;
+			struct socksvc *cb;
 
 			if (!FD_ISSET(state->fds[i], &set))
 				continue;
@@ -250,7 +259,7 @@ static void accept_conns(struct state *state)
 				continue;
 			}
 
-			cb = malloc(sizeof(struct cb));
+			cb = mem_cache_alloc(socksvc_cache);
 			if (!cb) {
 				cmn_err(CE_INFO, "Failed to allocate cb data");
 				xclose(fd);
