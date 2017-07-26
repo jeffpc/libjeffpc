@@ -81,6 +81,8 @@ JEFFPC_0.10 {
 		nvl_alloc;
 		nvl_convert;
 		nvl_dump_file;
+		nvl_exists;
+		nvl_exists_type;
 		nvl_free;
 		nvl_iter_next;
 		nvl_lookup;

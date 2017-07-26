@@ -160,6 +160,22 @@ extern int nvl_unset(struct nvlist *nvl, const char *name);
 extern int nvl_unset_type(struct nvlist *nvl, const char *name, enum nvtype type);
 
 /*
+ * Check existence of a specific key, or key-valuetype pair from the list.
+ *
+ * The generic nvl_exists returns true if the item exists and false
+ * otherwise.
+ *
+ * The type-specific checks return:
+ *
+ * -ENOENT = does not exist
+ * -ERANGE = exists, wrong type
+ * 0       = exists, correct type
+ */
+extern bool nvl_exists(struct nvlist *nvl, const char *name);
+extern int nvl_exists_type(struct nvlist *nvl, const char *name,
+			   enum nvtype type);
+
+/*
  * nvpair related functions
  */
 

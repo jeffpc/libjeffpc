@@ -502,6 +502,28 @@ int nvl_unset_type(struct nvlist *nvl, const char *name, enum nvtype type)
 }
 
 /*
+ * nvlist exists
+ */
+bool nvl_exists(struct nvlist *nvl, const char *name)
+{
+	return find(nvl, name) != NULL;
+}
+
+int nvl_exists_type(struct nvlist *nvl, const char *name, enum nvtype type)
+{
+	struct nvpair *pair;
+
+	pair = find(nvl, name);
+	if (!pair)
+		return -ENOENT;
+
+	if (pair->value.type != type)
+		return -ERANGE;
+
+	return 0;
+}
+
+/*
  * nvpair value
  */
 
