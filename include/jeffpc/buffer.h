@@ -28,6 +28,7 @@
 #include <fcntl.h>
 
 #include <jeffpc/error.h>
+#include <jeffpc/str.h>
 
 struct buffer;
 
@@ -92,6 +93,16 @@ static inline int buffer_append_c(struct buffer *buffer, char c)
 static inline int buffer_append_cstr(struct buffer *buffer, const char *str)
 {
 	return buffer_append(buffer, str, strlen(str));
+}
+
+static inline int buffer_append_str(struct buffer *buffer, const struct str *s)
+{
+	const char *str = str_cstr(s);
+
+	if (!str)
+		return 0;
+
+	return buffer_append_cstr(buffer, str);
 }
 
 #endif
