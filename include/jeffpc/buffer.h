@@ -89,7 +89,7 @@ static inline int buffer_append_c(struct buffer *buffer, char c)
 	return buffer_append(buffer, &c, 1);
 }
 
-static inline int buffer_append_str(struct buffer *buffer, const char *str)
+static inline int buffer_append_cstr(struct buffer *buffer, const char *str)
 {
 	return buffer_append(buffer, str, strlen(str));
 }

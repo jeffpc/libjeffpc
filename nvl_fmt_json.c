@@ -63,7 +63,7 @@ static int json_array_epilogue(struct buffer *buffer, const struct nvval *vals,
 
 static int json_val_bool(struct buffer *buffer, bool b)
 {
-	return buffer_append_str(buffer, b ? "true" : "false");
+	return buffer_append_cstr(buffer, b ? "true" : "false");
 }
 
 static int json_val_int(struct buffer *buffer, uint64_t i)
@@ -72,12 +72,12 @@ static int json_val_int(struct buffer *buffer, uint64_t i)
 
 	snprintf(tmp, sizeof(tmp), "%"PRIu64, i);
 
-	return buffer_append_str(buffer, tmp);
+	return buffer_append_cstr(buffer, tmp);
 }
 
 static int json_val_null(struct buffer *buffer)
 {
-	return buffer_append_str(buffer, "null");
+	return buffer_append_cstr(buffer, "null");
 }
 
 static int __escape_char(struct buffer *buffer, uint64_t c)
@@ -90,7 +90,7 @@ static int __escape_char(struct buffer *buffer, uint64_t c)
 
 	snprintf(tmp, sizeof(tmp), "\\u%04"PRIX64, c);
 
-	return buffer_append_str(buffer, tmp);
+	return buffer_append_cstr(buffer, tmp);
 }
 
 static int __escape_ctrl_char(struct buffer *buffer, uint8_t c)
@@ -116,7 +116,7 @@ static int __escape_ctrl_char(struct buffer *buffer, uint8_t c)
 	}
 
 	if (mapped)
-		return buffer_append_str(buffer, mapped);
+		return buffer_append_cstr(buffer, mapped);
 
 	return __escape_char(buffer, c);
 }
@@ -139,7 +139,7 @@ static int json_val_str(struct buffer *buffer, const char *str)
 			/* quote or backslash */
 			char tmp[3] = { '\\', c, '\0' };
 
-			ret = buffer_append_str(buffer, tmp);
+			ret = buffer_append_cstr(buffer, tmp);
 		} else {
 			/* no escape necessary */
 			ret = buffer_append_c(buffer, c);
