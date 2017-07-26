@@ -24,11 +24,6 @@
 
 #include "nvl_impl.h"
 
-static int json_buffer_finish(struct buffer *buffer)
-{
-	return buffer_append_c(buffer, '\0');
-}
-
 static int json_nvl_prologue(struct buffer *buffer, struct nvlist *nvl)
 {
 	return buffer_append_c(buffer, '{');
@@ -162,8 +157,6 @@ static int json_val_str(struct buffer *buffer, const char *str)
 
 const struct nvops nvops_json = {
 	.pack = {
-		.buffer_finish = json_buffer_finish,	/* \0 */
-
 		.nvl_prologue = json_nvl_prologue,	/* { */
 		.nvl_name_sep = json_nvl_name_sep,	/* : */
 		.nvl_val_sep = json_nvl_val_sep,	/* , */
