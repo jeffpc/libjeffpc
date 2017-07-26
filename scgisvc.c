@@ -302,7 +302,7 @@ static void scgi_free(struct scgi *req)
 	mem_cache_free(scgisvc_cache, req);
 }
 
-static void scgi_conn(int fd, void *private)
+static void scgi_conn(int fd, struct socksvc_stats *sockstats, void *private)
 {
 	void (*func)(struct scgi *, void *) = private;
 	struct scgi *req;

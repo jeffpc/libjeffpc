@@ -33,6 +33,7 @@
 #include <jeffpc/atomic.h>
 #include <jeffpc/error.h>
 #include <jeffpc/types.h>
+#include <jeffpc/time.h>
 #include <jeffpc/io.h>
 #include <jeffpc/mem.h>
 #include <jeffpc/socksvc.h>
@@ -57,12 +58,13 @@ union sockaddr_union {
 struct state {
 	void *private;
 	struct taskq *taskq;
-	void (*func)(int, void *);
+	void (*func)(int, struct socksvc_stats *, void *);
 	int fds[MAX_SOCK_FDS];
 	int nfds;
 };
 
 struct socksvc {
+	struct socksvc_stats stats;
 	struct state *state;
 	int fd;
 };
@@ -211,7 +213,9 @@ static void wrap_taskq_callback(void *arg)
 {
 	struct socksvc *cb = arg;
 
-	cb->state->func(cb->fd, cb->state->private);
+	cb->stats.dequeued_time = gettime();
+
+	cb->state->func(cb->fd, &cb->stats, cb->state->private);
 
 	close(cb->fd);
 	mem_cache_free(socksvc_cache, cb);
@@ -227,6 +231,8 @@ static void accept_conns(struct state *state)
 	for (;;) {
 		union sockaddr_union addr;
 		unsigned len;
+		uint64_t select_time;
+		uint64_t accept_time;
 		int fd;
 
 		FD_ZERO(&set);
@@ -237,6 +243,8 @@ static void accept_conns(struct state *state)
 		}
 
 		ret = select(maxfd + 1, &set, NULL, NULL, NULL);
+
+		select_time = gettime();
 
 		if (atomic_read(&server_shutdown))
 			break;
@@ -259,6 +267,8 @@ static void accept_conns(struct state *state)
 				continue;
 			}
 
+			accept_time = gettime();
+
 			cb = mem_cache_alloc(socksvc_cache);
 			if (!cb) {
 				cmn_err(CE_INFO, "Failed to allocate cb data");
@@ -266,6 +276,8 @@ static void accept_conns(struct state *state)
 				continue;
 			}
 
+			cb->stats.selected_time = select_time;
+			cb->stats.accepted_time = accept_time;
 			cb->state = state;
 			cb->fd = fd;
 
@@ -285,7 +297,7 @@ static void accept_conns(struct state *state)
 }
 
 int socksvc(const char *host, uint16_t port, int nthreads,
-	    void (*func)(int fd, void *), void *private)
+	    void (*func)(int fd, struct socksvc_stats *, void *), void *private)
 {
 	char name[128];
 	struct state state;

@@ -25,7 +25,14 @@
 
 #include <inttypes.h>
 
+struct socksvc_stats {
+	uint64_t selected_time;	/* time when select(2) returned */
+	uint64_t accepted_time;	/* time when accept(2) returned */
+	uint64_t dequeued_time;	/* time when this conn started being processed */
+};
+
 extern int socksvc(const char *host, uint16_t port, int nthreads,
-		   void (*func)(int fd, void *), void *private);
+		   void (*func)(int fd, struct socksvc_stats *, void *),
+		   void *private);
 
 #endif
