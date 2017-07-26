@@ -236,8 +236,13 @@ static inline void check_packing(struct nvlist *nvl, const struct test *test)
 	fprintf(stderr, "  expected: %s\n", test->json);
 	fprintf(stderr, "  got:      %s\n", (const char *) buffer_data(buf));
 
-	if (strcmp(buffer_data(buf), test->json))
-		fail("json packing failed");
+	if (buffer_used(buf) != strlen(test->json))
+		fail("json packing failed: length mismatch "
+		     "(got %zu, expected %zu)", buffer_used(buf),
+		     strlen(test->json));
+
+	if (memcmp(buffer_data(buf), test->json, buffer_used(buf)))
+		fail("json packing failed: content mismatch");
 
 	buffer_free(buf);
 }
