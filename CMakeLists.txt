@@ -150,6 +150,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/padding.h
 		include/jeffpc/rand.h
 		include/jeffpc/refcnt.h
+		include/jeffpc/scgi.h
 		include/jeffpc/scgisvc.h
 		include/jeffpc/sexpr.h
 		include/jeffpc/sock.h

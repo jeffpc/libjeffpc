@@ -27,20 +27,7 @@
 #include <jeffpc/time.h>
 #include <jeffpc/scgisvc.h>
 #include <jeffpc/socksvc.h>
-
-#define CONTENT_LENGTH		"CONTENT_LENGTH"
-#define CONTENT_TYPE		"CONTENT_TYPE"
-#define DOCUMENT_URI		"DOCUMENT_URI"		/* excludes QS */
-#define HTTP_REFERER		"HTTP_REFERER"
-#define HTTP_USER_AGENT		"HTTP_USER_AGENT"
-#define QUERY_STRING		"QUERY_STRING"
-#define REMOTE_ADDR		"REMOTE_ADDR"
-#define REMOTE_PORT		"REMOTE_PORT"
-#define REQUEST_METHOD		"REQUEST_METHOD"
-#define REQUEST_URI		"REQUEST_URI"		/* includes QS */
-#define SERVER_NAME		"SERVER_NAME"
-#define SERVER_PORT		"SERVER_PORT"
-#define SERVER_PROTOCOL		"SERVER_PROTOCOL"	/* e.g., HTTP/1.1 */
+#include <jeffpc/scgi.h>
 
 static struct mem_cache *scgisvc_cache;
 static atomic_t scgi_request_ids;
@@ -158,9 +145,9 @@ static int read_netstring(struct scgi *req)
 
 static const struct nvl_convert_info scgi_convert_headers[] = {
 	{ .name = "SCGI",		.tgt_type = NVT_INT, },
-	{ .name = CONTENT_LENGTH,	.tgt_type = NVT_INT, },
-	{ .name = REMOTE_PORT,		.tgt_type = NVT_INT, },
-	{ .name = SERVER_PORT,		.tgt_type = NVT_INT, },
+	{ .name = SCGI_CONTENT_LENGTH,	.tgt_type = NVT_INT, },
+	{ .name = SCGI_REMOTE_PORT,	.tgt_type = NVT_INT, },
+	{ .name = SCGI_SERVER_PORT,	.tgt_type = NVT_INT, },
 	{ .name = NULL, },
 };
 
@@ -179,7 +166,7 @@ static int parse_headers(struct scgi *req)
 	if (i != 1)
 		return -EINVAL;
 
-	ret = nvl_lookup_int(req->request.headers, CONTENT_LENGTH, &i);
+	ret = nvl_lookup_int(req->request.headers, SCGI_CONTENT_LENGTH, &i);
 	if (ret)
 		return ret;
 	if (i > SIZE_MAX)
