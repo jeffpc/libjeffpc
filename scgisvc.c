@@ -24,6 +24,7 @@
 #include <jeffpc/atomic.h>
 #include <jeffpc/io.h>
 #include <jeffpc/mem.h>
+#include <jeffpc/time.h>
 #include <jeffpc/scgisvc.h>
 #include <jeffpc/socksvc.h>
 
@@ -273,6 +274,8 @@ static struct scgi *scgi_alloc(int fd)
 	if (!req)
 		return ERR_PTR(-ENOMEM);
 
+	memset(req, 0, sizeof(struct scgi));
+
 	req->id = atomic_inc(&scgi_request_ids);
 	req->fd = fd;
 
@@ -314,21 +317,33 @@ static void scgi_conn(int fd, struct socksvc_stats *sockstats, void *private)
 		goto out;
 	}
 
+	req->conn_stats = *sockstats;
+
 	ret = scgi_read_headers(req);
 	if (ret)
 		goto out_free;
+
+	req->scgi_stats.read_header_time = gettime();
 
 	ret = scgi_read_body(req);
 	if (ret)
 		goto out_free;
 
+	req->scgi_stats.read_body_time = gettime();
+
 	func(req, NULL);
+
+	req->scgi_stats.compute_time = gettime();
 
 	ret = scgi_write_headers(req);
 	if (ret)
 		goto out_free;
 
+	req->scgi_stats.write_header_time = gettime();
+
 	ret = scgi_write_body(req);
+
+	req->scgi_stats.write_body_time = gettime();
 
 out_free:
 	scgi_free(req);

@@ -25,6 +25,7 @@
 
 #include <jeffpc/int.h>
 #include <jeffpc/nvl.h>
+#include <jeffpc/socksvc.h>
 
 struct scgi {
 	uint32_t id;
@@ -49,6 +50,16 @@ struct scgi {
 		size_t bodylen;
 		void *body;
 	} response;
+
+	/* timing information */
+	struct socksvc_stats conn_stats;
+	struct {
+		uint64_t read_header_time;	/* headers read */
+		uint64_t read_body_time;	/* body read/callback started */
+		uint64_t compute_time;		/* callback finished */
+		uint64_t write_header_time;	/* headers written */
+		uint64_t write_body_time;	/* body written */
+	} scgi_stats;
 };
 
 extern int scgisvc(const char *host, uint16_t port, int nthreads,
