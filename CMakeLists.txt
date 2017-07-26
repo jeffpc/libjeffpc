@@ -132,7 +132,9 @@ target_link_libraries(jeffpc-comm
 target_apply_mapfile(jeffpc jeffpc.mapfile-vers)
 target_apply_mapfile(jeffpc-comm jeffpc-comm.mapfile-vers)
 
-install(TARGETS	jeffpc DESTINATION ${CMAKE_INSTALL_LIBDIR}
+install(TARGETS	jeffpc
+		jeffpc-comm
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/buffer.h
