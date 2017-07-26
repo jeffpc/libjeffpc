@@ -104,7 +104,7 @@ int buffer_append(struct buffer *buffer, const void *data, size_t size)
 	if (!buffer)
 		return -EINVAL;
 
-	if ((data && !size) || (!data && size))
+	if (!data && size)
 		return -EINVAL;
 
 	if (buffer->ops->check_append) {
@@ -113,8 +113,8 @@ int buffer_append(struct buffer *buffer, const void *data, size_t size)
 			return ret;
 	}
 
-	if (!data && !size)
-		return 0; /* append(..., NULL, 0) is a no-op */
+	if (!size)
+		return 0; /* append(..., 0) is a no-op */
 
 	ret = resize(buffer, buffer->used + size);
 	if (ret)
