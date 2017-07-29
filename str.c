@@ -164,7 +164,12 @@ static struct str *__get_preallocated(const char *s)
 
 static bool __inlinable(char *s)
 {
-	return strlen(s) <= STR_INLINE_LEN;
+	char *giveup = s + STR_INLINE_LEN + 1;
+
+	while (*s && (s < giveup))
+		s++;
+
+	return s < giveup;
 }
 
 static struct str *__alloc(char *s, bool heapalloc, bool mustdup)
