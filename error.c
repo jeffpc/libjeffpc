@@ -64,6 +64,20 @@ void default_print(enum errlevel level, const char *fmt, va_list ap)
 	}
 
 	vfprintf(out, fmt, ap);
+
+	/*
+	 * TODO: improve this
+	 *
+	 * stderr doesn't need to be flushed since it is unbuffered by
+	 * default.  stdout o the other hand tends to default to fully
+	 * buffered instead of what we'd prefer - line buffered.  In theory,
+	 * the buffering strategy can be changed via setvbuf(), but the
+	 * description of it seems to indicate that this only works before
+	 * stdout is used the first time.  Unfortunately, we support using
+	 * cmn_err() before the library is initialized.
+	 */
+	if (out != stderr)
+		fflush(out);
 }
 
 void jeffpc_print(enum errlevel level, const char *fmt, ...)
