@@ -28,6 +28,8 @@
 #include <jeffpc/mem.h>
 #include <jeffpc/jeffpc.h>
 
+#define USE_STRLEN	((size_t) ~0ul)
+
 static struct str empty_string = STR_STATIC_INITIALIZER("");
 static struct str one_char[128] = {
 	['\''] = STR_STATIC_INITIALIZER("'"),
@@ -143,28 +145,44 @@ static void __attribute__((constructor)) init_str_subsys(void)
 	ASSERT(!IS_ERR(str_cache));
 }
 
-static struct str *__get_preallocated(const char *s)
+static inline bool has_nul_at(const char *s, size_t len, size_t qlen)
+{
+	if (len == USE_STRLEN)
+		return s[qlen] == '\0';
+
+	return len == qlen;
+}
+
+static struct str *__get_preallocated(const char *s, size_t len)
 {
 	unsigned char first_char;
 
-	/* NULL or empty string */
-	if (!s || (s[0] == '\0'))
+	/* NULL or non-nul terminated & zero length */
+	if (!s || !len)
+		return &empty_string;
+
+	/* empty string */
+	if (has_nul_at(s, len, 0))
 		return &empty_string;
 
 	first_char = s[0];
 
 	/* preallocated one-char long strings of 7-bit ASCII */
 	if ((first_char > '\0') && (first_char < '\x7f') &&
-	    (s[1] == '\0') && one_char[first_char].static_struct)
+	    has_nul_at(s, len, 1) &&
+	    one_char[first_char].static_struct)
 		return &one_char[first_char];
 
 	/* nothing pre-allocated */
 	return NULL;
 }
 
-static bool __inlinable(char *s)
+static bool __inlinable(char *s, size_t len)
 {
 	char *giveup = s + STR_INLINE_LEN + 1;
+
+	if (len != USE_STRLEN)
+		return (len <= STR_INLINE_LEN);
 
 	while (*s && (s < giveup))
 		s++;
@@ -172,7 +190,24 @@ static bool __inlinable(char *s)
 	return s < giveup;
 }
 
-static struct str *__alloc(char *s, bool heapalloc, bool mustdup)
+static char *dup_string(char *s, size_t len)
+{
+	char *tmp;
+
+	if (len == USE_STRLEN)
+		return strdup(s);
+
+	tmp = malloc(len + 1);
+	if (!tmp)
+		return NULL;
+
+	memcpy(tmp, s, len);
+	tmp[len] = '\0';
+
+	return tmp;
+}
+
+static struct str *__alloc(char *s, size_t len, bool heapalloc, bool mustdup)
 {
 	struct str *str;
 	bool copy;
@@ -182,16 +217,16 @@ static struct str *__alloc(char *s, bool heapalloc, bool mustdup)
 		ASSERT(!heapalloc);
 
 	/* check preallocated strings */
-	str = __get_preallocated(s);
+	str = __get_preallocated(s, len);
 	if (str)
 		goto out;
 
 	/* can we inline it? */
-	copy = __inlinable(s);
+	copy = __inlinable(s, len);
 
 	/* we'll be storing a pointer - strdup as necessary */
 	if (!copy && mustdup) {
-		s = strdup(s);
+		s = dup_string(s, len);
 		if (!s)
 			goto out;
 
@@ -209,7 +244,13 @@ static struct str *__alloc(char *s, bool heapalloc, bool mustdup)
 	str->inline_alloc = copy;
 
 	if (copy) {
-		strcpy(str->inline_str, s);
+		if (len == USE_STRLEN) {
+			strcpy(str->inline_str, s);
+		} else {
+			memcpy(str->inline_str, s, len);
+			str->inline_str[len] = '\0';
+		}
+
 		if (heapalloc)
 			free(s);
 	} else {
@@ -231,13 +272,18 @@ out:
  */
 struct str *str_dup(const char *s)
 {
-	return __alloc((char *) s, false, true);
+	return __alloc((char *) s, USE_STRLEN, false, true);
+}
+
+struct str *str_dup_len(const char *s, size_t len)
+{
+	return __alloc((char *) s, len, false, true);
 }
 
 /* Passed in str must be freed. */
 struct str *str_alloc(char *s)
 {
-	return __alloc(s, true, false);
+	return __alloc(s, USE_STRLEN, true, false);
 }
 
 /*
@@ -246,7 +292,7 @@ struct str *str_alloc(char *s)
  */
 struct str *str_alloc_static(const char *s)
 {
-	return __alloc((char *) s, false, false);
+	return __alloc((char *) s, USE_STRLEN, false, false);
 }
 
 size_t str_len(const struct str *s)
