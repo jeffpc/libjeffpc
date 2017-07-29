@@ -162,6 +162,11 @@ static struct str *__get_preallocated(const char *s)
 	return NULL;
 }
 
+static bool __inlinable(char *s)
+{
+	return strlen(s) <= STR_INLINE_LEN;
+}
+
 static struct str *__alloc(char *s, bool heapalloc, bool mustdup)
 {
 	struct str *str;
@@ -177,7 +182,7 @@ static struct str *__alloc(char *s, bool heapalloc, bool mustdup)
 		goto out;
 
 	/* can we inline it? */
-	copy = (strlen(s) <= STR_INLINE_LEN);
+	copy = __inlinable(s);
 
 	/* we'll be storing a pointer - strdup as necessary */
 	if (!copy && mustdup) {
