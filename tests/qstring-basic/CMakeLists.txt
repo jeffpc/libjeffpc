@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+# Copyright (c) 2014-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,5 +20,7 @@
 # SOFTWARE.
 #
 
-add_subdirectory(qstring-basic)
-add_subdirectory(sexpr-parser)
+file(GLOB TESTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.qs)
+foreach(TEST ${TESTS})
+	simple_c_test(qstring basic qstring ${TEST})
+endforeach()

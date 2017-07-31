@@ -100,6 +100,7 @@ add_library(jeffpc SHARED
 	nvl_pack.c
 	nvl_unpack.c
 	padding.c
+	qstring.c
 	rand.c
 	sexpr.c
 	sexpr_eval.c
@@ -150,6 +151,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/mem.h
 		include/jeffpc/nvl.h
 		include/jeffpc/padding.h
+		include/jeffpc/qstring.h
 		include/jeffpc/rand.h
 		include/jeffpc/refcnt.h
 		include/jeffpc/scgi.h
@@ -201,6 +203,7 @@ target_link_libraries(sexpr-repl
 #
 
 build_test_bin(sexpr_parser)
+build_test_bin(qstring)
 build_test_bin_and_run(array)
 build_test_bin_and_run(atomic-single-thread)
 build_test_bin_and_run(bswap)

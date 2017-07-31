@@ -121,6 +121,9 @@ JEFFPC_0.10 {
 		# padding
 		check_padding;
 
+		# qstring
+		qstring_parse_len;
+
 		# rand
 		rand32;
 		rand64;
