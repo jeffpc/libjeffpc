@@ -172,3 +172,20 @@ ssize_t urldecode(const char *in, size_t len, char *out)
 
 	return (state.state == DS_COPY) ? state.outoff : -EILSEQ;
 }
+
+struct str *urldecode_str(const char *in, size_t len)
+{
+	struct str *str;
+	ssize_t outlen;
+	char out[len];
+
+	outlen = urldecode(in, len, out);
+	if (outlen < 0)
+		return ERR_PTR(outlen);
+
+	str = str_dup_len(out, outlen);
+	if (!str)
+		return ERR_PTR(-ENOMEM);
+
+	return str;
+}
