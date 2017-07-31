@@ -30,6 +30,7 @@ test_nvl_pack
 test_padding
 test_sexpr_parser
 test_sexpr_eval
+test_urldecode
 test_version
 
 hgversion.h

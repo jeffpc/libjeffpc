@@ -200,6 +200,9 @@ JEFFPC_0.10 {
 		val_alloc_str;
 		val_alloc_sym;
 
+		# urldecode
+		urldecode;
+
 		# version
 		jeffpc_hgrev;
 		jeffpc_hgrev_binary;

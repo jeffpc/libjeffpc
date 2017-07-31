@@ -109,6 +109,7 @@ add_library(jeffpc SHARED
 	str.c
 	synch.c
 	taskq.c
+	urldecode.c
 	uuid.c
 	val.c
 	version.c
@@ -162,6 +163,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/thread.h
 		include/jeffpc/time.h
 		include/jeffpc/types.h
+		include/jeffpc/urldecode.h
 		include/jeffpc/uuid.h
 		include/jeffpc/val.h
 		include/jeffpc/version.h
@@ -212,6 +214,7 @@ build_test_bin_and_run(nvl)
 build_test_bin_and_run(nvl_pack)
 build_test_bin_and_run(padding)
 build_test_bin_and_run(sexpr_eval)
+build_test_bin_and_run(urldecode)
 build_test_bin_and_run(version)
 
 add_subdirectory(tests)
