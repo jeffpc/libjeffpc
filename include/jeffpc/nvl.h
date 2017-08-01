@@ -75,9 +75,14 @@ struct nvpair {
 	} value;
 };
 
+enum nvcvtcond {
+	NVCVT_COND_ALWAYS = 0,
+};
+
 struct nvl_convert_info {
 	const char *name;
 	enum nvtype tgt_type;
+	enum nvcvtcond cond;
 };
 
 extern struct nvlist *nvl_alloc(void);

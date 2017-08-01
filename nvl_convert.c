@@ -22,8 +22,25 @@
 
 #include <jeffpc/nvl.h>
 
+/*
+ * Check if a condition is true.  Returns:
+ *
+ * 0 if true
+ * -EBUSY if false
+ * -EINVAL if args are wrong
+ */
+static int check_condition_str(struct str *str, enum nvcvtcond cond)
+{
+	switch (cond) {
+		case NVCVT_COND_ALWAYS:
+			return 0;
+	}
+
+	return -EINVAL;
+}
+
 static int cvt_string(struct nvlist *nvl, const struct nvpair *pair,
-		      enum nvtype tgt)
+		      enum nvtype tgt, enum nvcvtcond cond)
 {
 	const char *name = nvpair_name(pair);
 	struct str *str;
@@ -36,6 +53,13 @@ static int cvt_string(struct nvlist *nvl, const struct nvpair *pair,
 	if (IS_ERR(str)) {
 		VERIFY3S(PTR_ERR(str), !=, -ENOENT);
 		return PTR_ERR(str);
+	}
+
+	/* check if the specified condition is true */
+	ret = check_condition_str(str, cond);
+	if (ret != 0) {
+		str_putref(str);
+		return (ret == -EBUSY) ? 0 : ret;
 	}
 
 	switch (tgt) {
@@ -93,7 +117,8 @@ int nvl_convert(struct nvlist *nvl, const struct nvl_convert_info *table)
 			case NVT_NVL:
 				return -ENOTSUP;
 			case NVT_STR:
-				ret = cvt_string(nvl, pair, table->tgt_type);
+				ret = cvt_string(nvl, pair, table->tgt_type,
+						 table->cond);
 				break;
 		}
 
