@@ -28,6 +28,7 @@
 #include <jeffpc/scgisvc.h>
 #include <jeffpc/socksvc.h>
 #include <jeffpc/scgi.h>
+#include <jeffpc/qstring.h>
 
 static struct mem_cache *scgisvc_cache;
 static atomic_t scgi_request_ids;
@@ -177,6 +178,25 @@ static int parse_headers(struct scgi *req)
 	return 0;
 }
 
+static int parse_qstring(struct scgi *req)
+{
+	struct str *qs;
+	int ret;
+
+	qs = nvl_lookup_str(req->request.headers, SCGI_QUERY_STRING);
+	if (IS_ERR(qs)) {
+		ret = PTR_ERR(qs);
+
+		return (ret == -ENOENT) ? 0 : ret;
+	}
+
+	ret = qstring_parse(req->request.query, str_cstr(qs));
+
+	str_putref(qs);
+
+	return ret;
+}
+
 static int scgi_read_headers(struct scgi *req)
 {
 	int ret;
@@ -185,7 +205,11 @@ static int scgi_read_headers(struct scgi *req)
 	if (ret)
 		return ret;
 
-	return parse_headers(req);
+	ret = parse_headers(req);
+	if (ret)
+		return ret;
+
+	return parse_qstring(req);
 }
 
 static int scgi_read_body(struct scgi *req)
@@ -267,6 +291,7 @@ static struct scgi *scgi_alloc(int fd)
 	req->fd = fd;
 
 	req->request.headers = nvl_alloc();
+	req->request.query = nvl_alloc();
 	req->request.content_length = 0;
 	req->request.body = NULL;
 	req->response.status = SCGI_STATUS_OK;
@@ -274,7 +299,8 @@ static struct scgi *scgi_alloc(int fd)
 	req->response.bodylen = 0;
 	req->response.body = NULL;
 
-	if (!req->request.headers || !req->response.headers) {
+	if (!req->request.headers || !req->request.query ||
+	    !req->response.headers) {
 		scgi_free(req);
 		return ERR_PTR(-ENOMEM);
 	}
@@ -285,6 +311,7 @@ static struct scgi *scgi_alloc(int fd)
 static void scgi_free(struct scgi *req)
 {
 	nvl_putref(req->request.headers);
+	nvl_putref(req->request.query);
 	nvl_putref(req->response.headers);
 
 	/* NOTE: Do *not* close the fd, it'll be closed by socksvc */

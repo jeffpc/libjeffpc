@@ -35,6 +35,7 @@ struct scgi {
 	/* request */
 	struct {
 		struct nvlist *headers;
+		struct nvlist *query;
 		size_t content_length;
 		const void *body;
 	} request;
