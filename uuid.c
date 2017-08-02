@@ -48,3 +48,8 @@ void xuuid_unparse(const struct xuuid *uuid, char *out)
 {
 	uuid_unparse((uint8_t *) uuid->raw, out);
 }
+
+bool_t xdr_xuuid(XDR *xdr, struct xuuid *obj)
+{
+	return xdr_opaque(xdr, (void *) obj->raw, sizeof(obj->raw));
+}

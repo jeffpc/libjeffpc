@@ -25,6 +25,7 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include <rpc/rpc.h>
 
 /* length of a string-ified UUID including the nul-terminator */
 #define XUUID_PRINTABLE_STRING_LENGTH	37
@@ -39,5 +40,7 @@ extern void xuuid_generate(struct xuuid *uuid);
 
 extern bool xuuid_parse(struct xuuid *u, const char *in);
 extern void xuuid_unparse(const struct xuuid *u, char *out);
+
+extern bool_t xdr_xuuid(XDR *xdr, struct xuuid *obj);
 
 #endif

@@ -189,6 +189,7 @@ JEFFPC_0.10 {
 		taskq_wait;
 
 		# uuid
+		xdr_xuuid;
 		xuuid_clear;
 		xuuid_compare;
 		xuuid_generate;
