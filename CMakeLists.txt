@@ -198,26 +198,4 @@ target_link_libraries(sexpr-repl
 	jeffpc
 )
 
-#
-# Test related executables
-#
-
-build_test_bin(sexpr_parser)
-build_test_bin(qstring)
-build_test_bin_and_run(array)
-build_test_bin_and_run(atomic-single-thread)
-build_test_bin_and_run(bswap)
-build_test_bin_and_run(buffer)
-build_test_bin_and_run(container_of)
-build_test_bin_and_run(endian)
-build_test_bin_and_run(errno)
-build_test_bin_and_run(hexdump)
-build_test_bin_and_run(list)
-build_test_bin_and_run(nvl)
-build_test_bin_and_run(nvl_pack)
-build_test_bin_and_run(padding)
-build_test_bin_and_run(sexpr_eval)
-build_test_bin_and_run(urldecode)
-build_test_bin_and_run(version)
-
 add_subdirectory(tests)

@@ -16,26 +16,10 @@ sexpr.tab.h
 libjeffpc.so
 libjeffpc-comm.so
 sexpr-repl
-test_array
-test_atomic-single-thread
-test_bswap
-test_buffer
-test_container_of
-test_endian
-test_errno
-test_hexdump
-test_list
-test_nvl
-test_nvl_pack
-test_padding
-test_qstring
-test_sexpr_parser
-test_sexpr_eval
-test_urldecode
-test_version
 
 hgversion.h
 
 .*.swp
 
 subinclude:include/jeffpc/.hgignore
+subinclude:tests/.hgignore

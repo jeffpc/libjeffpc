@@ -22,7 +22,7 @@
 
 function(simple_c_test type section bin data)
 	add_test(NAME "${type}:${section}:${data}"
-		 COMMAND "${CMAKE_BINARY_DIR}/test_${bin}"
+		 COMMAND "${CMAKE_BINARY_DIR}/tests/test_${bin}"
 			 "${CMAKE_CURRENT_SOURCE_DIR}/${data}"
 	)
 	set_tests_properties("${type}:${section}:${data}" PROPERTIES
@@ -43,7 +43,7 @@ endmacro()
 macro(build_test_bin_and_run name)
 	build_test_bin(${name})
 	add_test(NAME "${name}"
-		 COMMAND "${CMAKE_BINARY_DIR}/test_${name}"
+		 COMMAND "${CMAKE_BINARY_DIR}/tests/test_${name}"
 	)
 	set_tests_properties("${name}" PROPERTIES
 		ENVIRONMENT "UMEM_DEBUG=default,verbose"
