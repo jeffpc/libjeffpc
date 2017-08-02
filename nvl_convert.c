@@ -54,6 +54,7 @@ static int cvt_string(struct nvlist *nvl, const struct nvpair *pair,
 	str = nvpair_value_str(pair);
 	if (IS_ERR(str)) {
 		VERIFY3S(PTR_ERR(str), !=, -ENOENT);
+		VERIFY3S(PTR_ERR(str), !=, -ERANGE);
 		return PTR_ERR(str);
 	}
 
