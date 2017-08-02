@@ -26,6 +26,9 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+/* length of a string-ified UUID including the nul-terminator */
+#define XUUID_PRINTABLE_STRING_LENGTH	37
+
 struct xuuid {
 	uint8_t raw[16];
 };
