@@ -77,6 +77,7 @@ struct nvpair {
 
 enum nvcvtcond {
 	NVCVT_COND_ALWAYS = 0,
+	NVCVT_COND_STR_EMPTY,
 };
 
 struct nvl_convert_info {

@@ -34,6 +34,8 @@ static int check_condition_str(struct str *str, enum nvcvtcond cond)
 	switch (cond) {
 		case NVCVT_COND_ALWAYS:
 			return 0;
+		case NVCVT_COND_STR_EMPTY:
+			return str_len(str) ? -EBUSY : 0;
 	}
 
 	return -EINVAL;
