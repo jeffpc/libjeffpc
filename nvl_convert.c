@@ -76,6 +76,8 @@ static int cvt_string(struct nvlist *nvl, const struct nvpair *pair,
 				ret = nvl_set_int(nvl, name, intval);
 			break;
 		case NVT_NULL:
+			ret = nvl_set_null(nvl, name);
+			break;
 		case NVT_NVL:
 			ret = -ENOTSUP;
 			break;
