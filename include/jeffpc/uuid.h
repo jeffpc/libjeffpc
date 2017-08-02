@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 #define __JEFFPC_UUID_H
 
 #include <inttypes.h>
+#include <stdbool.h>
 
 struct xuuid {
 	uint8_t raw[16];
@@ -32,5 +33,8 @@ struct xuuid {
 extern void xuuid_clear(struct xuuid *uuid);
 extern int xuuid_compare(const struct xuuid *u1, const struct xuuid *u2);
 extern void xuuid_generate(struct xuuid *uuid);
+
+extern bool xuuid_parse(struct xuuid *u, const char *in);
+extern void xuuid_unparse(const struct xuuid *u, char *out);
 
 #endif

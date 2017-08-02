@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,4 +37,14 @@ int xuuid_compare(const struct xuuid *u1, const struct xuuid *u2)
 void xuuid_generate(struct xuuid *uuid)
 {
 	uuid_generate_random(uuid->raw);
+}
+
+bool xuuid_parse(struct xuuid *uuid, const char *in)
+{
+	return uuid_parse((char *) in, uuid->raw) == 0;
+}
+
+void xuuid_unparse(const struct xuuid *uuid, char *out)
+{
+	uuid_unparse((uint8_t *) uuid->raw, out);
 }

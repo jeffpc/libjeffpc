@@ -192,6 +192,8 @@ JEFFPC_0.10 {
 		xuuid_clear;
 		xuuid_compare;
 		xuuid_generate;
+		xuuid_parse;
+		xuuid_unparse;
 
 		# val
 		val_dump_file;
