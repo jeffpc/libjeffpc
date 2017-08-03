@@ -76,7 +76,8 @@ struct str {
 		}
 
 #define STR_STATIC_INITIALIZER(val)			\
-		_STR_STATIC_INITIALIZER((val), ~0ul)
+		_STR_STATIC_INITIALIZER((val),		\
+					__builtin_constant_p(val) ? strlen(val) : ~0ul)
 
 /* evaluates to a struct str *, so it can be used as a value */
 #define STATIC_STR(s)					\
