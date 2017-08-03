@@ -30,7 +30,7 @@
 
 /* ref-counted string */
 
-#define STR_INLINE_LEN	15
+#define STR_INLINE_LEN	18
 
 struct str {
 	union {
