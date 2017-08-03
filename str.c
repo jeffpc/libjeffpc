@@ -223,8 +223,7 @@ static struct str *__alloc(char *s, size_t len, bool heapalloc, bool mustdup)
 		ASSERT(!heapalloc);
 
 	/* determine the real length of the string */
-	if (len == USE_STRLEN)
-		len = s ? strlen(s) : 0;
+	len = s ? strnlen(s, len) : 0;
 
 	/* check preallocated strings */
 	str = __get_preallocated(s, len);
