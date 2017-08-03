@@ -37,8 +37,8 @@ struct sexpr_eval_env {
 extern struct val *sexpr_parse(const char *str, size_t len);
 extern struct str *sexpr_dump(struct val *lv, bool raw);
 extern void sexpr_dump_file(FILE *out, struct val *lv, bool raw);
-extern struct val *sexpr_array_to_list(struct val **vals, int nvals);
-extern struct val *sexpr_args_to_list(int nvals, ...);
+extern struct val *sexpr_array_to_list(struct val **vals, size_t nvals);
+extern struct val *sexpr_args_to_list(size_t nvals, ...);
 extern int sexpr_list_to_array(struct val *list, struct val **array, int alen);
 
 static inline struct val *sexpr_parse_str(struct str *str)

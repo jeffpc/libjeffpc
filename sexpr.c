@@ -218,7 +218,7 @@ void sexpr_dump_file(FILE *out, struct val *lv, bool raw)
  *
  *	'(A B C)
  */
-struct val *sexpr_array_to_list(struct val **vals, int nvals)
+struct val *sexpr_array_to_list(struct val **vals, size_t nvals)
 {
 	struct val *last = NULL;
 	struct val *tmp;
@@ -233,11 +233,11 @@ struct val *sexpr_array_to_list(struct val **vals, int nvals)
  * Just like sexpr_array_to_list, but obtains value from args instead of an
  * array.
  */
-struct val *sexpr_args_to_list(int nvals, ...)
+struct val *sexpr_args_to_list(size_t nvals, ...)
 {
 	struct val *arr[nvals];
 	va_list args;
-	int i;
+	size_t i;
 
 	va_start(args, nvals);
 	for (i = 0; i < nvals; i++)
