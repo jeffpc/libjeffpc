@@ -145,6 +145,14 @@ static struct str one_char[128] = {
 
 static struct mem_cache *str_cache;
 
+static inline size_t str_get_len(const struct str *str)
+{
+	if (!str->have_len)
+		return strlen(str_cstr(str));
+
+	return (str->len[0] << 16) | (str->len[1] << 8) | str->len[2];
+}
+
 static void __attribute__((constructor)) init_str_subsys(void)
 {
 	str_cache = mem_cache_create("str-cache", sizeof(struct str), 0);
@@ -304,7 +312,7 @@ struct str *str_alloc_static(const char *s)
 
 size_t str_len(const struct str *s)
 {
-	return strlen(str_cstr(s));
+	return str_get_len(s);
 }
 
 int str_cmp(const struct str *a, const struct str *b)
@@ -341,7 +349,7 @@ struct str *str_cat(size_t n, ...)
 		if (!str)
 			continue;
 
-		len[i] = strlen(str_cstr(str));
+		len[i] = str_get_len(str);
 
 		totallen += len[i];
 	}
