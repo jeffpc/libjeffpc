@@ -310,6 +310,7 @@ int str_cmp(const struct str *a, const struct str *b)
 
 struct str *str_cat(size_t n, ...)
 {
+	const size_t nargs = n;
 	size_t totallen;
 	struct str *ret;
 	char *buf, *out;
@@ -317,10 +318,10 @@ struct str *str_cat(size_t n, ...)
 	va_list ap;
 	size_t i;
 
-	if (!n)
+	if (!nargs)
 		return NULL;
 
-	if (n == 1) {
+	if (nargs == 1) {
 		va_start(ap, n);
 		ret = va_arg(ap, struct str *);
 		va_end(ap);
@@ -331,13 +332,10 @@ struct str *str_cat(size_t n, ...)
 	len = alloca(sizeof(size_t) * n);
 
 	va_start(ap, n);
-	for (i = 0; i < n; i++) {
+	for (i = 0; i < nargs; i++) {
 		struct str *str = va_arg(ap, struct str *);
 
-		if (!str)
-			continue;
-
-		len[i] = str_get_len(str);
+		len[i] = str ? str_get_len(str) : 0;
 
 		totallen += len[i];
 	}
@@ -346,10 +344,12 @@ struct str *str_cat(size_t n, ...)
 	buf = malloc(totallen + 1);
 	ASSERT(buf);
 
+	buf[0] = '\0';
+
 	out = buf;
 
 	va_start(ap, n);
-	for (i = 0; i < n; i++) {
+	for (i = 0; i < nargs; i++) {
 		struct str *str = va_arg(ap, struct str *);
 
 		if (!str)
