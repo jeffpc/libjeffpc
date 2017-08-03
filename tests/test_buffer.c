@@ -150,7 +150,7 @@ static void test_alloc_free(void)
 	size_t i;
 
 	for (i = 0; i < 10; i++) {
-		fprintf(stderr, "%s: iter = %d...", __func__, i);
+		fprintf(stderr, "%s: iter = %zu...", __func__, i);
 
 		buffer = buffer_alloc(i);
 		if (IS_ERR(buffer))
@@ -201,7 +201,7 @@ static void test_append(void)
 	for (startsize = 0; startsize < 300; startsize++) {
 		uint8_t data[256];
 
-		fprintf(stderr, "%s: iter = %3d...", __func__, startsize);
+		fprintf(stderr, "%s: iter = %3zu...", __func__, startsize);
 
 		buffer = buffer_alloc(startsize);
 		if (IS_ERR(buffer))
@@ -232,7 +232,7 @@ static void test_truncate_grow(void)
 		     xstrerror(PTR_ERR(buffer)));
 
 	for (i = 0; i < 50000; i += 13) {
-		fprintf(stderr, "%s: iter = %3d...", __func__, i);
+		fprintf(stderr, "%s: iter = %3zu...", __func__, i);
 
 		check_truncate(buffer, i);
 		check_used(buffer, i);
@@ -268,7 +268,7 @@ static void test_truncate_shrink(void)
 	check_used(buffer, maxsize);
 
 	for (i = maxsize; i > 0; i -= sizeof(uint64_t)) {
-		fprintf(stderr, "%s: iter = %3d...", __func__, i);
+		fprintf(stderr, "%s: iter = %3zu...", __func__, i);
 
 		check_truncate(buffer, i);
 		check_used(buffer, i);
@@ -287,7 +287,7 @@ static void test_sink(void)
 	for (maxsize = 0; maxsize < 270; maxsize++) {
 		buffer_init_sink(&buffer);
 
-		fprintf(stderr, "%s: iter = %3d...", __func__, maxsize);
+		fprintf(stderr, "%s: iter = %3zu...", __func__, maxsize);
 
 		inner_loop(256, &buffer, NULL, check_data_null);
 
@@ -299,7 +299,7 @@ static void test_sink(void)
 	for (maxsize = 300; maxsize < 300000; maxsize += 10000) {
 		buffer_init_sink(&buffer);
 
-		fprintf(stderr, "%s: iter = %3d...", __func__, maxsize);
+		fprintf(stderr, "%s: iter = %3zu...", __func__, maxsize);
 
 		inner_loop(256, &buffer, NULL, check_data_null);
 
