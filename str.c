@@ -28,6 +28,9 @@
 #include <jeffpc/mem.h>
 #include <jeffpc/jeffpc.h>
 
+/* check that STR_INLINE_LEN is used properly in the struct str definition */
+STATIC_ASSERT(STR_INLINE_LEN + 1 == sizeof(((struct str *) NULL)->inline_str));
+
 /* check that STR_INLINE_LEN is not undersized */
 STATIC_ASSERT(STR_INLINE_LEN + 1 >= sizeof(char *));
 
