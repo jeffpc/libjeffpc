@@ -73,11 +73,7 @@ struct str {
 #define STATIC_STR(s)					\
 	({						\
 		const char *_type_check __attribute__((__unused__)) = (s); \
-		static struct str _s = {		\
-			.str = (char *) (s),		\
-			.static_struct = true,		\
-			.static_alloc = true,		\
-		};					\
+		static struct str _s = STR_STATIC_INITIALIZER((char *) s); \
 		&_s;					\
 	})
 
