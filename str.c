@@ -153,6 +153,21 @@ static inline size_t str_get_len(const struct str *str)
 	return (str->len[0] << 16) | (str->len[1] << 8) | str->len[2];
 }
 
+static inline void str_set_len(struct str *str, size_t len)
+{
+	if (len > 0xffffff) {
+		str->have_len = false;
+		str->len[0] = 0xff;
+		str->len[1] = 0xff;
+		str->len[2] = 0xff;
+	} else {
+		str->have_len = true;
+		str->len[0] = (len >> 16) & 0xff;
+		str->len[1] = (len >> 8) & 0xff;
+		str->len[2] = len & 0xff;
+	}
+}
+
 static void __attribute__((constructor)) init_str_subsys(void)
 {
 	str_cache = mem_cache_create("str-cache", sizeof(struct str), 0);
@@ -237,7 +252,7 @@ static struct str *__alloc(char *s, size_t len, bool heapalloc, bool mustdup)
 	str->static_struct = false;
 	str->static_alloc = copy || !heapalloc;
 	str->inline_alloc = copy;
-	str->have_len = false;
+	str_set_len(str, len);
 
 	if (copy) {
 		memcpy(str->inline_str, s, len);
