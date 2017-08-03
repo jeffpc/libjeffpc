@@ -62,6 +62,16 @@ struct str {
 	};
 };
 
+#define STR_STATIC_CHAR_INITIALIZER(val)		\
+		{					\
+			.inline_str = { (val), '\0' },	\
+			.len = { 0, 0, 1 },		\
+			.have_len = true,		\
+			.static_struct = true,		\
+			.static_alloc = true,		\
+			.inline_alloc = true,		\
+		}
+
 #define _STR_STATIC_INITIALIZER(val, l)			\
 		{					\
 			.str = (val),			\
