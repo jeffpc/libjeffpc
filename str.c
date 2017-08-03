@@ -28,6 +28,9 @@
 #include <jeffpc/mem.h>
 #include <jeffpc/jeffpc.h>
 
+/* check that STR_INLINE_LEN is not undersized */
+STATIC_ASSERT(STR_INLINE_LEN + 1 >= sizeof(char *));
+
 #define USE_STRLEN	((size_t) ~0ul)
 
 static struct str empty_string = STR_STATIC_INITIALIZER("");
