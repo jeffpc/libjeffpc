@@ -159,14 +159,6 @@ static void __attribute__((constructor)) init_str_subsys(void)
 	ASSERT(!IS_ERR(str_cache));
 }
 
-static inline bool has_nul_at(const char *s, size_t len, size_t qlen)
-{
-	if (len == USE_STRLEN)
-		return s[qlen] == '\0';
-
-	return len == qlen;
-}
-
 static struct str *__get_preallocated(const char *s, size_t len)
 {
 	unsigned char first_char;
@@ -175,15 +167,11 @@ static struct str *__get_preallocated(const char *s, size_t len)
 	if (!s || !len)
 		return &empty_string;
 
-	/* empty string */
-	if (has_nul_at(s, len, 0))
-		return &empty_string;
-
 	first_char = s[0];
 
 	/* preallocated one-char long strings of 7-bit ASCII */
-	if ((first_char > '\0') && (first_char < '\x7f') &&
-	    has_nul_at(s, len, 1) &&
+	if ((len == 1) &&
+	    (first_char > '\0') && (first_char < '\x7f') &&
 	    one_char[first_char].static_struct)
 		return &one_char[first_char];
 
@@ -191,25 +179,14 @@ static struct str *__get_preallocated(const char *s, size_t len)
 	return NULL;
 }
 
-static bool __inlinable(char *s, size_t len)
+static bool __inlinable(size_t len)
 {
-	char *giveup = s + STR_INLINE_LEN + 1;
-
-	if (len != USE_STRLEN)
-		return (len <= STR_INLINE_LEN);
-
-	while (*s && (s < giveup))
-		s++;
-
-	return s < giveup;
+	return (len <= STR_INLINE_LEN);
 }
 
 static char *dup_string(char *s, size_t len)
 {
 	char *tmp;
-
-	if (len == USE_STRLEN)
-		return strdup(s);
 
 	tmp = malloc(len + 1);
 	if (!tmp)
@@ -230,13 +207,17 @@ static struct str *__alloc(char *s, size_t len, bool heapalloc, bool mustdup)
 	if (mustdup)
 		ASSERT(!heapalloc);
 
+	/* determine the real length of the string */
+	if (len == USE_STRLEN)
+		len = s ? strlen(s) : 0;
+
 	/* check preallocated strings */
 	str = __get_preallocated(s, len);
 	if (str)
 		goto out;
 
 	/* can we inline it? */
-	copy = __inlinable(s, len);
+	copy = __inlinable(len);
 
 	/* we'll be storing a pointer - strdup as necessary */
 	if (!copy && mustdup) {
@@ -259,12 +240,8 @@ static struct str *__alloc(char *s, size_t len, bool heapalloc, bool mustdup)
 	str->have_len = false;
 
 	if (copy) {
-		if (len == USE_STRLEN) {
-			strcpy(str->inline_str, s);
-		} else {
-			memcpy(str->inline_str, s, len);
-			str->inline_str[len] = '\0';
-		}
+		memcpy(str->inline_str, s, len);
+		str->inline_str[len] = '\0';
 
 		if (heapalloc)
 			free(s);
