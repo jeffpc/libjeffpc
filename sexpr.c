@@ -223,8 +223,8 @@ struct val *sexpr_array_to_list(struct val **vals, size_t nvals)
 	struct val *last = NULL;
 	struct val *tmp;
 
-	for (nvals--; nvals >= 0; nvals--, last = tmp)
-		tmp = VAL_ALLOC_CONS(vals[nvals], last);
+	for (; nvals > 0; nvals--, last = tmp)
+		tmp = VAL_ALLOC_CONS(vals[nvals - 1], last);
 
 	return last;
 }
@@ -235,16 +235,17 @@ struct val *sexpr_array_to_list(struct val **vals, size_t nvals)
  */
 struct val *sexpr_args_to_list(size_t nvals, ...)
 {
-	struct val *arr[nvals];
+	const size_t n = nvals;
+	struct val *arr[n];
 	va_list args;
 	size_t i;
 
 	va_start(args, nvals);
-	for (i = 0; i < nvals; i++)
+	for (i = 0; i < n; i++)
 		arr[i] = va_arg(args, struct val *);
 	va_end(args);
 
-	return sexpr_array_to_list(arr, nvals);
+	return sexpr_array_to_list(arr, n);
 }
 
 /*
