@@ -31,46 +31,23 @@
 /* ref-counted string */
 
 /*
- * sizeof(struct str) == 24:
- *	18 for inline string
- *	1 for inline string nul-terminator
- *	1 for flags
- *	4 for refcount
- *
- * Changing this value by 4 will maintain zero padding on 32-bit systems.
- * Changing this value by 8 will maintain zero padding on both 32-bit and
- * 64-bit systems.
+ * Changing this value by...
+ *    4 will maintain the amount of padding on 32-bit systems.
+ *    8 will maintain the amount of padding on both 32-bit and 64-bit systems.
  */
-#define STR_INLINE_LEN	18
+#define STR_INLINE_LEN	15
 
 struct str {
 	/*
-	 * Ideally, we could define the whole struct as:
-	 *
-	 *	struct str {
-	 *		union {
-	 *			char *str;
-	 *			char inline_str[STR_INLINE_LEN + 1];
-	 *		};
-	 *		bool foo:1;
-	 *		bool bar:1;
-	 *		refcnt_t refcnt;
-	 *	};
-	 *
-	 * But C, ABIs, and ISAs get in our way.
-	 *
-	 * We have three distinct members we care about:
-	 *
-	 *   - str pointer or inline_str array
-	 *   - a number of bool flags
-	 *   - a refcount
+	 * Ideally, we could define the whole struct without padding bytes,
+	 * but C, ABIs, and ISAs get in our way.
 	 *
 	 * The tricky part is that we don't want to waste any memory on
 	 * structure padding.  The refcount is always 4 bytes, and the
 	 * boolean flags are always a byte.  This means that we'd want the
-	 * compiler to make the union an odd number of bytes (e.g., 15, 19,
-	 * 23, ...) so that the remaining 5 bytes make the size a nice
-	 * multiple.
+	 * compiler to make the union (of str and inline_str) an odd number
+	 * of bytes (e.g., 15, 19, 23, ...) so that the remaining 5 bytes
+	 * make the size a nice multiple.
 	 *
 	 * We cannot simply add the packed attribute onto the union since
 	 * that would generate terrible code when trying to access the ->str
@@ -78,60 +55,25 @@ struct str {
 	 * generates padding.  (Actually, aligned(8) makes the union a
 	 * multiple of 8 bytes creating tons of padding on 32-bit systems!)
 	 *
-	 * For example, let's assume that STR_INLINE_LEN is 18.  With a byte
-	 * for the nul-terminator, we want inline_str to be 19 bytes in
-	 * size, immediately followed by the one byte for the boolean flags.
-	 * The easiest way would be to add a third item to the union - one
-	 * with 19 bytes of padding followed by the flags.  This would round
-	 * out the union to 20 bytes, which should make the compiler not add
-	 * any padding.  In other words:
-	 *
-	 *	struct str {
-	 *		union {
-	 *			char *str;
-	 *			char inline_str[STR_INLINE_LEN + 1];
-	 *			struct {
-	 *				char _pad[STR_INLINE_LEN + 1];
-	 *				bool foo:1;
-	 *				bool bar:1;
-	 *			};
-	 *		};
-	 *		refcnt_t refcnt;
-	 *	};
-	 *
-	 * Unfortunately, this idea runs into trouble when we try to use
-	 * designated initializers (e.g., in STR_STATIC_INITIALIZER) that
-	 * set both str and a flag.  The flag initialization forces _pad to
-	 * be zeroed out, which in essence nukes the str pointer we tried to
-	 * store.
-	 *
-	 * To get around this, we can move the str pointer into the same
-	 * struct as the flags and shrink the padding.  (We never initialize
-	 * flags and inline string in a designated initializer.)  This
-	 * produces a nicely packed structure on 32-bit systems where
-	 * structures and unions get padded to multiples of 4 bytes.
-	 *
-	 * On 64-bit systems, where structures and unions are padded to
-	 * multiples of 8 bytes, we end up with the inner struct getting
-	 * padded to 24 bytes (assuming STR_INLINE_LEN is still 18), then
-	 * the refcount brings up the size to 28 bytes and the outer
-	 * structure adds 4 bytes of padding making the total size 32 bytes.
-	 * If we move the refcount inside, we end up with a nicely packed
-	 * structure on both 32-bit and 64-bit systems with zero padding and
-	 * size of 24 bytes.
-	 *
-	 * This is why this structure is defined in such a strage way.
+	 * Instead of coming up with a convoluted scheme that makes the
+	 * structure's usage difficult, we just suck it up and use 3 bytes
+	 * of padding.  While this is inefficient from memory usage
+	 * perspective, we can use this padding in the future to extend this
+	 * API's functionality in the future.
 	 */
+
+	refcnt_t refcnt;
+
+	bool static_struct:1;	/* struct str is static */
+	bool static_alloc:1;	/* char * is static */
+	bool inline_alloc:1;	/* char * is inline */
+
+	uint8_t _pad0;
+	uint16_t _pad1;
+
 	union {
+		const char *str;
 		char inline_str[STR_INLINE_LEN + 1];
-		struct {
-			const char *str;
-			char _pad[STR_INLINE_LEN + 1 - sizeof(char *)];
-			bool static_struct:1;	/* struct str is static */
-			bool static_alloc:1;	/* char * is static */
-			bool inline_alloc:1;	/* char * is inline */
-			refcnt_t refcnt;
-		};
 	};
 };
 
