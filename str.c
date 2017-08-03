@@ -199,18 +199,10 @@ static bool __inlinable(size_t len)
 	return (len <= STR_INLINE_LEN);
 }
 
-static const char *dup_string(const char *s, size_t len)
+static inline void __copy(char *dest, const char *s, size_t len)
 {
-	char *tmp;
-
-	tmp = malloc(len + 1);
-	if (!tmp)
-		return NULL;
-
-	memcpy(tmp, s, len);
-	tmp[len] = '\0';
-
-	return tmp;
+	memcpy(dest, s, len);
+	dest[len] = '\0';
 }
 
 static struct str *__alloc(const char *s, size_t len, bool heapalloc,
@@ -236,12 +228,17 @@ static struct str *__alloc(const char *s, size_t len, bool heapalloc,
 
 	/* we'll be storing a pointer - strdup as necessary */
 	if (!copy && mustdup) {
-		s = dup_string(s, len);
-		if (!s)
+		char *tmp;
+
+		tmp = malloc(len + 1);
+		if (!tmp)
 			goto out;
+
+		__copy(tmp, s, len);
 
 		/* we're now using the heap */
 		heapalloc = true;
+		s = tmp;
 	}
 
 	str = mem_cache_alloc(str_cache);
@@ -255,8 +252,7 @@ static struct str *__alloc(const char *s, size_t len, bool heapalloc,
 	str_set_len(str, len);
 
 	if (copy) {
-		memcpy(str->inline_str, s, len);
-		str->inline_str[len] = '\0';
+		__copy(str->inline_str, s, len);
 
 		if (heapalloc)
 			free((char *) s);
