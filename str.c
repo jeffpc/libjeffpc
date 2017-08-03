@@ -248,6 +248,7 @@ static struct str *__alloc(char *s, size_t len, bool heapalloc, bool mustdup)
 	str->static_struct = false;
 	str->static_alloc = copy || !heapalloc;
 	str->inline_alloc = copy;
+	str->have_len = false;
 
 	if (copy) {
 		if (len == USE_STRLEN) {

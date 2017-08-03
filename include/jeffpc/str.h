@@ -38,38 +38,23 @@
 #define STR_INLINE_LEN	15
 
 struct str {
-	/*
-	 * Ideally, we could define the whole struct without padding bytes,
-	 * but C, ABIs, and ISAs get in our way.
-	 *
-	 * The tricky part is that we don't want to waste any memory on
-	 * structure padding.  The refcount is always 4 bytes, and the
-	 * boolean flags are always a byte.  This means that we'd want the
-	 * compiler to make the union (of str and inline_str) an odd number
-	 * of bytes (e.g., 15, 19, 23, ...) so that the remaining 5 bytes
-	 * make the size a nice multiple.
-	 *
-	 * We cannot simply add the packed attribute onto the union since
-	 * that would generate terrible code when trying to access the ->str
-	 * pointer.  Adding packed,aligned(8) or something like that
-	 * generates padding.  (Actually, aligned(8) makes the union a
-	 * multiple of 8 bytes creating tons of padding on 32-bit systems!)
-	 *
-	 * Instead of coming up with a convoluted scheme that makes the
-	 * structure's usage difficult, we just suck it up and use 3 bytes
-	 * of padding.  While this is inefficient from memory usage
-	 * perspective, we can use this padding in the future to extend this
-	 * API's functionality in the future.
-	 */
-
 	refcnt_t refcnt;
 
 	bool static_struct:1;	/* struct str is static */
 	bool static_alloc:1;	/* char * is static */
 	bool inline_alloc:1;	/* char * is inline */
+	bool have_len:1;	/* length member is valid */
 
-	uint8_t _pad0;
-	uint16_t _pad1;
+	/*
+	 * Keep track of a 24-bit length of the string.  While we could use
+	 * a size_t to represent all possible lengths, we use only 24 bits
+	 * to represents strings from 0 to ~16MB in size.  This covers the
+	 * vast majority of them.  Strings that have length less than or
+	 * equal to 16777215 (0xffffff) bytes save the length in the len
+	 * member and set have_len to true.  Strings that are longer set
+	 * have_len to false and ignore the len member.
+	 */
+	uint8_t len[3];
 
 	union {
 		const char *str;
