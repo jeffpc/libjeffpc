@@ -30,6 +30,17 @@
 
 /* ref-counted string */
 
+/*
+ * sizeof(struct str) == 24:
+ *	18 for inline string
+ *	1 for inline string nul-terminator
+ *	1 for flags
+ *	4 for refcount
+ *
+ * Changing this value by 4 will maintain zero padding on 32-bit systems.
+ * Changing this value by 8 will maintain zero padding on both 32-bit and
+ * 64-bit systems.
+ */
 #define STR_INLINE_LEN	18
 
 struct str {
@@ -96,7 +107,18 @@ struct str {
 	 *
 	 * To get around this, we can move the str pointer into the same
 	 * struct as the flags and shrink the padding.  (We never initialize
-	 * flags and inline string in a designated initializer.)
+	 * flags and inline string in a designated initializer.)  This
+	 * produces a nicely packed structure on 32-bit systems where
+	 * structures and unions get padded to multiples of 4 bytes.
+	 *
+	 * On 64-bit systems, where structures and unions are padded to
+	 * multiples of 8 bytes, we end up with the inner struct getting
+	 * padded to 24 bytes (assuming STR_INLINE_LEN is still 18), then
+	 * the refcount brings up the size to 28 bytes and the outer
+	 * structure adds 4 bytes of padding making the total size 32 bytes.
+	 * If we move the refcount inside, we end up with a nicely packed
+	 * structure on both 32-bit and 64-bit systems with zero padding and
+	 * size of 24 bytes.
 	 *
 	 * This is why this structure is defined in such a strage way.
 	 */
@@ -108,9 +130,9 @@ struct str {
 			bool static_struct:1;	/* struct str is static */
 			bool static_alloc:1;	/* char * is static */
 			bool inline_alloc:1;	/* char * is inline */
+			refcnt_t refcnt;
 		};
 	};
-	refcnt_t refcnt;
 };
 
 #define STR_STATIC_INITIALIZER(val)			\
