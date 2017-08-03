@@ -125,7 +125,7 @@ struct str {
 	union {
 		char inline_str[STR_INLINE_LEN + 1];
 		struct {
-			char *str;
+			const char *str;
 			char _pad[STR_INLINE_LEN + 1 - sizeof(char *)];
 			bool static_struct:1;	/* struct str is static */
 			bool static_alloc:1;	/* char * is static */

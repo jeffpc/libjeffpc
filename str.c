@@ -404,6 +404,6 @@ void str_free(struct str *str)
 	ASSERT3U(refcnt_read(&str->refcnt), ==, 0);
 
 	if (!str->inline_alloc && !str->static_alloc)
-		free(str->str);
+		free((char *) str->str);
 	mem_cache_free(str_cache, str);
 }
