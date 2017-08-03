@@ -119,7 +119,7 @@ struct val *sexpr_parse(const char *str, size_t len)
 static struct str *dump_cons(struct val *lv, bool raw)
 {
 	static struct str dot = STR_STATIC_INITIALIZER(" . ");
-	static struct str space = STR_STATIC_INITIALIZER(" ");
+	static struct str space = STR_STATIC_CHAR_INITIALIZER(' ');
 	struct val *head = lv->cons.head;
 	struct val *tail = lv->cons.tail;
 
@@ -143,12 +143,12 @@ static struct str *dump_cons(struct val *lv, bool raw)
 
 struct str *sexpr_dump(struct val *lv, bool raw)
 {
-	static struct str dquote = STR_STATIC_INITIALIZER("\"");
-	static struct str squote = STR_STATIC_INITIALIZER("'");
+	static struct str dquote = STR_STATIC_CHAR_INITIALIZER('"');
+	static struct str squote = STR_STATIC_CHAR_INITIALIZER('\'');
 	static struct str poundt = STR_STATIC_INITIALIZER("#t");
 	static struct str poundf = STR_STATIC_INITIALIZER("#f");
-	static struct str oparen = STR_STATIC_INITIALIZER("(");
-	static struct str cparen = STR_STATIC_INITIALIZER(")");
+	static struct str oparen = STR_STATIC_CHAR_INITIALIZER('(');
+	static struct str cparen = STR_STATIC_CHAR_INITIALIZER(')');
 	static struct str empty = STR_STATIC_INITIALIZER("()");
 	char *tmpstr;
 
