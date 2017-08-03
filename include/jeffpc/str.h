@@ -81,8 +81,7 @@ struct str {
 /* evaluates to a struct str *, so it can be used as a value */
 #define STATIC_STR(s)					\
 	({						\
-		const char *_type_check __attribute__((__unused__)) = (s); \
-		static struct str _s = STR_STATIC_INITIALIZER((char *) s); \
+		static struct str _s = STR_STATIC_INITIALIZER(s); \
 		&_s;					\
 	})
 
