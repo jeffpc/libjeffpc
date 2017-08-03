@@ -62,12 +62,21 @@ struct str {
 	};
 };
 
-#define STR_STATIC_INITIALIZER(val)			\
+#define _STR_STATIC_INITIALIZER(val, l)			\
 		{					\
 			.str = (val),			\
+			.len = {			\
+				((l) >> 16) & 0xff,	\
+				((l) >> 8) & 0xff,	\
+				(l) & 0xff,		\
+			},				\
+			.have_len = ((l) <= 0xffffff),	\
 			.static_struct = true,		\
 			.static_alloc = true,		\
 		}
+
+#define STR_STATIC_INITIALIZER(val)			\
+		_STR_STATIC_INITIALIZER((val), ~0ul)
 
 /* evaluates to a struct str *, so it can be used as a value */
 #define STATIC_STR(s)					\
