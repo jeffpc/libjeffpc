@@ -36,6 +36,7 @@ add_definitions(
 
 add_compile_options(
 	-Wall
+	-Woverride-init
 	-O2
 	-g
 	-std=gnu99
