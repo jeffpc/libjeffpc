@@ -199,7 +199,7 @@ static bool __inlinable(size_t len)
 	return (len <= STR_INLINE_LEN);
 }
 
-static char *dup_string(char *s, size_t len)
+static const char *dup_string(const char *s, size_t len)
 {
 	char *tmp;
 
@@ -213,7 +213,8 @@ static char *dup_string(char *s, size_t len)
 	return tmp;
 }
 
-static struct str *__alloc(char *s, size_t len, bool heapalloc, bool mustdup)
+static struct str *__alloc(const char *s, size_t len, bool heapalloc,
+			   bool mustdup)
 {
 	struct str *str;
 	bool copy;
@@ -258,7 +259,7 @@ static struct str *__alloc(char *s, size_t len, bool heapalloc, bool mustdup)
 		str->inline_str[len] = '\0';
 
 		if (heapalloc)
-			free(s);
+			free((char *) s);
 	} else {
 		str->str = s;
 	}
@@ -267,7 +268,7 @@ static struct str *__alloc(char *s, size_t len, bool heapalloc, bool mustdup)
 
 out:
 	if (heapalloc)
-		free(s);
+		free((char *) s);
 
 	return str;
 }
@@ -278,12 +279,12 @@ out:
  */
 struct str *str_dup(const char *s)
 {
-	return __alloc((char *) s, USE_STRLEN, false, true);
+	return __alloc(s, USE_STRLEN, false, true);
 }
 
 struct str *str_dup_len(const char *s, size_t len)
 {
-	return __alloc((char *) s, len, false, true);
+	return __alloc(s, len, false, true);
 }
 
 /* Passed in str must be freed. */
@@ -298,7 +299,7 @@ struct str *str_alloc(char *s)
  */
 struct str *str_alloc_static(const char *s)
 {
-	return __alloc((char *) s, USE_STRLEN, false, false);
+	return __alloc(s, USE_STRLEN, false, false);
 }
 
 size_t str_len(const struct str *s)
