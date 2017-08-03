@@ -446,27 +446,27 @@ bool sexpr_equal(struct val *lhs, struct val *rhs)
 		goto out;
 	}
 
-	ret = true; /* pacify gcc */
-
 	switch (lhs->type) {
 		case VT_INT:
 		case VT_CHAR:
 			ret = (lhs->i == rhs->i);
-			break;
+			goto out;
 		case VT_STR:
 		case VT_SYM:
 			ret = str_cmp(lhs->str, rhs->str) == 0;
-			break;
+			goto out;
 		case VT_BOOL:
 			ret = (lhs->b == rhs->b);
-			break;
+			goto out;
 		case VT_CONS:
 			ret = sexpr_equal(val_getref(lhs->cons.head),
 					  val_getref(rhs->cons.head)) &&
 			      sexpr_equal(val_getref(lhs->cons.tail),
 					  val_getref(rhs->cons.tail));
-			break;
+			goto out;
 	}
+
+	panic("unknown struct val type %u", lhs->type);
 
 out:
 	val_putref(lhs);
