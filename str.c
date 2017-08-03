@@ -57,7 +57,6 @@ static struct str one_char[128] = {
 	['+'] = _STR_STATIC_INITIALIZER("+", 1),
 	[','] = _STR_STATIC_INITIALIZER(",", 1),
 	['-'] = _STR_STATIC_INITIALIZER("-", 1),
-	['-'] = _STR_STATIC_INITIALIZER("-", 1),
 	['.'] = _STR_STATIC_INITIALIZER(".", 1),
 	['/'] = _STR_STATIC_INITIALIZER("/", 1),
 	[':'] = _STR_STATIC_INITIALIZER(":", 1),
