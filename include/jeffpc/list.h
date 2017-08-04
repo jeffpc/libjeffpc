@@ -124,6 +124,12 @@ static inline void slist_move_tail(struct list_node *dst,
 #define slist_tail_entry(list, type, member) \
 	container_of(slist_tail(list), type, member)
 
+#define slist_next_entry(pos, member) \
+	container_of(slist_head(&pos->member), typeof(*pos), member)
+
+#define slist_prev_entry(pos, member) \
+	container_of(slist_tail(&pos->member), typeof(*pos), member)
+
 #define slist_for_each(pos, list) \
 	for (pos = slist_head(list); \
 	     pos != (list); \
