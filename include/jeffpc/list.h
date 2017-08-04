@@ -146,6 +146,28 @@ static inline void slist_move_tail(struct list_node *dst,
 	     pos = safe, \
 	     safe = slist_entry(safe->member.next, typeof(*pos), member))
 
+#define slist_for_each_reverse(pos, list) \
+	for (pos = slist_tail(list); \
+	     pos != (list); \
+	     pos = pos->prev)
+
+#define slist_for_each_safe_reverse(pos, safe, list) \
+	for (pos = slist_tail(list), safe = pos->prev; \
+	     pos != (list); \
+	     pos = safe, safe = safe->prev)
+
+#define slist_for_each_entry_reverse(pos, list, member) \
+	for (pos = slist_entry(slist_tail(list), typeof(*pos), member); \
+	     &pos->member != (list); \
+	     pos = slist_entry(pos->member.prev, typeof(*pos), member)) \
+
+#define slist_for_each_entry_safe_reverse(pos, safe, list, member) \
+	for (pos = slist_entry(slist_tail(list), typeof(*pos), member), \
+	     safe = slist_entry(pos->member.prev, typeof(*pos), member); \
+	     &pos->member != (list); \
+	     pos = safe, \
+	     safe = slist_entry(safe->member.prev, typeof(*pos), member))
+
 /*
  * list
  */
