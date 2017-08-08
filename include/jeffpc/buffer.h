@@ -71,6 +71,12 @@ static inline size_t buffer_used(struct buffer *buffer)
 	return buffer->used;
 }
 
+/* number of bytes between current location and end of used data */
+static inline size_t buffer_remain(struct buffer *buffer)
+{
+	return buffer->used - buffer->off;
+}
+
 static inline const void *buffer_data(struct buffer *buffer)
 {
 	return buffer->data;
