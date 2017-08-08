@@ -139,6 +139,14 @@ REFCNT_INLINE_FXNS(struct str, str, refcnt, str_free, str_isstatic)
 		_s;			\
 	})
 
+#define STR_DUP_LEN(s, l)		\
+	({				\
+		struct str *_s;		\
+		_s = str_dup_len((s), (l));\
+		ASSERT(_s);		\
+		_s;			\
+	})
+
 static inline const char *str_cstr(const struct str *str)
 {
 	if (!str)
