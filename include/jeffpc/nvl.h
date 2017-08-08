@@ -141,6 +141,7 @@ extern struct str *nvl_lookup_str(struct nvlist *nvl, const char *name);
  *
  * -ENOMEM = out of memory
  */
+extern int nvl_set(struct nvlist *nvl, const char *name, struct nvval *val);
 extern int nvl_set_array(struct nvlist *nvl, const char *name,
 			 struct nvval *vals, size_t nelem);
 extern int nvl_set_array_copy(struct nvlist *nvl, const char *name,

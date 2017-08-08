@@ -350,6 +350,19 @@ static struct nvpair *__nvl_set_prep(struct nvlist *nvl, const char *name)
 	return pair;
 }
 
+int nvl_set(struct nvlist *nvl, const char *name, struct nvval *val)
+{
+	struct nvpair *pair;
+
+	pair = __nvl_set_prep(nvl, name);
+	if (!pair)
+		return -ENOMEM;
+
+	pair->value = *val;
+
+	return 0;
+}
+
 #define SET(fxn, ctype, nvtype, nvmember, putref)			\
 int fxn(struct nvlist *nvl, const char *name, ctype val)		\
 {									\
