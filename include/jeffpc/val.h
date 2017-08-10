@@ -39,6 +39,9 @@
  *
  * Note: The sexpr code considers NULL the same as an empty VT_CONS.  This
  * is different from VT_NULL.
+ *
+ * Note: Not all consumers of struct val use all types or can reliably
+ * serialize and deserialize all types.
  */
 
 enum val_type {
@@ -49,6 +52,7 @@ enum val_type {
 	VT_BOOL,	/* boolean */
 	VT_CONS,	/* cons cell */
 	VT_CHAR,	/* a single (unicode) character */
+	VT_BLOB,	/* a byte string */
 };
 
 #define STR_INLINE_LEN	15
@@ -68,6 +72,10 @@ struct val {
 			struct val *head;
 			struct val *tail;
 		} cons;
+		const struct {
+			const void *ptr;
+			size_t size;
+		} blob;
 
 		/*
 		 * We want to keep the normal members const to catch
@@ -88,6 +96,10 @@ struct val {
 			struct val *head;
 			struct val *tail;
 		} _set_cons;
+		struct {
+			void *ptr;
+			size_t size;
+		} _set_blob;
 	};
 };
 
@@ -105,6 +117,9 @@ struct sym {
  * Allocation functions
  */
 
+extern struct val *val_alloc_blob(void *ptr, size_t size);
+extern struct val *val_alloc_blob_dup(const void *ptr, size_t size);
+extern struct val *val_alloc_blob_static(const void *ptr, size_t size);
 extern struct val *val_alloc_bool(bool v);
 extern struct val *val_alloc_char(uint64_t v);
 extern struct val *val_alloc_int(uint64_t v);

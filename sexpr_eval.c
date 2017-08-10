@@ -194,6 +194,8 @@ static struct val *eval_cons(struct val *expr, struct sexpr_eval_env *env)
 			      op->b ? "true" : "false");
 		case VT_CONS:
 			panic("function name cannot be a VT_CONS");
+		case VT_BLOB:
+			panic("function name cannot be a VT_BLOB");
 		case VT_SYM:
 			break; /* ok */
 	}
@@ -246,6 +248,7 @@ struct val *sexpr_eval(struct val *expr,
 		case VT_STR:
 		case VT_BOOL:
 		case VT_CHAR:
+		case VT_BLOB:
 			return expr;
 		case VT_SYM:
 			if (!env->symlookup)

@@ -94,6 +94,10 @@ void val_free(struct val *val)
 		case VT_BOOL:
 		case VT_CHAR:
 			break;
+		case VT_BLOB:
+			if (!val->static_alloc)
+				free(val->_set_blob.ptr);
+			break;
 		case VT_STR:
 		case VT_SYM:
 			if (!val->static_alloc)
@@ -171,6 +175,48 @@ struct val *val_alloc_null(void)
 	return (struct val *) &val_null;
 }
 
+static struct val *__val_alloc_blob(void *ptr, size_t size, bool heap)
+{
+	struct val *val;
+
+	val = __val_alloc(VT_BLOB);
+	if (IS_ERR(val)) {
+		if (heap)
+			free(ptr);
+
+		return val;
+	}
+
+	val->_set_blob.ptr = ptr;
+	val->_set_blob.size = size;
+	val->static_alloc = !heap;
+
+	return val;
+}
+
+struct val *val_alloc_blob(void *ptr, size_t size)
+{
+	return __val_alloc_blob(ptr, size, true);
+}
+
+struct val *val_alloc_blob_dup(const void *ptr, size_t size)
+{
+	void *tmp;
+
+	tmp = malloc(size);
+	if (!tmp)
+		return ERR_PTR(-ENOMEM);
+
+	memcpy(tmp, ptr, size);
+
+	return __val_alloc_blob(tmp, size, true);
+}
+
+struct val *val_alloc_blob_static(const void *ptr, size_t size)
+{
+	return __val_alloc_blob((void *) ptr, size, false);
+}
+
 struct val *val_alloc_cons(struct val *head, struct val *tail)
 {
 	struct val *val;
@@ -232,6 +278,11 @@ void val_dump_file(FILE *out, struct val *val, int indent)
 			val_dump(val->cons.head, indent + 2);
 			fprintf(out, "%*scons tail:\n", indent, "");
 			val_dump(val->cons.tail, indent + 2);
+			break;
+		case VT_BLOB:
+			fprintf(out, "%*sblob @ %p.%zu (%s)\n", indent, "",
+				val->blob.ptr, val->blob.size,
+				val->static_alloc ? "static" : "heap");
 			break;
 		default:
 			fprintf(out, "Unknown type %d\n", val->type);

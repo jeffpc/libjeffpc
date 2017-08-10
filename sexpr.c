@@ -245,6 +245,8 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 			/* nothing to quote */
 			return str_cat(3, &oparen, tmp, &cparen);
 		}
+		case VT_BLOB:
+			return ERR_PTR(-ENOTSUP);
 	}
 
 	panic("%s: unknown val type: %u", __func__, lv->type);
@@ -525,6 +527,18 @@ bool sexpr_equal(struct val *lhs, struct val *rhs)
 			goto out;
 		case VT_BOOL:
 			ret = (lhs->b == rhs->b);
+			goto out;
+		case VT_BLOB:
+			ret = (lhs->blob.size == rhs->blob.size);
+			if (!ret)
+				goto out;
+
+			ret = (lhs->blob.ptr == rhs->blob.ptr);
+			if (ret)
+				goto out;
+
+			ret = (memcmp(lhs->blob.ptr, rhs->blob.ptr,
+				      lhs->blob.size) == 0);
 			goto out;
 		case VT_CONS:
 			ret = sexpr_equal(val_getref(lhs->cons.head),
