@@ -251,7 +251,7 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 		}
 	}
 
-	return NULL;
+	panic("%s: unknown val type: %u", __func__, lv->type);
 }
 
 int sexpr_dump_file(FILE *out, struct val *lv, bool raw)
