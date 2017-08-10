@@ -93,6 +93,7 @@ static int getint(const char *str, uint64_t *i, int base, const char *type,
 
 [().']			{ return *yytext; }
 #[tf]			{ yylval->b = (yytext[1] == 't'); return BOOL; }
+#n			{ return VNULL; }
 0[0-7]*			{ return getint(yytext, &yylval->i, 8, "integer", NUMBER); }
 0x[0-9a-fA-F]*		{ return getint(yytext, &yylval->i, 16, "integer", NUMBER); }
 #x[0-9a-fA-F]+		{ return getint(yytext + 2, &yylval->i, 16, "integer", NUMBER); }

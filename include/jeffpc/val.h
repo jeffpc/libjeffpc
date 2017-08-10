@@ -31,8 +31,19 @@
 #include <jeffpc/refcnt.h>
 #include <jeffpc/error.h>
 
+/*
+ * A typed value structure.
+ *
+ * A struct val can hold a number of different values along with type
+ * information.  There are several different types that are supported.
+ *
+ * Note: The sexpr code considers NULL the same as an empty VT_CONS.  This
+ * is different from VT_NULL.
+ */
+
 enum val_type {
-	VT_INT = 0,	/* 64-bit uint */
+	VT_NULL = 0,	/* not a value */
+	VT_INT,		/* 64-bit uint */
 	VT_STR,		/* a struct str string */
 	VT_SYM,		/* symbol */
 	VT_BOOL,	/* boolean */
@@ -77,6 +88,7 @@ struct val {
 extern struct val *val_alloc_bool(bool v);
 extern struct val *val_alloc_char(uint64_t v);
 extern struct val *val_alloc_int(uint64_t v);
+extern struct val *val_alloc_null(void);
 /* val_alloc_{str,sym,cons} always consume the passed in references */
 extern struct val *val_alloc_str(struct str *v);
 extern struct val *val_alloc_sym(struct str *v);
@@ -136,6 +148,7 @@ REFCNT_INLINE_FXNS(struct val, val, refcnt, val_free, val_isstatic)
 
 /* never fails */
 #define VAL_ALLOC_BOOL(v)	val_alloc_bool(v)
+#define VAL_ALLOC_NULL(v)	val_alloc_null(v)
 
 #define VAL_ALLOC_CONS(head, tail)		\
 	({					\

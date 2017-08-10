@@ -57,6 +57,7 @@ void sexpr_error2(const char *e, const char *yytext)
 %token <s> SYMBOL STRING
 %token <i> NUMBER CHAR
 %token <b> BOOL
+%token VNULL	/* can't be called NULL because of stdlib collision */
 %token ERROR
 
 %type <lv> document tok list toklist
@@ -70,6 +71,7 @@ tok : SYMBOL			{ $$ = VAL_ALLOC_SYM($1); }
     | NUMBER			{ $$ = VAL_ALLOC_INT($1); }
     | BOOL			{ $$ = VAL_ALLOC_BOOL($1); }
     | CHAR			{ $$ = VAL_ALLOC_CHAR($1); }
+    | VNULL			{ $$ = VAL_ALLOC_NULL(); }
     | list			{ $$ = $1; }
     | '\'' tok			{ $$ = VAL_ALLOC_CONS(
 				         VAL_ALLOC_SYM_CSTR("quote"),

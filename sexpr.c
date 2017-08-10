@@ -145,6 +145,7 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 {
 	static struct str dquote = STR_STATIC_CHAR_INITIALIZER('"');
 	static struct str squote = STR_STATIC_CHAR_INITIALIZER('\'');
+	static struct str null = STR_STATIC_INITIALIZER("#n");
 	static struct str poundt = STR_STATIC_INITIALIZER("#t");
 	static struct str poundf = STR_STATIC_INITIALIZER("#f");
 	static struct str oparen = STR_STATIC_CHAR_INITIALIZER('(');
@@ -162,6 +163,8 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 			tmpstr = escape_str(str_cstr(lv->str));
 
 			return str_cat(3, &dquote, STR_ALLOC(tmpstr), &dquote);
+		case VT_NULL:
+			return &null;
 		case VT_BOOL:
 			return lv->b ? &poundt : &poundf;
 		case VT_CHAR:
@@ -448,6 +451,9 @@ bool sexpr_equal(struct val *lhs, struct val *rhs)
 	}
 
 	switch (lhs->type) {
+		case VT_NULL:
+			ret = true;
+			goto out;
 		case VT_INT:
 		case VT_CHAR:
 			ret = (lhs->i == rhs->i);

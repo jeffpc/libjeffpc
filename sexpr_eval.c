@@ -178,6 +178,8 @@ static struct val *eval_cons(struct val *expr, struct sexpr_eval_env *env)
 
 	ASSERT(op);
 	switch (op->type) {
+		case VT_NULL:
+			panic("function name cannot be a VT_NULL");
 		case VT_INT:
 			panic("function name cannot be a VT_INT (%"PRIu64")",
 			      op->i);
@@ -240,6 +242,7 @@ struct val *sexpr_eval(struct val *expr,
 		env = &emptyenv;
 
 	switch (expr->type) {
+		case VT_NULL:
 		case VT_INT:
 		case VT_STR:
 		case VT_BOOL:

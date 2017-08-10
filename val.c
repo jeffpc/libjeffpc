@@ -43,6 +43,7 @@
 
 static const struct val val_true = INIT_STATIC_VAL(VT_BOOL, b, true);
 static const struct val val_false = INIT_STATIC_VAL(VT_BOOL, b, false);
+static const struct val val_null = INIT_STATIC_VAL(VT_NULL, i, 0);
 static const struct val val_ints[10] = {
 	[0] = INIT_STATIC_VAL(VT_INT, i, 0),
 	[1] = INIT_STATIC_VAL(VT_INT, i, 1),
@@ -86,6 +87,7 @@ void val_free(struct val *val)
 	ASSERT3U(refcnt_read(&val->refcnt), ==, 0);
 
 	switch (val->type) {
+		case VT_NULL:
 		case VT_INT:
 		case VT_BOOL:
 		case VT_CHAR:
@@ -156,6 +158,18 @@ struct val *val_alloc_bool(bool b)
 	return (struct val *) ret;
 }
 
+struct val *val_alloc_null(void)
+{
+	/*
+	 * Cast away the const - we define the static as const to get it
+	 * into .rodata, but we have to drop the const since everything
+	 * expects struct val to be writable (because refcounts modify it).
+	 * In this case, we won't get any modifications because we're marked
+	 * as static.
+	 */
+	return (struct val *) &val_null;
+}
+
 struct val *val_alloc_cons(struct val *head, struct val *tail)
 {
 	struct val *val;
@@ -179,6 +193,9 @@ void val_dump_file(FILE *out, struct val *val, int indent)
 		return;
 
 	switch (val->type) {
+		case VT_NULL:
+			fprintf(out, "%*snull\n", indent, "");
+			break;
 		case VT_STR:
 		case VT_SYM:
 			fprintf(out, "%*s'%s'\n", indent, "", str_cstr(val->str));
