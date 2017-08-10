@@ -42,6 +42,7 @@
 			.memb = (val),				\
 		}
 
+static const struct val val_cons_empty = INIT_STATIC_VAL(VT_CONS, i, 0);
 static const struct val val_true = INIT_STATIC_VAL(VT_BOOL, b, true);
 static const struct val val_false = INIT_STATIC_VAL(VT_BOOL, b, false);
 static const struct val val_null = INIT_STATIC_VAL(VT_NULL, i, 0);
@@ -174,6 +175,17 @@ struct val *val_alloc_null(void)
 struct val *val_alloc_cons(struct val *head, struct val *tail)
 {
 	struct val *val;
+
+	if (!head && !tail) {
+		/*
+		 * Cast away the const - we define the static as const to
+		 * get it into .rodata, but we have to drop the const since
+		 * everything expects struct val to be writable (because
+		 * refcounts modify it).  In this case, we won't get any
+		 * modifications because we're marked as static.
+		 */
+		return (struct val *) &val_cons_empty;
+	}
 
 	val = __val_alloc(VT_CONS);
 	if (IS_ERR(val)) {
