@@ -43,6 +43,8 @@ static char *repl_read(GetLine *gl)
 
 static void repl_print(struct val *e)
 {
+	int ret;
+
 	switch (e->type) {
 		case VT_BOOL:
 		case VT_INT:
@@ -57,7 +59,9 @@ static void repl_print(struct val *e)
 			break;
 	}
 
-	sexpr_dump_file(stdout, e, false);
+	ret = sexpr_dump_file(stdout, e, false);
+	if (ret)
+		printf("Error: %s", xstrerror(ret));
 	printf("\n");
 }
 

@@ -116,29 +116,73 @@ struct val *sexpr_parse(const char *str, size_t len)
 	return ret ? ERR_PTR(-EINVAL) : x.output;
 }
 
+static inline int dump_cons_parts(struct val *head, struct str **hstr,
+				  struct val *tail, struct str **tstr,
+				  bool raw)
+{
+	struct str *h, *t;
+
+	/* pacify gcc */
+	*hstr = NULL;
+	*tstr = NULL;
+
+	h = sexpr_dump(head, raw);
+	if (IS_ERR(h))
+		return PTR_ERR(h);
+
+	t = sexpr_dump(tail, raw);
+	if (IS_ERR(t)) {
+		str_putref(h);
+		return PTR_ERR(t);
+	}
+
+	*hstr = h;
+	*tstr = t;
+
+	return 0;
+}
+
 static struct str *dump_cons(struct val *lv, bool raw)
 {
 	static struct str dot = STR_STATIC_INITIALIZER(" . ");
 	static struct str space = STR_STATIC_CHAR_INITIALIZER(' ');
 	struct val *head = lv->cons.head;
 	struct val *tail = lv->cons.tail;
+	struct str *hstr;
+	struct str *tstr;
+	int ret;
 
-	if (raw)
-		return str_cat(3, sexpr_dump(head, raw),
-			       &dot,
-			       sexpr_dump(tail, raw));
-	else if (!head && !tail)
+	if (raw) {
+		ret = dump_cons_parts(head, &hstr, tail, &tstr, true);
+		if (ret)
+			return ERR_PTR(ret);
+
+		return str_cat(3, hstr, &dot, tstr);
+	}
+
+	/* empty cons */
+	if (!head && !tail)
 		return NULL;
-	else if (head && !tail)
+
+	/* last element of the list */
+	if (head && !tail)
 		return sexpr_dump(head, raw);
-	else if (tail->type == VT_CONS)
-		return str_cat(3, sexpr_dump(head, raw),
-			       &space,
-			       dump_cons(tail, raw));
+
+	/*
+	 * We have a tail.  This means that we are either just a bare cons
+	 * or an internal element of a list.  Bare cons cells separate the
+	 * head from the tail with a dot, while internal list elements use a
+	 * space.
+	 */
+
+	ret = dump_cons_parts(head, &hstr, tail, &tstr, false);
+	if (ret)
+		return ERR_PTR(ret);
+
+	if (tail->type == VT_CONS)
+		return str_cat(3, hstr, &space, tstr);
 	else
-		return str_cat(3, sexpr_dump(head, raw),
-			       &dot,
-			       sexpr_dump(tail, raw));
+		return str_cat(3, hstr, &dot, tstr);
 }
 
 struct str *sexpr_dump(struct val *lv, bool raw)
@@ -151,6 +195,7 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 	static struct str oparen = STR_STATIC_CHAR_INITIALIZER('(');
 	static struct str cparen = STR_STATIC_CHAR_INITIALIZER(')');
 	static struct str empty = STR_STATIC_INITIALIZER("()");
+	struct str *tmp;
 	char *tmpstr;
 
 	if (!lv)
@@ -162,7 +207,11 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 		case VT_STR:
 			tmpstr = escape_str(str_cstr(lv->str));
 
-			return str_cat(3, &dquote, STR_ALLOC(tmpstr), &dquote);
+			tmp = str_alloc(tmpstr);
+			if (!tmp)
+				return ERR_PTR(-ENOMEM);
+
+			return str_cat(3, &dquote, tmp, &dquote);
 		case VT_NULL:
 			return &null;
 		case VT_BOOL:
@@ -185,27 +234,39 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 				if (sexpr_is_null(tail))
 					return str_cat(2, &squote, &empty);
 
+				tmp = dump_cons(tail, raw);
+				if (IS_ERR(tmp))
+					return tmp;
+
 				/* we're dealing with a (quote ...) */
-				return str_cat(2, &squote, dump_cons(tail, raw));
+				return str_cat(2, &squote, tmp);
 			}
 
+			tmp = dump_cons(lv, raw);
+			if (IS_ERR(tmp))
+				return tmp;
+
 			/* nothing to quote */
-			return str_cat(3, &oparen, dump_cons(lv, raw), &cparen);
+			return str_cat(3, &oparen, tmp, &cparen);
 		}
 	}
 
 	return NULL;
 }
 
-void sexpr_dump_file(FILE *out, struct val *lv, bool raw)
+int sexpr_dump_file(FILE *out, struct val *lv, bool raw)
 {
 	struct str *tmp;
 
 	tmp = sexpr_dump(lv, raw);
+	if (IS_ERR(tmp))
+		return PTR_ERR(tmp);
 
 	fprintf(out, "%s", str_cstr(tmp));
 
 	str_putref(tmp);
+
+	return 0;
 }
 
 /*

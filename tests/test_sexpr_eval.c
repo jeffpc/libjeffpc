@@ -25,6 +25,17 @@
 
 #include "test.c"
 
+static inline struct val *safe_dump(struct val *val)
+{
+	int ret;
+
+	ret = sexpr_dump_file(stderr, val, false);
+	if (ret)
+		fail("%s: failed to dump value: %s", xstrerror(ret));
+
+	return val;
+}
+
 static inline struct val *op0(char *op)
 {
 	struct val *arr[1];
@@ -34,9 +45,7 @@ static inline struct val *op0(char *op)
 
 	ret = sexpr_array_to_list(arr, ARRAY_LEN(arr));
 
-	sexpr_dump_file(stderr, ret, false);
-
-	return ret;
+	return safe_dump(ret);
 }
 
 static inline struct val *op1(char *op, struct val *a)
@@ -49,9 +58,7 @@ static inline struct val *op1(char *op, struct val *a)
 
 	ret = sexpr_array_to_list(arr, ARRAY_LEN(arr));
 
-	sexpr_dump_file(stderr, ret, false);
-
-	return ret;
+	return safe_dump(ret);
 }
 
 static inline struct val *op2(char *op, struct val *a, struct val *b)
@@ -65,9 +72,7 @@ static inline struct val *op2(char *op, struct val *a, struct val *b)
 
 	ret = sexpr_array_to_list(arr, ARRAY_LEN(arr));
 
-	sexpr_dump_file(stderr, ret, false);
-
-	return ret;
+	return safe_dump(ret);
 }
 
 static inline struct val *op3(char *op, struct val *a, struct val *b, struct val *c)
@@ -82,20 +87,21 @@ static inline struct val *op3(char *op, struct val *a, struct val *b, struct val
 
 	ret = sexpr_array_to_list(arr, ARRAY_LEN(arr));
 
-	sexpr_dump_file(stderr, ret, false);
-
-	return ret;
+	return safe_dump(ret);
 }
 
 static void test_int_op(char *opname, enum val_type type, uint64_t expected,
 			struct val *expr)
 {
 	struct val *res;
+	int ret;
 
 	res = sexpr_eval(expr, NULL);
 
 	fprintf(stderr, " -> ");
-	sexpr_dump_file(stderr, res, false);
+	ret = sexpr_dump_file(stderr, res, false);
+	if (ret)
+		fail("failed to dump result: %s", xstrerror(ret));
 	fprintf(stderr, "\n");
 
 	ASSERT3U(res->type, ==, type);

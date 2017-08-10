@@ -31,17 +31,20 @@
 static int onefile(char *ibuf, size_t len)
 {
 	struct val *lv;
+	int ret;
 
 	lv = sexpr_parse(ibuf, len);
 	if (IS_ERR(lv))
 		return PTR_ERR(lv);
 
-	sexpr_dump_file(stdout, lv, false);
-	printf("\n");
+	ret = sexpr_dump_file(stdout, lv, false);
+
+	if (!ret)
+		printf("\n");
 
 	val_putref(lv);
 
-	return 0;
+	return ret;
 }
 
 int main(int argc, char **argv)
