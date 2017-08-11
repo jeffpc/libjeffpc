@@ -37,7 +37,7 @@
 #define INIT_STATIC_VAL(t, memb, val)				\
 		{						\
 			.type = (t),				\
-			.static_alloc = true,			\
+			.static_struct = true,			\
 			.memb = (val),				\
 		}
 
@@ -74,7 +74,7 @@ static struct val *__val_alloc(enum val_type type)
 		return ERR_PTR(-ENOMEM);
 
 	val->type = type;
-	val->static_alloc = false;
+	val->static_struct = false;
 
 	refcnt_init(&val->refcnt, 1);
 
