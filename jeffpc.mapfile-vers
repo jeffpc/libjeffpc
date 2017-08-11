@@ -204,6 +204,7 @@ JEFFPC_0.10 {
 		val_alloc_char;
 		val_alloc_cons;
 		val_alloc_int;
+		val_alloc_null;
 		val_alloc_str;
 		val_alloc_sym;
 
