@@ -28,11 +28,12 @@
 #include <ctype.h>
 #include <inttypes.h>
 
-#include <jeffpc/val.h>
 #include <jeffpc/jeffpc.h>
 #include <jeffpc/error.h>
 #include <jeffpc/types.h>
 #include <jeffpc/mem.h>
+
+#include "val_impl.h"
 
 #define INIT_STATIC_VAL(t, memb, val)				\
 		{						\
@@ -65,7 +66,7 @@ static void __attribute__((constructor)) init_val_subsys(void)
 	ASSERT(!IS_ERR(val_cache));
 }
 
-static struct val *__val_alloc(enum val_type type)
+struct val *__val_alloc(enum val_type type)
 {
 	struct val *val;
 
