@@ -86,7 +86,7 @@ toklist : tok toklist		{ $$ = VAL_ALLOC_CONS($1, $2); }
 	| tok			{ $$ = VAL_ALLOC_CONS($1, NULL); }
 	;
 
-list : '(' ')'			{ $$ = NULL; }
+list : '(' ')'			{ $$ = VAL_ALLOC_CONS(NULL, NULL); }
      | '(' toklist ')'		{ $$ = $2; }
      | '(' tok '.' tok ')'	{ $$ = VAL_ALLOC_CONS($2, $4); }
      ;
