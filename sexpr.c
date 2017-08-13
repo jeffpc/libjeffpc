@@ -146,6 +146,7 @@ static struct str *dump_cons(struct val *lv, bool raw)
 {
 	static struct str dot = STR_STATIC_INITIALIZER(" . ");
 	static struct str space = STR_STATIC_CHAR_INITIALIZER(' ');
+	static struct str nothing = STR_STATIC_INITIALIZER("");
 	struct val *head = lv->cons.head;
 	struct val *tail = lv->cons.tail;
 	struct str *hstr;
@@ -162,7 +163,7 @@ static struct str *dump_cons(struct val *lv, bool raw)
 
 	/* empty cons */
 	if (!head && !tail)
-		return NULL;
+		return &nothing;
 
 	/* last element of the list */
 	if (head && !tail)
