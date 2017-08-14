@@ -362,10 +362,7 @@ struct str *str_cat(size_t n, ...)
 	}
 	va_end(ap);
 
-	ret = str_alloc(buf);
-	ASSERT(ret);
-
-	return ret;
+	return STR_ALLOC(buf);
 }
 
 struct str *str_vprintf(const char *fmt, va_list args)
