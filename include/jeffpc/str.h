@@ -108,6 +108,8 @@ extern struct str *str_printf(const char *fmt, ...)
 extern struct str *str_vprintf(const char *fmt, va_list args);
 extern void str_free(struct str *str);
 
+extern struct str *str_empty_string(void);
+
 static inline bool str_isstatic(struct str *x)
 {
 	return x->static_struct;

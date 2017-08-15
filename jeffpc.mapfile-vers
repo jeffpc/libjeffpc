@@ -159,6 +159,7 @@ JEFFPC_0.10 {
 		str_cmp;
 		str_dup;
 		str_dup_len;
+		str_empty_string;
 		str_free;
 		str_len;
 		str_printf;

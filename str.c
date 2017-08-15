@@ -400,3 +400,8 @@ void str_free(struct str *str)
 		free((char *) str->str);
 	mem_cache_free(str_cache, str);
 }
+
+struct str *str_empty_string(void)
+{
+	return &empty_string;
+}
