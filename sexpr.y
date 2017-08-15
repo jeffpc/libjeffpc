@@ -66,15 +66,15 @@ void sexpr_error2(const char *e, const char *yytext)
 document : tok			{ data->output = $1; }
 	 ;
 
-tok : SYMBOL			{ $$ = VAL_ALLOC_SYM($1); }
-    | STRING			{ $$ = VAL_ALLOC_STR($1); }
+tok : SYMBOL			{ $$ = str_cast_to_val($1); }
+    | STRING			{ $$ = str_cast_to_val($1); }
     | NUMBER			{ $$ = VAL_ALLOC_INT($1); }
     | BOOL			{ $$ = VAL_ALLOC_BOOL($1); }
     | CHAR			{ $$ = VAL_ALLOC_CHAR($1); }
     | VNULL			{ $$ = VAL_ALLOC_NULL(); }
     | list			{ $$ = $1; }
     | '\'' tok			{ $$ = VAL_ALLOC_CONS(
-				         VAL_ALLOC_SYM_CSTR("quote"),
+                                         sym_cast_to_val(STATIC_SYM("quote")),
 				         VAL_ALLOC_CONS($2, NULL)); }
     ;
 

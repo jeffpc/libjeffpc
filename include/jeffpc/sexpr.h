@@ -26,11 +26,10 @@
 #include <stdbool.h>
 
 #include <jeffpc/val.h>
-#include <jeffpc/str.h>
 
 struct sexpr_eval_env {
-	struct val *(*symlookup)(struct str *, struct sexpr_eval_env *);
-	void *(*fxnlookup)(struct str *, struct sexpr_eval_env *);
+	struct val *(*symlookup)(struct sym *, struct sexpr_eval_env *);
+	void *(*fxnlookup)(struct sym *, struct sexpr_eval_env *);
 	void *private;
 };
 

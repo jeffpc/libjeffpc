@@ -152,16 +152,15 @@ JEFFPC_0.10 {
 		# sock
 		connect_ip;
 
-		# str
-		str_alloc;
-		str_alloc_static;
+		# str / sym
+		_strsym_alloc;
+		_strsym_alloc_static;
+		_strsym_cmp;
+		_strsym_dup;
+		_strsym_dup_len;
+		_strsym_len;
 		str_cat;
-		str_cmp;
-		str_dup;
-		str_dup_len;
 		str_empty_string;
-		str_free;
-		str_len;
 		str_printf;
 		str_vprintf;
 
@@ -206,8 +205,6 @@ JEFFPC_0.10 {
 		val_alloc_cons;
 		val_alloc_int;
 		val_alloc_null;
-		val_alloc_str;
-		val_alloc_sym;
 
 		# urldecode
 		urldecode;

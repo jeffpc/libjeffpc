@@ -24,19 +24,29 @@
 #include <stdbool.h>
 #include <alloca.h>
 
-#include <jeffpc/str.h>
 #include <jeffpc/mem.h>
 #include <jeffpc/jeffpc.h>
 
-/* check that STR_INLINE_LEN is used properly in the struct str definition */
-STATIC_ASSERT(STR_INLINE_LEN + 1 == sizeof(((struct str *) NULL)->inline_str));
+#include "val_impl.h"
+
+/* check that STR_INLINE_LEN is used properly in the struct definition */
+STATIC_ASSERT(STR_INLINE_LEN + 1 == sizeof(((struct str *) NULL)->val.str_inline));
 
 /* check that STR_INLINE_LEN is not undersized */
 STATIC_ASSERT(STR_INLINE_LEN + 1 >= sizeof(char *));
 
+/* check that struct str is just a type alias for struct val */
+STATIC_ASSERT(sizeof(struct str) == sizeof(struct val));
+STATIC_ASSERT(offsetof(struct str, val) == 0);
+
+/* same as above but for struct sym */
+STATIC_ASSERT(sizeof(struct sym) == sizeof(struct val));
+STATIC_ASSERT(offsetof(struct sym, val) == 0);
+
 #define USE_STRLEN	((size_t) ~0ul)
 
-static struct str empty_string = _STR_STATIC_INITIALIZER("", 0);
+static struct str empty_string = _STATIC_STR_INITIALIZER(VT_STR, "");
+static struct sym empty_symbol = _STATIC_STR_INITIALIZER(VT_SYM, "");
 
 /* one 7-bit ASCII character long strings */
 static struct str one_char[128] = {
@@ -64,52 +74,35 @@ static struct str one_char[128] = {
 	STATIC_CHAR32(96)	/* 96..127 */
 };
 
-static struct mem_cache *str_cache;
-
-static inline size_t str_get_len(const struct str *str)
+static inline size_t get_len(const struct val *val)
 {
-	if (!str->have_len)
-		return strlen(str_cstr(str));
-
-	return (str->len[0] << 16) | (str->len[1] << 8) | str->len[2];
+	return strlen(val_cstr(val));
 }
 
-static inline void str_set_len(struct str *str, size_t len)
+static inline void set_len(struct val *str, size_t len)
 {
-	if (len > 0xffffff) {
-		str->have_len = false;
-		str->len[0] = 0xff;
-		str->len[1] = 0xff;
-		str->len[2] = 0xff;
-	} else {
-		str->have_len = true;
-		str->len[0] = (len >> 16) & 0xff;
-		str->len[1] = (len >> 8) & 0xff;
-		str->len[2] = len & 0xff;
-	}
+	/* TODO: stash length in struct val if possible */
 }
 
-static void __attribute__((constructor)) init_str_subsys(void)
-{
-	str_cache = mem_cache_create("str-cache", sizeof(struct str), 0);
-	ASSERT(!IS_ERR(str_cache));
-}
-
-static struct str *__get_preallocated(const char *s, size_t len)
+static struct val *__get_preallocated(enum val_type type, const char *s,
+				      size_t len)
 {
 	unsigned char first_char;
 
 	/* NULL or non-nul terminated & zero length */
 	if (!s || !len)
-		return &empty_string;
+		return (type == VT_STR) ? &empty_string.val : &empty_symbol.val;
+
+	if (type != VT_STR)
+		return NULL;
 
 	first_char = s[0];
 
 	/* preallocated one-char long strings of 7-bit ASCII */
 	if ((len == 1) &&
 	    (first_char > '\0') && (first_char < '\x7f') &&
-	    one_char[first_char].static_struct)
-		return &one_char[first_char];
+	    one_char[first_char].val.static_struct)
+		return &one_char[first_char].val;
 
 	/* nothing pre-allocated */
 	return NULL;
@@ -126,11 +119,13 @@ static inline void __copy(char *dest, const char *s, size_t len)
 	dest[len] = '\0';
 }
 
-static struct str *__alloc(const char *s, size_t len, bool heapalloc,
-			   bool mustdup)
+static struct val *__alloc(enum val_type type, const char *s, size_t len,
+			   bool heapalloc, bool mustdup)
 {
-	struct str *str;
+	struct val *val;
 	bool copy;
+
+	ASSERT((type == VT_STR) || (type == VT_SYM));
 
 	/* sanity check */
 	if (mustdup)
@@ -140,8 +135,8 @@ static struct str *__alloc(const char *s, size_t len, bool heapalloc,
 	len = s ? strnlen(s, len) : 0;
 
 	/* check preallocated strings */
-	str = __get_preallocated(s, len);
-	if (str)
+	val = __get_preallocated(type, s, len);
+	if (val)
 		goto out;
 
 	/* can we inline it? */
@@ -152,8 +147,10 @@ static struct str *__alloc(const char *s, size_t len, bool heapalloc,
 		char *tmp;
 
 		tmp = malloc(len + 1);
-		if (!tmp)
+		if (!tmp) {
+			val = ERR_PTR(-ENOMEM);
 			goto out;
+		}
 
 		__copy(tmp, s, len);
 
@@ -162,78 +159,66 @@ static struct str *__alloc(const char *s, size_t len, bool heapalloc,
 		s = tmp;
 	}
 
-	str = mem_cache_alloc(str_cache);
-	if (!str)
+	val = __val_alloc(type);
+	if (IS_ERR(val))
 		goto out;
 
-	refcnt_init(&str->refcnt, 1);
-	str->static_struct = false;
-	str->static_alloc = copy || !heapalloc;
-	str->inline_alloc = copy;
-	str_set_len(str, len);
+	val->static_alloc = copy || !heapalloc;
+	val->inline_alloc = copy;
+	set_len(val, len);
 
 	if (copy) {
-		__copy(str->inline_str, s, len);
+		__copy(val->_set_str_inline, s, len);
 
 		if (heapalloc)
 			free((char *) s);
 	} else {
-		str->str = s;
+		val->_set_str_ptr = s;
 	}
 
-	return str;
+	return val;
 
 out:
 	if (heapalloc)
 		free((char *) s);
 
-	return str;
+	return val;
 }
 
-/*
- * Passed in str cannot be freed, and it must be dup'd.  (E.g., it could be
- * a string on the stack.)
- */
-struct str *str_dup(const char *s)
+struct val *_strsym_dup(const char *s, enum val_type type)
 {
-	return __alloc(s, USE_STRLEN, false, true);
+	return __alloc(type, s, USE_STRLEN, false, true);
 }
 
-struct str *str_dup_len(const char *s, size_t len)
+struct val *_strsym_dup_len(const char *s, size_t len, enum val_type type)
 {
-	return __alloc(s, len, false, true);
+	return __alloc(type, s, len, false, true);
 }
 
-/* Passed in str must be freed. */
-struct str *str_alloc(char *s)
+struct val *_strsym_alloc(char *s, enum val_type type)
 {
-	return __alloc(s, USE_STRLEN, true, false);
+	return __alloc(type, s, USE_STRLEN, true, false);
 }
 
-/*
- * Passed in str cannot be freed, and it doesn't have to be dup'd.  (E.g.,
- * it could be a string in .rodata.)
- */
-struct str *str_alloc_static(const char *s)
+struct val *_strsym_alloc_static(const char *s, enum val_type type)
 {
-	return __alloc(s, USE_STRLEN, false, false);
+	return __alloc(type, s, USE_STRLEN, false, false);
 }
 
-size_t str_len(const struct str *s)
+size_t _strsym_len(const struct val *s)
 {
-	return str_get_len(s);
+	return get_len(s);
 }
 
-int str_cmp(const struct str *a, const struct str *b)
+int _strsym_cmp(const struct val *a, const struct val *b)
 {
-	return strcmp(str_cstr(a), str_cstr(b));
+	return strcmp(val_cstr(a), val_cstr(b));
 }
 
 struct str *str_cat(size_t n, ...)
 {
 	const size_t nargs = n;
 	size_t totallen;
-	struct str *ret;
 	char *buf, *out;
 	size_t *len;
 	va_list ap;
@@ -243,9 +228,18 @@ struct str *str_cat(size_t n, ...)
 		return NULL;
 
 	if (nargs == 1) {
+		struct val *val;
+		struct str *ret;
+
 		va_start(ap, n);
-		ret = va_arg(ap, struct str *);
+		val = va_arg(ap, struct val *);
 		va_end(ap);
+
+		if (val->type == VT_STR)
+			return val_cast_to_str(val);
+
+		ret = STR_DUP(val_cstr(val));
+		val_putref(val);
 		return ret;
 	}
 
@@ -254,9 +248,14 @@ struct str *str_cat(size_t n, ...)
 
 	va_start(ap, n);
 	for (i = 0; i < nargs; i++) {
-		struct str *str = va_arg(ap, struct str *);
+		struct val *val = va_arg(ap, struct val *);
 
-		len[i] = str ? str_get_len(str) : 0;
+		if (!val) {
+			len[i] = 0;
+			continue;
+		}
+
+		len[i] = get_len(val);
 
 		totallen += len[i];
 	}
@@ -271,16 +270,16 @@ struct str *str_cat(size_t n, ...)
 
 	va_start(ap, n);
 	for (i = 0; i < nargs; i++) {
-		struct str *str = va_arg(ap, struct str *);
+		struct val *val = va_arg(ap, struct val *);
 
-		if (!str)
+		if (!val)
 			continue;
 
-		strcpy(out, str_cstr(str));
+		strcpy(out, val_cstr(val));
 
 		out += len[i];
 
-		str_putref(str);
+		val_putref(val);
 	}
 	va_end(ap);
 
@@ -311,16 +310,6 @@ struct str *str_printf(const char *fmt, ...)
 	va_end(args);
 
 	return ret;
-}
-
-void str_free(struct str *str)
-{
-	ASSERT(str);
-	ASSERT3U(refcnt_read(&str->refcnt), ==, 0);
-
-	if (!str->inline_alloc && !str->static_alloc)
-		free((char *) str->str);
-	mem_cache_free(str_cache, str);
 }
 
 struct str *str_empty_string(void)

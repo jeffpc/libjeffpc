@@ -25,7 +25,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <jeffpc/str.h>
 #include <jeffpc/sexpr.h>
 
 #include "sexpr_impl.h"
@@ -196,20 +195,17 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 	static struct str cparen = STR_STATIC_CHAR_INITIALIZER(')');
 	static struct str empty = STR_STATIC_INITIALIZER("()");
 	struct str *tmp;
-	char *tmpstr;
 
 	if (!lv)
 		return &empty;
 
 	switch (lv->type) {
 		case VT_SYM:
-			return str_getref(lv->str);
+			return str_dup(val_cstr(lv));
 		case VT_STR:
-			tmpstr = escape_str(str_cstr(lv->str));
-
-			tmp = str_alloc(tmpstr);
-			if (!tmp)
-				return ERR_PTR(-ENOMEM);
+			tmp = str_alloc(escape_str(val_cstr(lv)));
+			if (IS_ERR(tmp))
+				return tmp;
 
 			return str_cat(3, &dquote, tmp, &dquote);
 		case VT_NULL:
@@ -229,7 +225,7 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 
 			/* handle quoting */
 			if (!raw && head && (head->type == VT_SYM) &&
-			    !strcmp(str_cstr(head->str), "quote")) {
+			    !strcmp(val_cstr(head), "quote")) {
 				/* we're dealing with a (quote) */
 				if (sexpr_is_null(tail))
 					return str_cat(2, &squote, &empty);
@@ -471,7 +467,7 @@ struct val *sexpr_assoc(struct val *lv, const char *name)
 	    head->cons.head &&
 	    ((head->cons.head->type == VT_STR) ||
 	     (head->cons.head->type == VT_SYM)) &&
-	    !strcmp(str_cstr(head->cons.head->str), name))
+	    !strcmp(val_cstr(head->cons.head), name))
 		return val_getref(head);
 
 	return sexpr_assoc(tail, name);
@@ -524,7 +520,8 @@ bool sexpr_equal(struct val *lhs, struct val *rhs)
 			goto out;
 		case VT_STR:
 		case VT_SYM:
-			ret = str_cmp(lhs->str, rhs->str) == 0;
+			ret = str_cmp(val_cast_to_str(lhs),
+				      val_cast_to_str(rhs)) == 0;
 			goto out;
 		case VT_BOOL:
 			ret = (lhs->b == rhs->b);
@@ -565,7 +562,7 @@ struct str *sexpr_alist_lookup_str(struct val *lv, const char *name)
 	if (!v || (v->type != VT_STR))
 		ret = NULL;
 	else
-		ret = str_getref(v->str);
+		ret = val_cast_to_str(val_getref(v));
 
 	val_putref(v);
 

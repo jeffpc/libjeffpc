@@ -23,7 +23,7 @@
 #ifndef __JEFFPC_URLDECODE_H
 #define __JEFFPC_URLDECODE_H
 
-#include <jeffpc/str.h>
+#include <jeffpc/val.h>
 
 extern ssize_t urldecode(const char *in, size_t len, char *out);
 extern struct str *urldecode_str(const char *in, size_t len);

@@ -96,7 +96,8 @@ void val_free(struct val *val)
 			break;
 		case VT_STR:
 		case VT_SYM:
-			str_putref(val->str);
+			if (!val->static_alloc)
+				free((char *) val->_set_str_ptr);
 			break;
 		case VT_CONS:
 			val_putref(val->cons.head);
@@ -124,8 +125,6 @@ struct val *val_alloc_##fxn(ctype v)				\
 }
 
 static DEF_VAL_SET(int_heap, VT_INT, i, uint64_t, (void))
-DEF_VAL_SET(str, VT_STR, str, struct str *, str_putref)
-DEF_VAL_SET(sym, VT_SYM, str, struct str *, str_putref)
 DEF_VAL_SET(char, VT_CHAR, i, uint64_t, (void))
 
 struct val *val_alloc_int(uint64_t i)
@@ -211,7 +210,7 @@ void val_dump_file(FILE *out, struct val *val, int indent)
 			break;
 		case VT_STR:
 		case VT_SYM:
-			fprintf(out, "%*s'%s'\n", indent, "", str_cstr(val->str));
+			fprintf(out, "%*s'%s'\n", indent, "", val_cstr(val));
 			break;
 		case VT_INT:
 			fprintf(out, "%*s%"PRIu64"\n", indent, "", val->i);

@@ -41,7 +41,7 @@ static inline struct val *op0(char *op)
 	struct val *arr[1];
 	struct val *ret;
 
-	arr[0] = VAL_ALLOC_SYM_CSTR(op);
+	arr[0] = VAL_ALLOC_SYM_STATIC(op);
 
 	ret = sexpr_array_to_list(arr, ARRAY_LEN(arr));
 
@@ -53,7 +53,7 @@ static inline struct val *op1(char *op, struct val *a)
 	struct val *arr[2];
 	struct val *ret;
 
-	arr[0] = VAL_ALLOC_SYM_CSTR(op);
+	arr[0] = VAL_ALLOC_SYM_STATIC(op);
 	arr[1] = a;
 
 	ret = sexpr_array_to_list(arr, ARRAY_LEN(arr));
@@ -66,7 +66,7 @@ static inline struct val *op2(char *op, struct val *a, struct val *b)
 	struct val *arr[3];
 	struct val *ret;
 
-	arr[0] = VAL_ALLOC_SYM_CSTR(op);
+	arr[0] = VAL_ALLOC_SYM_STATIC(op);
 	arr[1] = a;
 	arr[2] = b;
 
@@ -80,7 +80,7 @@ static inline struct val *op3(char *op, struct val *a, struct val *b, struct val
 	struct val *arr[4];
 	struct val *ret;
 
-	arr[0] = VAL_ALLOC_SYM_CSTR(op);
+	arr[0] = VAL_ALLOC_SYM_STATIC(op);
 	arr[1] = a;
 	arr[2] = b;
 	arr[3] = c;

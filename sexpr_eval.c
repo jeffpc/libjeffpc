@@ -155,12 +155,12 @@ static struct builtin_fxn builtins[] = {
 	{ NULL, },
 };
 
-static struct builtin_fxn *fxnlookup_builtin(struct str *name)
+static struct builtin_fxn *fxnlookup_builtin(struct sym *name)
 {
 	size_t i;
 
 	for (i = 0; builtins[i].name; i++)
-		if (!strcmp(builtins[i].name, str_cstr(name)))
+		if (!strcmp(builtins[i].name, sym_cstr(name)))
 			return &builtins[i];
 
 	return NULL;
@@ -169,7 +169,7 @@ static struct builtin_fxn *fxnlookup_builtin(struct str *name)
 static struct val *eval_cons(struct val *expr, struct sexpr_eval_env *env)
 {
 	struct builtin_fxn *fxn;
-	struct str *name;
+	struct sym *name;
 	struct val *args;
 	struct val *op;
 
@@ -188,7 +188,7 @@ static struct val *eval_cons(struct val *expr, struct sexpr_eval_env *env)
 			      op->i);
 		case VT_STR:
 			panic("function name cannot be a VT_STR (\"%s\")",
-			      str_cstr(op->str));
+			      val_cstr(op));
 		case VT_BOOL:
 			panic("function name cannot be a VT_BOOL (%s)",
 			      op->b ? "true" : "false");
@@ -198,8 +198,7 @@ static struct val *eval_cons(struct val *expr, struct sexpr_eval_env *env)
 			break; /* ok */
 	}
 
-	name = str_getref(op->str);
-	val_putref(op);
+	name = val_cast_to_sym(op);
 
 	if (env->fxnlookup) {
 		fxn = env->fxnlookup(name, env);
@@ -211,10 +210,10 @@ static struct val *eval_cons(struct val *expr, struct sexpr_eval_env *env)
 	if (fxn)
 		goto found;
 
-	panic("unknown function '%s'", str_cstr(name));
+	panic("unknown function '%s'", sym_cstr(name));
 
 found:
-	str_putref(name);
+	sym_putref(name);
 
 	if (fxn->arglen != -1) {
 		size_t got;
@@ -248,22 +247,16 @@ struct val *sexpr_eval(struct val *expr,
 		case VT_BOOL:
 		case VT_CHAR:
 			return expr;
-		case VT_SYM: {
-			struct str *name;
-
+		case VT_SYM:
 			if (!env->symlookup)
 				panic("VT_SYM requires non-NULL symlookup "
 				      "function in the environment");
-
-			name = str_getref(expr->str);
-			val_putref(expr);
 
 			/*
 			 * Symbol lookup returns a value (not an expression)
 			 * therefore we don't want to evaluate it.
 			 */
-			return env->symlookup(name, env);
-		}
+			return env->symlookup(val_cast_to_sym(expr), env);
 		case VT_CONS:
 			return eval_cons(expr, env);
 	}

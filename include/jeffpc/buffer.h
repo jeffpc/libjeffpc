@@ -28,7 +28,7 @@
 #include <fcntl.h>
 
 #include <jeffpc/error.h>
-#include <jeffpc/str.h>
+#include <jeffpc/val.h>
 
 struct buffer;
 
