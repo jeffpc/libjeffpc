@@ -37,7 +37,7 @@ static void scgi_free(struct scgi *req);
 
 static void __attribute__((constructor)) init_scgisvc_subsys(void)
 {
-	scgisvc_cache = mem_cache_create("cgisvc-cache",
+	scgisvc_cache = mem_cache_create("scgisvc-cache",
 					 sizeof(struct scgi), 0);
 	ASSERT(!IS_ERR(scgisvc_cache));
 }
