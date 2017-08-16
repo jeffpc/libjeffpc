@@ -217,17 +217,17 @@ int _strsym_cmp(const struct val *a, const struct val *b)
 
 struct str *str_cat(size_t n, ...)
 {
-	const size_t nargs = n;
 	size_t totallen;
 	char *buf, *out;
+	struct val **vals;
 	size_t *len;
 	va_list ap;
 	size_t i;
 
-	if (!nargs)
+	if (!n)
 		return NULL;
 
-	if (nargs == 1) {
+	if (n == 1) {
 		struct val *val;
 		struct str *ret;
 
@@ -245,19 +245,21 @@ struct str *str_cat(size_t n, ...)
 
 	totallen = 0;
 	len = alloca(sizeof(size_t) * n);
+	vals = alloca(sizeof(struct val *) * n);
 
 	va_start(ap, n);
-	for (i = 0; i < nargs; i++) {
+	for (i = 0; i < n; i++) {
 		struct val *val = va_arg(ap, struct val *);
 
 		if (!val) {
 			len[i] = 0;
-			continue;
+			vals[i] = NULL;
+		} else {
+			len[i] = get_len(val);
+			vals[i] = val;
+
+			totallen += len[i];
 		}
-
-		len[i] = get_len(val);
-
-		totallen += len[i];
 	}
 	va_end(ap);
 
@@ -268,9 +270,8 @@ struct str *str_cat(size_t n, ...)
 
 	out = buf;
 
-	va_start(ap, n);
-	for (i = 0; i < nargs; i++) {
-		struct val *val = va_arg(ap, struct val *);
+	for (i = 0; i < n; i++) {
+		struct val *val = vals[i];
 
 		if (!val)
 			continue;
@@ -281,7 +282,6 @@ struct str *str_cat(size_t n, ...)
 
 		val_putref(val);
 	}
-	va_end(ap);
 
 	return STR_ALLOC(buf);
 }
