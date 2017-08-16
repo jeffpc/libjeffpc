@@ -225,7 +225,7 @@ struct str *str_cat(size_t n, ...)
 	size_t i;
 
 	if (!n)
-		return NULL;
+		return &empty_string;
 
 	if (n == 1) {
 		struct val *val;
