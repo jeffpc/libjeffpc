@@ -66,7 +66,7 @@ void sexpr_error2(const char *e, const char *yytext)
 document : tok			{ data->output = $1; }
 	 ;
 
-tok : SYMBOL			{ $$ = str_cast_to_val($1); }
+tok : SYMBOL			{ $$ = VAL_DUP_SYM(str_cstr($1)); str_putref($1); }
     | STRING			{ $$ = str_cast_to_val($1); }
     | NUMBER			{ $$ = VAL_ALLOC_INT($1); }
     | BOOL			{ $$ = VAL_ALLOC_BOOL($1); }
