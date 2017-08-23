@@ -175,7 +175,7 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 	static struct str empty = STR_STATIC_INITIALIZER("()");
 	struct str *tmp;
 
-	if (!lv)
+	if (sexpr_is_null(lv))
 		return &empty;
 
 	switch (lv->type) {
