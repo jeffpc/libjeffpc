@@ -27,57 +27,102 @@
 #include <jeffpc/val.h>
 #include <jeffpc/io.h>
 
-static int onefile(char *ibuf, size_t len)
+static void fail(const char *fmt, ...)
 {
+	va_list ap;
+
+	fprintf(stderr, "TEST FAILED: ");
+
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
+
+	fprintf(stderr, "\n");
+
+	exit(1);
+}
+
+static void trim(char *ptr)
+{
+	size_t len = strlen(ptr);
+
+	if (!len)
+		return;
+
+	if (ptr[len - 1] == '\n')
+		ptr[len - 1] = '\0';
+}
+
+static void check_file(struct val *got, char *fname, bool raw)
+{
+	const char *pfx = raw ? "raw   " : "pretty";
+	struct str *dumped;
+	char *exp;
+
+	exp = read_file(fname);
+	if (IS_ERR(exp))
+		fail("failed to read expected file (%s): %s", fname,
+		     xstrerror(PTR_ERR(exp)));
+
+	trim(exp);
+
+	fprintf(stderr, "%s exp: %s\n", pfx, exp);
+
+	dumped = sexpr_dump(got, raw);
+	if (IS_ERR(dumped))
+		fail("failed to dump val: %s", xstrerror(PTR_ERR(dumped)));
+
+	fprintf(stderr, "%s got: %s\n", pfx, str_cstr(dumped));
+
+	if (strcmp(str_cstr(dumped), exp))
+		fail("mismatch!");
+
+	free(exp);
+
+	str_putref(dumped);
+}
+
+static void onefile(char *fname)
+{
+	char expfname[FILENAME_MAX];
 	struct val *lv;
-	int ret;
+	char *in;
 
-	lv = sexpr_parse(ibuf, len);
+	fprintf(stderr, "Checking %s...\n", fname);
+
+	in = read_file(fname);
+	if (IS_ERR(in))
+		fail("failed to read input (%s)", xstrerror(PTR_ERR(in)));
+
+	trim(in);
+
+	fprintf(stderr, "input     : %s\n", in);
+
+	lv = sexpr_parse(in, strlen(in));
 	if (IS_ERR(lv))
-		return PTR_ERR(lv);
+		fail("failed to parse input: %s", xstrerror(PTR_ERR(lv)));
 
-	ret = sexpr_dump_file(stdout, lv, false);
+	free(in);
 
-	if (!ret)
-		printf("\n");
+	/* replace .lisp with .raw & check it*/
+	strcpy(expfname, fname);
+	strcpy(expfname + strlen(expfname) - 4, "raw");
+	check_file(lv, expfname, true);
+
+	/* replace .lisp with .txt & check it*/
+	strcpy(expfname, fname);
+	strcpy(expfname + strlen(expfname) - 4, "txt");
+	check_file(lv, expfname, false);
 
 	val_putref(lv);
-
-	return ret;
 }
 
 int main(int argc, char **argv)
 {
-	char *in;
 	int i;
-	int result;
 
-	result = 0;
+	for (i = 1; i < argc; i++)
+		onefile(argv[i]);
 
-	for (i = 1; i < argc; i++) {
-		int ret;
-
-		fprintf(stderr, "Checking %s...", argv[i]);
-
-		in = read_file(argv[i]);
-		if (IS_ERR(in)) {
-			fprintf(stderr, "failed to read input (%s)\n",
-				xstrerror(PTR_ERR(in)));
-			result = 1;
-			continue;
-		}
-
-		ret = onefile(in, strlen(in));
-		if (ret) {
-			fprintf(stderr, "failed to parse (%s)\n",
-				xstrerror(ret));
-			result = 1;
-		} else {
-			fprintf(stderr, "ok.\n");
-		}
-
-		free(in);
-	}
-
-	return result;
+	return 0;
 }
