@@ -208,6 +208,7 @@ JEFFPC_0.10 {
 		val_alloc_cons;
 		val_alloc_int;
 		val_alloc_null;
+		val_empty_cons;
 
 		# urldecode
 		urldecode;

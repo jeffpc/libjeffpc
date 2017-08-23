@@ -217,20 +217,24 @@ struct val *val_alloc_blob_static(const void *ptr, size_t size)
 	return __val_alloc_blob((void *) ptr, size, false);
 }
 
+struct val *val_empty_cons(void)
+{
+	/*
+	 * Cast away the const - we define the static as const to get it
+	 * into .rodata, but we have to drop the const since everything
+	 * expects struct val to be writable (because refcounts modify it).
+	 * In this case, we won't get any modifications because we're marked
+	 * as static.
+	 */
+	return (struct val *) &val_cons_empty;
+}
+
 struct val *val_alloc_cons(struct val *head, struct val *tail)
 {
 	struct val *val;
 
-	if (!head && !tail) {
-		/*
-		 * Cast away the const - we define the static as const to
-		 * get it into .rodata, but we have to drop the const since
-		 * everything expects struct val to be writable (because
-		 * refcounts modify it).  In this case, we won't get any
-		 * modifications because we're marked as static.
-		 */
-		return (struct val *) &val_cons_empty;
-	}
+	if (!head && !tail)
+		return val_empty_cons();
 
 	val = __val_alloc(VT_CONS);
 	if (IS_ERR(val)) {

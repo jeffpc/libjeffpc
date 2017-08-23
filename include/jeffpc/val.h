@@ -127,6 +127,9 @@ extern struct val *val_alloc_null(void);
 /* val_alloc_cons always consume the passed in references */
 extern struct val *val_alloc_cons(struct val *head, struct val *tail);
 
+/* assorted preallocated values */
+extern struct val *val_empty_cons(void);
+
 /*
  * Passed in string must be freed by the str code.  (I.e., we're adopting
  * it.)
