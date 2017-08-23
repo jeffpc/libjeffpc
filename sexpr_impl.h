@@ -26,9 +26,11 @@
 #include <jeffpc/sexpr.h>
 #include <jeffpc/int.h>
 
+#include "val_impl.h"
+
 static inline bool sexpr_is_null(struct val *v)
 {
-	return !v || (v->type == VT_CONS && !v->cons.head && !v->cons.tail);
+	return val_is_null_cons(v);
 }
 
 struct sexpr_parser_state {

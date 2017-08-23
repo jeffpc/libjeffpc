@@ -27,4 +27,9 @@
 
 extern struct val *__val_alloc(enum val_type type);
 
+static inline bool val_is_null_cons(struct val *v)
+{
+	return !v || (v->type == VT_CONS && !v->cons.head && !v->cons.tail);
+}
+
 #endif
