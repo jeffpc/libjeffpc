@@ -75,7 +75,7 @@ tok : SYMBOL			{ $$ = str_cast_to_val($1); }
     | list			{ $$ = $1; }
     | '\'' tok			{ $$ = VAL_ALLOC_CONS(
                                          sym_cast_to_val(STATIC_SYM("quote")),
-				         VAL_ALLOC_CONS($2, NULL)); }
+				         VAL_ALLOC_CONS($2, val_empty_cons())); }
     ;
 
 /*
@@ -83,10 +83,10 @@ tok : SYMBOL			{ $$ = str_cast_to_val($1); }
  * recursively.
  */
 toklist : tok toklist		{ $$ = VAL_ALLOC_CONS($1, $2); }
-	| tok			{ $$ = VAL_ALLOC_CONS($1, NULL); }
+	| tok			{ $$ = VAL_ALLOC_CONS($1, val_empty_cons()); }
 	;
 
-list : '(' ')'			{ $$ = VAL_ALLOC_CONS(NULL, NULL); }
+list : '(' ')'			{ $$ = val_empty_cons(); }
      | '(' toklist ')'		{ $$ = $2; }
      | '(' tok '.' tok ')'	{ $$ = VAL_ALLOC_CONS($2, $4); }
      ;

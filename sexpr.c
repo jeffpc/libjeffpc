@@ -286,7 +286,7 @@ struct val *sexpr_array_to_list(struct val **vals, size_t nvals)
 	struct val *tmp;
 
 	if (!nvals)
-		return VAL_ALLOC_CONS(NULL, NULL);
+		return val_empty_cons();
 
 	for (; nvals > 0; nvals--, last = tmp)
 		tmp = VAL_ALLOC_CONS(vals[nvals - 1], last);
