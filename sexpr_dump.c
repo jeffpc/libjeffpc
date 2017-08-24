@@ -27,6 +27,8 @@
 
 #include "sexpr_impl.h"
 
+static struct str *do_sexpr_dump(struct val *lv, bool raw, bool wrap);
+
 static char *escape_str(const char *in)
 {
 	char *out, *tmp;
@@ -94,89 +96,13 @@ static char *escape_str(const char *in)
 	return out;
 }
 
-static inline int dump_cons_parts(struct val *head, struct str **hstr,
-				  struct val *tail, struct str **tstr,
-				  bool raw)
-{
-	struct str *h, *t;
-
-	/* pacify gcc */
-	*hstr = NULL;
-	*tstr = NULL;
-
-	h = sexpr_dump(head, raw);
-	if (IS_ERR(h))
-		return PTR_ERR(h);
-
-	t = sexpr_dump(tail, raw);
-	if (IS_ERR(t)) {
-		str_putref(h);
-		return PTR_ERR(t);
-	}
-
-	*hstr = h;
-	*tstr = t;
-
-	return 0;
-}
-
-static struct str *dump_cons(struct val *lv, bool raw)
-{
-	static struct str dot = STR_STATIC_INITIALIZER(" . ");
-	static struct str space = STR_STATIC_CHAR_INITIALIZER(' ');
-	struct val *head = lv->cons.head;
-	struct val *tail = lv->cons.tail;
-	struct str *hstr;
-	struct str *tstr;
-	int ret;
-
-	if (raw) {
-		ret = dump_cons_parts(head, &hstr, tail, &tstr, true);
-		if (ret)
-			return ERR_PTR(ret);
-
-		return str_cat(3, hstr, &dot, tstr);
-	}
-
-	/* empty cons */
-	if (!head && !tail)
-		return str_empty_string();
-
-	/* last element of the list */
-	if (head && !tail)
-		return sexpr_dump(head, raw);
-
-	/*
-	 * We have a tail.  This means that we are either just a bare cons
-	 * or an internal element of a list.  Bare cons cells separate the
-	 * head from the tail with a dot, while internal list elements use a
-	 * space.
-	 */
-
-	ret = dump_cons_parts(head, &hstr, tail, &tstr, false);
-	if (ret)
-		return ERR_PTR(ret);
-
-	if (tail->type == VT_CONS)
-		return str_cat(3, hstr, &space, tstr);
-	else
-		return str_cat(3, hstr, &dot, tstr);
-}
-
-struct str *sexpr_dump(struct val *lv, bool raw)
+static struct str *dump_atom(struct val *lv)
 {
 	static struct str dquote = STR_STATIC_CHAR_INITIALIZER('"');
-	static struct str squote = STR_STATIC_CHAR_INITIALIZER('\'');
 	static struct str null = STR_STATIC_INITIALIZER("#n");
 	static struct str poundt = STR_STATIC_INITIALIZER("#t");
 	static struct str poundf = STR_STATIC_INITIALIZER("#f");
-	static struct str oparen = STR_STATIC_CHAR_INITIALIZER('(');
-	static struct str cparen = STR_STATIC_CHAR_INITIALIZER(')');
-	static struct str empty = STR_STATIC_INITIALIZER("()");
 	struct str *tmp;
-
-	if (sexpr_is_null(lv))
-		return &empty;
 
 	switch (lv->type) {
 		case VT_SYM:
@@ -198,37 +124,143 @@ struct str *sexpr_dump(struct val *lv, bool raw)
 				return str_printf("#\\u%04"PRIX64, lv->i);
 		case VT_INT:
 			return str_printf("%"PRIu64, lv->i);
-		case VT_CONS: {
-			struct val *head = lv->cons.head;
-			struct val *tail = lv->cons.tail;
-
-			/* handle quoting */
-			if (!raw && head && (head->type == VT_SYM) &&
-			    !strcmp(val_cstr(head), "quote")) {
-				/* we're dealing with a (quote) */
-				if (sexpr_is_null(tail))
-					return str_cat(2, &squote, &empty);
-
-				tmp = dump_cons(tail, raw);
-				if (IS_ERR(tmp))
-					return tmp;
-
-				/* we're dealing with a (quote ...) */
-				return str_cat(2, &squote, tmp);
-			}
-
-			tmp = dump_cons(lv, raw);
-			if (IS_ERR(tmp))
-				return tmp;
-
-			/* nothing to quote */
-			return str_cat(3, &oparen, tmp, &cparen);
-		}
+		case VT_CONS:
+			panic("%s: VT_CONS is not an atom", __func__);
 		case VT_BLOB:
 			return ERR_PTR(-ENOTSUP);
 	}
 
 	panic("%s: unknown val type: %u", __func__, lv->type);
+}
+
+static inline int dump_cons_parts(struct val *head, struct str **hstr,
+				  struct val *tail, struct str **tstr,
+				  bool raw)
+{
+	struct str *h, *t;
+
+	/* pacify gcc */
+	*hstr = NULL;
+	*tstr = NULL;
+
+	/* the head needs to always be wrapped */
+	h = do_sexpr_dump(head, raw, true);
+	if (IS_ERR(h))
+		return PTR_ERR(h);
+
+	/* the tail needs to be wrapped only when dumping raw */
+	t = do_sexpr_dump(tail, raw, raw);
+	if (IS_ERR(t)) {
+		str_putref(h);
+		return PTR_ERR(t);
+	}
+
+	*hstr = h;
+	*tstr = t;
+
+	return 0;
+}
+
+static struct str *dump_cons_pretty_quote(struct val *lv)
+{
+	static struct str squote = STR_STATIC_CHAR_INITIALIZER('\'');
+	struct str *tmp;
+
+	tmp = do_sexpr_dump(lv, false, false);
+	if (IS_ERR(tmp))
+		return tmp;
+
+	return str_cat(2, &squote, tmp);
+}
+
+static struct str *dump_cons_pretty(struct val *lv, bool wrap)
+{
+	static struct str oparen = STR_STATIC_CHAR_INITIALIZER('(');
+	static struct str cparen = STR_STATIC_CHAR_INITIALIZER(')');
+	static struct str dot = STR_STATIC_INITIALIZER(" . ");
+	static struct str space = STR_STATIC_INITIALIZER(" ");
+	struct val *head = lv->cons.head;
+	struct val *tail = lv->cons.tail;
+	struct str *hstr;
+	struct str *tstr;
+	struct str *tmp;
+	int ret;
+
+	ASSERT(!sexpr_is_null(lv));
+	ASSERT3U(lv->type, ==, VT_CONS);
+
+	if (head && (head->type == VT_SYM) && !strcmp(val_cstr(head), "quote"))
+		/*
+		 * quote . tail		-> 'tail
+		 *
+		 * note: we don't wrap
+		 */
+		return dump_cons_pretty_quote(tail);
+
+	ret = dump_cons_parts(head, &hstr, tail, &tstr, false);
+	if (ret)
+		return ERR_PTR(ret);
+
+	if (sexpr_is_null(tail)) {
+		/* head . ()		-> head */
+		str_putref(tstr);
+		tmp = hstr;
+	} else if (tail->type == VT_CONS) {
+		/* head . (x . y)	-> head x . y */
+		tmp = str_cat(3, hstr, &space, tstr);
+	} else {
+		/* head . tail		-> head . tail */
+		tmp = str_cat(3, hstr, &dot, tstr);
+	}
+
+	return wrap ? str_cat(3, &oparen, tmp, &cparen) : tmp;
+}
+
+static struct str *dump_cons_raw(struct val *lv)
+{
+	static struct str oparen = STR_STATIC_CHAR_INITIALIZER('(');
+	static struct str cparen = STR_STATIC_CHAR_INITIALIZER(')');
+	static struct str dot = STR_STATIC_INITIALIZER(" . ");
+	struct str *hstr;
+	struct str *tstr;
+	int ret;
+
+	ret = dump_cons_parts(lv->cons.head, &hstr, lv->cons.tail, &tstr, true);
+	if (ret)
+		return ERR_PTR(ret);
+
+	return str_cat(5, &oparen, hstr, &dot, tstr, &cparen);
+}
+
+static struct str *do_sexpr_dump(struct val *lv, bool raw, bool wrap)
+{
+	static struct str empty = STR_STATIC_INITIALIZER("()");
+
+	if (sexpr_is_null(lv))
+		return &empty;
+
+	switch (lv->type) {
+		case VT_SYM:
+		case VT_STR:
+		case VT_NULL:
+		case VT_BOOL:
+		case VT_CHAR:
+		case VT_INT:
+		case VT_BLOB:
+			return dump_atom(lv);
+		case VT_CONS:
+			if (raw)
+				return dump_cons_raw(lv);
+
+			return dump_cons_pretty(lv, wrap);
+	}
+
+	panic("%s: unknown val type: %u", __func__, lv->type);
+}
+
+struct str *sexpr_dump(struct val *lv, bool raw)
+{
+	return do_sexpr_dump(lv, raw, true);
 }
 
 int sexpr_dump_file(FILE *out, struct val *lv, bool raw)
