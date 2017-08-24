@@ -104,6 +104,7 @@ add_library(jeffpc SHARED
 	qstring.c
 	rand.c
 	sexpr.c
+	sexpr_dump.c
 	sexpr_eval.c
 	${FLEX_sexpr_OUTPUTS} ${BISON_sexpr_OUTPUTS}
 	slab.c
