@@ -233,11 +233,8 @@ struct val *val_alloc_cons(struct val *head, struct val *tail)
 {
 	struct val *val;
 
-	if (val_is_null_cons(head) && val_is_null_cons(tail)) {
-		val_putref(head);
-		val_putref(tail);
+	if (!head && !tail)
 		return val_empty_cons();
-	}
 
 	val = __val_alloc(VT_CONS);
 	if (IS_ERR(val)) {
