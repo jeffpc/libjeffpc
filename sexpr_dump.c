@@ -118,7 +118,11 @@ static struct str *dump_atom(struct val *lv)
 		case VT_BOOL:
 			return lv->b ? &poundt : &poundf;
 		case VT_CHAR:
-			if (isprint(lv->i))
+			if (lv->i == '\0')
+				return STATIC_STR("#\\nul");
+			else if (lv->i == ' ')
+				return STATIC_STR("#\\space");
+			else if (isprint(lv->i))
 				return str_printf("#\\%c", (char) lv->i);
 			else
 				return str_printf("#\\u%04"PRIX64, lv->i);

@@ -147,6 +147,9 @@ static int getutf8(const char *str, size_t len, uint64_t *out)
 #x[0-9a-fA-F]+		{ return getint(yytext + 2, &yylval->i, 16, "integer", NUMBER); }
 #\\u[0-9a-fA-F]+	{ return getint(yytext + 3, &yylval->i, 16, "character", CHAR); }
 
+#\\nul			{ yylval->i = '\0'; return CHAR; }
+#\\space		{ yylval->i = ' '; return CHAR; }
+
 	/* #\<unicode char> */
 #\\[\x00-\x7f]			{ return getutf8(yytext + 2, 1, &yylval->i); }
 #\\[\x80-\xbf]			{ sexpr_error2("sexpr text contains illegal UTF-8 byte", yytext); yyterminate(); }
