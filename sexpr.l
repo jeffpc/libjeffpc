@@ -57,6 +57,54 @@ static int getint(const char *str, uint64_t *i, int base, const char *type,
 
 	return okretval;
 }
+
+static int getutf8(const char *str, size_t len, uint64_t *out)
+{
+	const uint8_t *tmp = (const uint8_t *) str;
+	uint64_t c;
+
+	/* process the first byte */
+	c = *tmp;
+
+	switch (len) {
+		case 1:
+			ASSERT3U(c, >=, 0x00);
+			ASSERT3U(c, <=, 0x7f);
+			c &= 0x7f;
+			break;
+		case 2:
+			ASSERT3U(c, >=, 0xc0);
+			ASSERT3U(c, <=, 0xdf);
+			c &= 0x1f;
+			break;
+		case 3:
+			ASSERT3U(c, >=, 0xe0);
+			ASSERT3U(c, <=, 0xef);
+			c &= 0x0f;
+			break;
+		case 4:
+			ASSERT3U(c, >=, 0xf0);
+			ASSERT3U(c, <=, 0xf7);
+			c &= 0x07;
+			break;
+		default:
+			return ERROR;
+	}
+
+	/* process remaining bytes */
+	for (len--, tmp++; len; len--, tmp++) {
+		uint64_t cur = *tmp;
+
+		ASSERT3U(cur, >=, 0x80);
+		ASSERT3U(cur, <=, 0xbf);
+
+		c = (c << 6) | (*tmp & 0x3f);
+	}
+
+	*out = c;
+
+	return CHAR;
+}
 %}
 
 %x string
@@ -98,8 +146,15 @@ static int getint(const char *str, uint64_t *i, int base, const char *type,
 0x[0-9a-fA-F]+		{ return getint(yytext, &yylval->i, 16, "integer", NUMBER); }
 #x[0-9a-fA-F]+		{ return getint(yytext + 2, &yylval->i, 16, "integer", NUMBER); }
 #\\u[0-9a-fA-F]+	{ return getint(yytext + 3, &yylval->i, 16, "character", CHAR); }
-#\\[^ ]			{ yylval->i = yytext[2]; return CHAR; }
-	/* TODO: handle '#\<utf-8>' */
+
+	/* #\<unicode char> */
+#\\[\x00-\x7f]			{ return getutf8(yytext + 2, 1, &yylval->i); }
+#\\[\x80-\xbf]			{ sexpr_error2("sexpr text contains illegal UTF-8 byte", yytext); yyterminate(); }
+#\\[\xc0-\xdf][\x80-\xbf]	{ return getutf8(yytext + 2, 2, &yylval->i); }
+#\\[\xe0-\xef][\x80-\xbf]{2}	{ return getutf8(yytext + 2, 3, &yylval->i); }
+#\\[\xf0-\xf7][\x80-\xbf]{3}	{ return getutf8(yytext + 2, 4, &yylval->i); }
+	/* TODO: handle #\<unicode char><combining char> */
+
 [1-9][0-9]*		{ return getint(yytext, &yylval->i, 10, "integer", NUMBER); }
 [a-zA-Z+=|&*?_-]?[a-zA-Z0-9+=|&*?_-]* { yylval->s = STR_DUP(yytext); return SYMBOL; }
 [ \r\t]			{ /* ignore */ }
