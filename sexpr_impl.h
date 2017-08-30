@@ -28,11 +28,6 @@
 
 #include "val_impl.h"
 
-static inline bool sexpr_is_null(struct val *v)
-{
-	return val_is_null_cons(v);
-}
-
 struct sexpr_parser_state {
 	void *scanner;
 	const char *input;

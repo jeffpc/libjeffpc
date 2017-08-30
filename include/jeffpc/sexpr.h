@@ -77,6 +77,11 @@ extern bool sexpr_alist_lookup_bool(struct val *lv, const char *name, bool def,
 				    bool *found);
 extern struct val *sexpr_alist_lookup_list(struct val *lv, const char *name);
 
+static inline bool sexpr_is_null(struct val *v)
+{
+	return !v || (v->type == VT_CONS && !v->cons.head && !v->cons.tail);
+}
+
 static inline struct val *__sexpr_for_each_first(struct val *list)
 {
 	if (!list || list->type != VT_CONS)
