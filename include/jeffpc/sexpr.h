@@ -82,27 +82,48 @@ static inline bool sexpr_is_null(struct val *v)
 	return !v || (v->type == VT_CONS && !v->cons.head && !v->cons.tail);
 }
 
-static inline struct val *__sexpr_for_each_first(struct val *list)
+/*
+ * This is a helper, do not use it directly.  Instead use the sexpr_for_each
+ * macros.
+ */
+static inline void __sexpr_for_each(struct val *curcons,
+				    struct val *curtail,
+				    struct val **nextval,
+				    struct val **nextcons,
+				    bool ref)
 {
-	if (!list || list->type != VT_CONS)
-		return NULL;
+	if (sexpr_is_null(curtail) || (curtail->type != VT_CONS)) {
+		*nextcons = NULL;
+		*nextval  = NULL;
+	} else {
+		*nextcons = curtail;
+		*nextval  = curtail->cons.head;
+	}
 
-	return list->cons.head;
+	if (ref) {
+		val_getref(*nextcons);
+		val_putref(curcons);
+	}
 }
 
-static inline struct val *__sexpr_for_each_next(struct val *list)
-{
-	if (!list || list->type != VT_CONS)
-		return NULL;
-
-	return list->cons.tail;
-}
+/*
+ * Iterate over an s-expression list.
+ *
+ * sexpr_for_each consumes the passed in list, while sexpr_for_each_noref
+ * assumes that the list will not disappear from under it.
+ *
+ * Caution: using 'break' inside sexpr_for_each will result in a reference
+ * leak!
+ */
 
 #define sexpr_for_each(v, tmp, list) \
-	for (v = __sexpr_for_each_first(list), \
-	     tmp = __sexpr_for_each_next(v); \
+	for (__sexpr_for_each(list, list, &v, &tmp, true); \
 	     v; \
-	     v = __sexpr_for_each_first(tmp), \
-	     tmp = __sexpr_for_each_next(tmp))
+	     __sexpr_for_each(tmp, tmp->cons.tail, &v, &tmp, true))
+
+#define sexpr_for_each_noref(v, tmp, list) \
+	for (__sexpr_for_each(list, list, &v, &tmp, false); \
+	     v; \
+	     __sexpr_for_each(tmp, tmp->cons.tail, &v, &tmp, false))
 
 #endif

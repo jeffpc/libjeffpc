@@ -86,9 +86,8 @@ static inline void check_loop_tail(size_t got, size_t exp)
 
 static void test_check(struct val *list, size_t nitems, struct val **items)
 {
-	DO_CHECK(sexpr_for_each, list, items, nitems);
-
-	val_putref(list);
+	DO_CHECK(sexpr_for_each_noref, list, items, nitems);
+	DO_CHECK(sexpr_for_each,       list, items, nitems);
 }
 
 static void test_atoms(void)
