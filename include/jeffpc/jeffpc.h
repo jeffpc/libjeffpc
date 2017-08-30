@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ struct jeffpc_ops {
 	void (*assfail)(const char *a, const char *f, int l);
 	void (*assfail3)(const char *a, uintmax_t lv, const char *op,
 			 uintmax_t rv, const char *f, int l);
+	const char *(*get_session)(void);
 };
 
 extern void jeffpc_init(struct jeffpc_ops *ops);

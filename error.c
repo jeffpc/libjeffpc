@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2013-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -149,9 +149,18 @@ void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
 	abort();
 }
 
+static const char *get_session(void)
+{
+	if (!libops.get_session)
+		return "";
+
+	return libops.get_session();
+}
+
 void cmn_verr(enum errlevel level, const char *fmt, va_list ap)
 {
 	const char *levelstr;
+	const char *session;
 	unsigned long tid;
 	int loglevel;
 	bool panic;
@@ -196,6 +205,11 @@ void cmn_verr(enum errlevel level, const char *fmt, va_list ap)
 	vsnprintf(buf, sizeof(buf), fmt, ap);
 
 	/*
+	 * Get the session string.
+	 */
+	session = get_session();
+
+	/*
 	 * We are printing the thread ID as a 4-digit number. This will
 	 * allow systems that use small integers (e.g., Illumos) to have
 	 * short IDs.  Systems that use large integers (e.g., Linux) will
@@ -203,8 +217,8 @@ void cmn_verr(enum errlevel level, const char *fmt, va_list ap)
 	 * clustered around some big integer, they will very likely always
 	 * print as the same number of digits.
 	 */
-	jeffpc_log(loglevel, "[%04lx] %-5s %s\n", tid, levelstr, buf);
-	jeffpc_print(level, "[%04lx] %-5s %s\n", tid, levelstr, buf);
+	jeffpc_log(loglevel, "[%04lx]%s %-5s %s\n", tid, session, levelstr, buf);
+	jeffpc_print(level, "[%04lx]%s %-5s %s\n", tid, session, levelstr, buf);
 
 	if (panic) {
 		print_stacktrace(CE_CRIT, NULL);

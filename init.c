@@ -50,8 +50,9 @@ void jeffpc_init(struct jeffpc_ops *ops)
 		ops = &dummy;
 	}
 
-	SET_OP(print,    default_print);
-	SET_OP(log,      default_log);
-	SET_OP(assfail,  default_assfail);
-	SET_OP(assfail3, default_assfail3);
+	SET_OP(print,       default_print);
+	SET_OP(log,         default_log);
+	SET_OP(assfail,     default_assfail);
+	SET_OP(assfail3,    default_assfail3);
+	SET_OP(get_session, NULL);
 }
