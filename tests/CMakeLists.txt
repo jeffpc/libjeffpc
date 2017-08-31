@@ -35,6 +35,7 @@ build_test_bin_and_run(nvl)
 build_test_bin_and_run(nvl_pack)
 build_test_bin_and_run(padding)
 build_test_bin_and_run(sexpr_eval)
+build_test_bin_and_run(sexpr_iter)
 build_test_bin_and_run(urldecode)
 build_test_bin_and_run(version)
 
