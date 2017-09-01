@@ -30,7 +30,9 @@
 struct scgi;
 
 struct scgiops {
+	int (*init)(struct scgi *, void *);
 	void (*process)(struct scgi *, void *);
+	void (*deinit)(struct scgi *);
 };
 
 struct scgi {

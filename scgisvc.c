@@ -38,7 +38,7 @@ struct scgiargs {
 static struct mem_cache *scgisvc_cache;
 static atomic_t scgi_request_ids;
 
-static void scgi_free(struct scgi *req);
+static void scgi_free(struct scgi *req, bool init_failed);
 
 static void __attribute__((constructor)) init_scgisvc_subsys(void)
 {
@@ -282,9 +282,10 @@ static int scgi_write_body(struct scgi *req)
 	return xwrite(req->fd, req->response.body, req->response.bodylen);
 }
 
-static struct scgi *scgi_alloc(int fd, const struct scgiops *ops)
+static struct scgi *scgi_alloc(int fd, struct scgiargs *args)
 {
 	struct scgi *req;
+	int ret;
 
 	req = mem_cache_alloc(scgisvc_cache);
 	if (!req)
@@ -294,7 +295,7 @@ static struct scgi *scgi_alloc(int fd, const struct scgiops *ops)
 
 	req->id = atomic_inc(&scgi_request_ids);
 	req->fd = fd;
-	req->ops = ops;
+	req->ops = args->ops;
 
 	req->request.headers = nvl_alloc();
 	req->request.query = nvl_alloc();
@@ -307,15 +308,28 @@ static struct scgi *scgi_alloc(int fd, const struct scgiops *ops)
 
 	if (!req->request.headers || !req->request.query ||
 	    !req->response.headers) {
-		scgi_free(req);
-		return ERR_PTR(-ENOMEM);
+		ret = -ENOMEM;
+		goto err;
+	}
+
+	if (req->ops->init) {
+		ret = req->ops->init(req, args->private);
+		if (ret)
+			goto err;
 	}
 
 	return req;
+
+err:
+	scgi_free(req, true);
+	return ERR_PTR(ret);
 }
 
-static void scgi_free(struct scgi *req)
+static void scgi_free(struct scgi *req, bool init_failed)
 {
+	if (!init_failed && req->ops->deinit)
+		req->ops->deinit(req);
+
 	nvl_putref(req->request.headers);
 	nvl_putref(req->request.query);
 	nvl_putref(req->response.headers);
@@ -331,7 +345,7 @@ static void scgi_conn(int fd, struct socksvc_stats *sockstats, void *private)
 	struct scgi *req;
 	int ret;
 
-	req = scgi_alloc(fd, args->ops);
+	req = scgi_alloc(fd, private);
 	if (IS_ERR(req)) {
 		ret = PTR_ERR(req);
 		goto out;
@@ -366,7 +380,7 @@ static void scgi_conn(int fd, struct socksvc_stats *sockstats, void *private)
 	req->scgi_stats.write_body_time = gettime();
 
 out_free:
-	scgi_free(req);
+	scgi_free(req, false);
 
 out:
 	if (ret)
