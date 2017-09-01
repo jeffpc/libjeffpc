@@ -31,7 +31,7 @@ struct scgi;
 
 struct scgiops {
 	int (*init)(struct scgi *, void *);
-	void (*process)(struct scgi *, void *);
+	void (*process)(struct scgi *);
 	void (*deinit)(struct scgi *);
 };
 
@@ -41,6 +41,7 @@ struct scgi {
 	int fd;
 
 	const struct scgiops *ops;
+	void *private;
 
 	/* request */
 	struct {

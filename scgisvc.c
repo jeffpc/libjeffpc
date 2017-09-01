@@ -341,7 +341,6 @@ static void scgi_free(struct scgi *req, bool init_failed)
 
 static void scgi_conn(int fd, struct socksvc_stats *sockstats, void *private)
 {
-	struct scgiargs *args = private;
 	struct scgi *req;
 	int ret;
 
@@ -365,7 +364,7 @@ static void scgi_conn(int fd, struct socksvc_stats *sockstats, void *private)
 
 	req->scgi_stats.read_body_time = gettime();
 
-	req->ops->process(req, args->private);
+	req->ops->process(req);
 
 	req->scgi_stats.compute_time = gettime();
 
