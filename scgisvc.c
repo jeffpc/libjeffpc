@@ -282,7 +282,7 @@ static int scgi_write_body(struct scgi *req)
 	return xwrite(req->fd, req->response.body, req->response.bodylen);
 }
 
-static struct scgi *scgi_alloc(int fd)
+static struct scgi *scgi_alloc(int fd, const struct scgiops *ops)
 {
 	struct scgi *req;
 
@@ -294,6 +294,7 @@ static struct scgi *scgi_alloc(int fd)
 
 	req->id = atomic_inc(&scgi_request_ids);
 	req->fd = fd;
+	req->ops = ops;
 
 	req->request.headers = nvl_alloc();
 	req->request.query = nvl_alloc();
@@ -330,13 +331,12 @@ static void scgi_conn(int fd, struct socksvc_stats *sockstats, void *private)
 	struct scgi *req;
 	int ret;
 
-	req = scgi_alloc(fd);
+	req = scgi_alloc(fd, args->ops);
 	if (IS_ERR(req)) {
 		ret = PTR_ERR(req);
 		goto out;
 	}
 
-	req->ops = args->ops;
 	req->conn_stats = *sockstats;
 
 	ret = scgi_read_headers(req);
