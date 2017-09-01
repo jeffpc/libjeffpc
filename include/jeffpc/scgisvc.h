@@ -27,10 +27,18 @@
 #include <jeffpc/nvl.h>
 #include <jeffpc/socksvc.h>
 
+struct scgi;
+
+struct scgiops {
+	void (*process)(struct scgi *, void *);
+};
+
 struct scgi {
 	uint32_t id;
 
 	int fd;
+
+	const struct scgiops *ops;
 
 	/* request */
 	struct {
@@ -64,6 +72,6 @@ struct scgi {
 };
 
 extern int scgisvc(const char *host, uint16_t port, int nthreads,
-		   void (*func)(struct scgi *, void *), void *private);
+		   const struct scgiops *ops, void *private);
 
 #endif
