@@ -30,6 +30,11 @@
 #include <jeffpc/scgi.h>
 #include <jeffpc/qstring.h>
 
+struct scgiargs {
+	void (*func)(struct scgi *, void *);
+	void *private;
+};
+
 static struct mem_cache *scgisvc_cache;
 static atomic_t scgi_request_ids;
 
@@ -321,7 +326,7 @@ static void scgi_free(struct scgi *req)
 
 static void scgi_conn(int fd, struct socksvc_stats *sockstats, void *private)
 {
-	void (*func)(struct scgi *, void *) = private;
+	struct scgiargs *args = private;
 	struct scgi *req;
 	int ret;
 
@@ -345,7 +350,7 @@ static void scgi_conn(int fd, struct socksvc_stats *sockstats, void *private)
 
 	req->scgi_stats.read_body_time = gettime();
 
-	func(req, NULL);
+	args->func(req, args->private);
 
 	req->scgi_stats.compute_time = gettime();
 
@@ -370,12 +375,10 @@ out:
 int scgisvc(const char *host, uint16_t port, int nthreads,
 	    void (*func)(struct scgi *, void *), void *private)
 {
-	int ret;
+	struct scgiargs args = {
+		.func = func,
+		.private = private,
+	};
 
-	if (private)
-		return -EINVAL; /* FIXME: not yet supported */
-
-	ret = socksvc(host, port, nthreads, scgi_conn, func);
-
-	return ret;
+	return socksvc(host, port, nthreads, scgi_conn, &args);
 }
