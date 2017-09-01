@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@
 #include <string.h>
 
 #include <jeffpc/version.h>
+#include <jeffpc/error.h>
 
 static void test(void);
 
@@ -34,7 +35,7 @@ static void test(void);
  * Do not make this static or the compiler may complain about an unused
  * static function.
  */
-void fail(const char *fmt, ...)
+void NORETURN fail(const char *fmt, ...)
 {
 	va_list ap;
 
