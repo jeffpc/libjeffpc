@@ -217,8 +217,8 @@ void cmn_verr(enum errlevel level, const char *fmt, va_list ap)
 	 * clustered around some big integer, they will very likely always
 	 * print as the same number of digits.
 	 */
-	jeffpc_log(loglevel, "[%04lx]%s %-5s %s\n", tid, session, levelstr, buf);
-	jeffpc_print(level, "[%04lx]%s %-5s %s\n", tid, session, levelstr, buf);
+	jeffpc_log(loglevel, "[%04lx] %-5s%s %s\n", tid, levelstr, session, buf);
+	jeffpc_print(level, "[%04lx] %-5s%s %s\n", tid, levelstr, session, buf);
 
 	if (panic) {
 		print_stacktrace(CE_CRIT, NULL);
