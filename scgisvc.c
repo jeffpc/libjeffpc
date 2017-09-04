@@ -346,21 +346,22 @@ static void scgi_conn(int fd, struct socksvc_stats *sockstats, void *private)
 
 	req = scgi_alloc(fd, private);
 	if (IS_ERR(req)) {
-		ret = PTR_ERR(req);
-		goto out;
+		cmn_err(CE_INFO, "%s failed to alloc: %s", __func__,
+			xstrerror(PTR_ERR(req)));
+		return;
 	}
 
 	req->conn_stats = *sockstats;
 
 	ret = scgi_read_headers(req);
 	if (ret)
-		goto out_free;
+		goto out;
 
 	req->scgi_stats.read_header_time = gettime();
 
 	ret = scgi_read_body(req);
 	if (ret)
-		goto out_free;
+		goto out;
 
 	req->scgi_stats.read_body_time = gettime();
 
@@ -370,7 +371,7 @@ static void scgi_conn(int fd, struct socksvc_stats *sockstats, void *private)
 
 	ret = scgi_write_headers(req);
 	if (ret)
-		goto out_free;
+		goto out;
 
 	req->scgi_stats.write_header_time = gettime();
 
@@ -378,12 +379,15 @@ static void scgi_conn(int fd, struct socksvc_stats *sockstats, void *private)
 
 	req->scgi_stats.write_body_time = gettime();
 
-out_free:
-	scgi_free(req, false);
-
 out:
+	/*
+	 * We want to print this before freeing the request so that the
+	 * error message includes any potential session information.
+	 */
 	if (ret)
 		cmn_err(CE_INFO, "%s failed: %s", __func__, xstrerror(ret));
+
+	scgi_free(req, false);
 }
 
 int scgisvc(const char *host, uint16_t port, int nthreads,
