@@ -90,7 +90,13 @@ extern struct nvlist *nvl_alloc(void);
 extern void nvl_free(struct nvlist *nvl);
 extern int nvl_merge(struct nvlist *dest, struct nvlist *src);
 extern void nvl_dump_file(FILE *out, struct nvlist *nvl);
-extern int nvl_convert(struct nvlist *nvl, const struct nvl_convert_info *table);
+
+/*
+ * If convert_all is true, then all errors except -ENOTSUP encountered
+ * during the conversion are ignored.
+ */
+extern int nvl_convert(struct nvlist *nvl, const struct nvl_convert_info *table,
+		       bool convert_all);
 
 /* serialization & deserialization */
 extern ssize_t nvl_size(struct nvlist *nvl, enum nvformat format);

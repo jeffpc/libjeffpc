@@ -93,7 +93,12 @@ static int cvt_string(struct nvlist *nvl, const struct nvpair *pair,
 	return ret;
 }
 
-int nvl_convert(struct nvlist *nvl, const struct nvl_convert_info *table)
+#define CHECK_ERROR(e, cvtall) \
+	((!(cvtall) && (e)) || \
+	 ((cvtall) && ((e) == -ENOTSUP)))
+
+int nvl_convert(struct nvlist *nvl, const struct nvl_convert_info *table,
+		bool convert_all)
 {
 	/*
 	 * If we weren't given a table, we have nothing to do.
@@ -103,14 +108,16 @@ int nvl_convert(struct nvlist *nvl, const struct nvl_convert_info *table)
 
 	for (; table->name; table++) {
 		const struct nvpair *pair;
-		int ret;
+		int ret = -ENOTSUP;
 
 		pair = nvl_lookup(nvl, table->name);
 		if (IS_ERR(pair)) {
-			if (PTR_ERR(pair) == -ENOENT)
+			ret = PTR_ERR(pair);
+
+			if ((ret == -ENOENT) || !CHECK_ERROR(ret, convert_all))
 				continue;
 
-			return PTR_ERR(pair);
+			return ret;
 		}
 
 		switch (nvpair_type(pair)) {
@@ -127,7 +134,7 @@ int nvl_convert(struct nvlist *nvl, const struct nvl_convert_info *table)
 				break;
 		}
 
-		if (ret)
+		if (CHECK_ERROR(ret, convert_all))
 			return ret;
 	}
 

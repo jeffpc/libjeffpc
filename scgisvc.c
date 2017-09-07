@@ -162,7 +162,7 @@ static int parse_headers(struct scgi *req)
 	uint64_t i;
 	int ret;
 
-	ret = nvl_convert(req->request.headers, scgi_convert_headers);
+	ret = nvl_convert(req->request.headers, scgi_convert_headers, false);
 	if (ret)
 		return ret;
 
