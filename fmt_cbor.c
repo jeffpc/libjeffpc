@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+#include <jeffpc/mem.h>
 #include <jeffpc/cbor.h>
 #include <jeffpc/nvl.h>
 
@@ -358,4 +359,417 @@ int cbor_peek_type(struct buffer *buffer, enum val_type *type)
 	}
 
 	return 0;
+}
+
+/*
+ * unpack
+ */
+
+static int read_cbor_type(struct buffer *buffer, enum major_type *type,
+			  uint8_t *extra)
+{
+	uint8_t byte;
+	ssize_t ret;
+
+	ret = buffer_read(buffer, &byte, 1);
+	if (ret < 1)
+		return ret ? ret : -EINVAL;
+
+	*type = byte >> 5;
+	*extra = byte & 0x1f;
+
+	return 0;
+}
+
+static int get_addl_bytes(struct buffer *buffer, uint8_t extra, uint64_t *out)
+{
+	const void *ptr;
+	ssize_t ret;
+	size_t size;
+
+	switch (extra) {
+		case ADDL_UINT8:
+			size = 1;
+			break;
+		case ADDL_UINT16:
+			size = 2;
+			break;
+		case ADDL_UINT32:
+			size = 4;
+			break;
+		case ADDL_UINT64:
+			size = 8;
+			break;
+		default:
+			if (extra > 23)
+				return -EINVAL;
+
+			size = 0;
+			break;
+	}
+
+	if (buffer_remain(buffer) < size)
+		return -EINVAL;
+
+	ptr = buffer_data_current(buffer);
+
+	switch (size) {
+		case 0:
+			*out = extra;
+			break;
+		case 1:
+			*out = be8_to_cpu_unaligned(ptr);
+			break;
+		case 2:
+			*out = be16_to_cpu_unaligned(ptr);
+			break;
+		case 4:
+			*out = be32_to_cpu_unaligned(ptr);
+			break;
+		case 8:
+			*out = be64_to_cpu_unaligned(ptr);
+			break;
+	}
+
+	ret = buffer_seek(buffer, size, SEEK_CUR);
+
+	return (ret < 0) ? ret : 0;
+}
+
+static int unpack_cbor_int(struct buffer *buffer, enum major_type expected_type,
+			   uint64_t *out)
+{
+	enum major_type type;
+	uint8_t extra;
+	int ret;
+
+	ret = read_cbor_type(buffer, &type, &extra);
+	if (ret)
+		return ret;
+
+	if (expected_type != type)
+		return -EILSEQ;
+
+	return get_addl_bytes(buffer, extra, out);
+}
+
+/* NOTE: the FLOAT major type is used for a *lot* of different things */
+static int unpack_cbor_float(struct buffer *buffer, uint8_t *extra)
+{
+	enum major_type type;
+	int ret;
+
+	ret = read_cbor_type(buffer, &type, extra);
+	if (ret)
+		return ret;
+
+	if (type != CMT_FLOAT)
+		return -EILSEQ;
+
+	switch (*extra) {
+		case ADDL_FLOAT_FALSE:
+		case ADDL_FLOAT_TRUE:
+		case ADDL_FLOAT_NULL:
+		case ADDL_FLOAT_BREAK:
+			return 0;
+	}
+
+	return -EILSEQ;
+}
+
+static int unpack_cbor_arraymap_start(struct buffer *buffer,
+				      enum major_type exp_type, uint8_t indef,
+				      uint64_t *len, bool *end_required)
+{
+	enum major_type type;
+	uint8_t extra;
+	int ret;
+
+	ret = read_cbor_type(buffer, &type, &extra);
+	if (ret)
+		return ret;
+
+	if (type != exp_type)
+		return -EILSEQ;
+
+	if (extra == indef) {
+		*end_required = true;
+		*len = 0;
+		return 0;
+	} else {
+		*end_required = false;
+		return get_addl_bytes(buffer, extra, len);
+	}
+}
+
+static int sync_buffers(struct buffer *orig, struct buffer *tmp)
+{
+	ssize_t ret;
+
+	ret = buffer_seek(orig, buffer_used(tmp), SEEK_CUR);
+
+	return (ret < 0) ? ret : 0;
+}
+
+int cbor_unpack_uint(struct buffer *buffer, uint64_t *v)
+{
+	struct buffer tmp;
+	int ret;
+
+	buffer_init_static(&tmp, buffer_data_current(buffer),
+			   buffer_remain(buffer), false);
+
+	ret = unpack_cbor_int(&tmp, CMT_UINT, v);
+	if (ret)
+		return ret;
+
+	return sync_buffers(buffer, &tmp);
+}
+
+int cbor_unpack_nint(struct buffer *buffer, uint64_t *v)
+{
+	struct buffer tmp;
+	int ret;
+
+	buffer_init_static(&tmp, buffer_data_current(buffer),
+			   buffer_remain(buffer), false);
+
+	ret = unpack_cbor_int(&tmp, CMT_NINT, v);
+	if (ret)
+		return ret;
+
+	return sync_buffers(buffer, &tmp);
+}
+
+int cbor_unpack_int(struct buffer *buffer, int64_t *v)
+{
+	struct buffer tmp;
+	uint64_t tmpv;
+	int ret;
+
+	/*
+	 * First, try unsigned ints
+	 */
+
+	buffer_init_static(&tmp, buffer_data_current(buffer),
+			   buffer_remain(buffer), false);
+
+	ret = cbor_unpack_uint(&tmp, &tmpv);
+	if (!ret) {
+		if (tmpv > INT64_MAX)
+			return -EOVERFLOW;
+
+		*v = tmpv;
+
+		return sync_buffers(buffer, &tmp);
+	}
+
+	/*
+	 * Second, try negative ints
+	 */
+
+	buffer_init_static(&tmp, buffer_data_current(buffer),
+			   buffer_remain(buffer), false);
+
+	ret = cbor_unpack_nint(&tmp, &tmpv);
+	if (!ret) {
+		/* 2's complement has one extra negative number */
+		if (tmpv > (((uint64_t) INT64_MAX) + 1))
+			return -EOVERFLOW;
+
+		*v = ((~tmpv) + 1);
+
+		return sync_buffers(buffer, &tmp);
+	}
+
+	return ret;
+}
+
+int cbor_unpack_blob(struct buffer *buffer, const void **data,
+		     size_t *size)
+{
+	return -ENOTSUP;
+}
+
+int cbor_unpack_cstr_len(struct buffer *buffer, char **str, size_t *len)
+{
+	uint64_t parsed_len;
+	struct buffer tmp;
+	ssize_t ret;
+	char *out;
+
+	buffer_init_static(&tmp, buffer_data_current(buffer),
+			   buffer_remain(buffer), false);
+
+	ret = unpack_cbor_int(&tmp, CMT_TEXT, &parsed_len);
+	if (ret)
+		return ret;
+
+	/* can't handle strings longer than what fits in memory */
+	if (parsed_len > SIZE_MAX)
+		return -EOVERFLOW;
+
+	out = malloc(parsed_len + 1);
+	if (!out)
+		return -ENOMEM;
+
+	ret = buffer_read(&tmp, out, parsed_len);
+	if (ret < 0)
+		goto err;
+
+	/* must read exactly the number of bytes */
+	if (ret != parsed_len) {
+		ret = -EILSEQ;
+		goto err;
+	}
+
+	out[parsed_len] = '\0';
+
+	*len = parsed_len;
+	*str = out;
+
+	return sync_buffers(buffer, &tmp);
+
+err:
+	free(out);
+
+	return ret;
+}
+
+int cbor_unpack_str(struct buffer *buffer, struct str **str)
+{
+	char *s;
+	size_t len;
+	int ret;
+
+	ret = cbor_unpack_cstr_len(buffer, &s, &len);
+	if (ret)
+		return ret;
+
+	*str = str_alloc(s);
+
+	return IS_ERR(*str) ? PTR_ERR(*str) : 0;
+}
+
+int cbor_unpack_bool(struct buffer *buffer, bool *b)
+{
+	struct buffer tmp;
+	uint8_t extra;
+	int ret;
+
+	buffer_init_static(&tmp, buffer_data_current(buffer),
+			   buffer_remain(buffer), false);
+
+	ret = unpack_cbor_float(&tmp, &extra);
+	if (ret)
+		return ret;
+
+	switch (extra) {
+		case ADDL_FLOAT_FALSE:
+			*b = false;
+			break;
+		case ADDL_FLOAT_TRUE:
+			*b = true;
+			break;
+		default:
+			return -EILSEQ;
+	}
+
+	return sync_buffers(buffer, &tmp);
+}
+
+int cbor_unpack_null(struct buffer *buffer)
+{
+	struct buffer tmp;
+	uint8_t extra;
+	int ret;
+
+	buffer_init_static(&tmp, buffer_data_current(buffer),
+			   buffer_remain(buffer), false);
+
+	ret = unpack_cbor_float(&tmp, &extra);
+	if (ret)
+		return ret;
+
+	switch (extra) {
+		case ADDL_FLOAT_NULL:
+			break;
+		default:
+			return -EILSEQ;
+	}
+
+	return sync_buffers(buffer, &tmp);
+}
+
+int cbor_unpack_break(struct buffer *buffer)
+{
+	struct buffer tmp;
+	uint8_t extra;
+	int ret;
+
+	buffer_init_static(&tmp, buffer_data_current(buffer),
+			   buffer_remain(buffer), false);
+
+	ret = unpack_cbor_float(&tmp, &extra);
+	if (ret)
+		return ret;
+
+	switch (extra) {
+		case ADDL_FLOAT_BREAK:
+			break;
+		default:
+			return -EILSEQ;
+	}
+
+	return sync_buffers(buffer, &tmp);
+}
+
+int cbor_unpack_map_start(struct buffer *buffer, uint64_t *npairs,
+			  bool *end_required)
+{
+	struct buffer tmp;
+	int ret;
+
+	buffer_init_static(&tmp, buffer_data_current(buffer),
+			   buffer_remain(buffer), false);
+
+	ret = unpack_cbor_arraymap_start(&tmp, CMT_MAP, ADDL_MAP_INDEF,
+					 npairs, end_required);
+	if (ret)
+		return ret;
+
+	return sync_buffers(buffer, &tmp);
+}
+
+int cbor_unpack_map_end(struct buffer *buffer, bool end_required)
+{
+	if (!end_required)
+		return 0;
+
+	return cbor_unpack_break(buffer);
+}
+
+int cbor_unpack_array_start(struct buffer *buffer, uint64_t *nelem,
+			    bool *end_required)
+{
+	struct buffer tmp;
+	int ret;
+
+	buffer_init_static(&tmp, buffer_data_current(buffer),
+			   buffer_remain(buffer), false);
+
+	ret = unpack_cbor_arraymap_start(&tmp, CMT_ARRAY, ADDL_ARRAY_INDEF,
+					 nelem, end_required);
+	if (ret)
+		return ret;
+
+	return sync_buffers(buffer, &tmp);
+}
+
+int cbor_unpack_array_end(struct buffer *buffer, bool end_required)
+{
+	if (!end_required)
+		return 0;
+
+	return cbor_unpack_break(buffer);
 }

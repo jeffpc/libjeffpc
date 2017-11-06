@@ -58,4 +58,26 @@ static inline int cbor_pack_cstr(struct buffer *buffer, const char *str)
 
 extern int cbor_peek_type(struct buffer *buffer, enum val_type *type);
 
+/*
+ * On failure, the buffer state is unchanged.  On success, the buffer is
+ * updated to point to the first byte of the next data item.
+ */
+extern int cbor_unpack_uint(struct buffer *buffer, uint64_t *v);
+extern int cbor_unpack_nint(struct buffer *buffer, uint64_t *v);
+extern int cbor_unpack_int(struct buffer *buffer, int64_t *v);
+extern int cbor_unpack_blob(struct buffer *buffer, const void **data,
+			    size_t *size);
+extern int cbor_unpack_cstr_len(struct buffer *buffer, char **str,
+				size_t *len);
+extern int cbor_unpack_str(struct buffer *buffer, struct str **str);
+extern int cbor_unpack_bool(struct buffer *buffer, bool *b);
+extern int cbor_unpack_null(struct buffer *buffer);
+extern int cbor_unpack_break(struct buffer *buffer);
+extern int cbor_unpack_map_start(struct buffer *buffer, uint64_t *npairs,
+				 bool *end_required);
+extern int cbor_unpack_map_end(struct buffer *buffer, bool end_required);
+extern int cbor_unpack_array_start(struct buffer *buffer, uint64_t *nelem,
+				   bool *end_required);
+extern int cbor_unpack_array_end(struct buffer *buffer, bool end_required);
+
 #endif

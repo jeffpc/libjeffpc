@@ -65,6 +65,19 @@ JEFFPC_0.10 {
 		cbor_pack_uint;
 		cbor_pack_val;
 		cbor_peek_type;
+		cbor_unpack_array_end;
+		cbor_unpack_array_start;
+		cbor_unpack_blob;
+		cbor_unpack_break;
+		cbor_unpack_bool;
+		cbor_unpack_cstr_len;
+		cbor_unpack_int;
+		cbor_unpack_map_end;
+		cbor_unpack_map_start;
+		cbor_unpack_nint;
+		cbor_unpack_null;
+		cbor_unpack_str;
+		cbor_unpack_uint;
 
 		# cstr
 		strcpy_safe;
