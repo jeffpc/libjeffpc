@@ -49,3 +49,17 @@ macro(build_test_bin_and_run name)
 		ENVIRONMENT "UMEM_DEBUG=default,verbose"
 	)
 endmacro()
+
+macro(build_test_bin_and_run_files name files)
+	build_test_bin(${name})
+	file(GLOB TESTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${files})
+	foreach(TEST ${TESTS})
+		add_test(NAME "${name}:${TEST}"
+			 COMMAND "${CMAKE_BINARY_DIR}/tests/test_${name}"
+			 	 "${TEST}"
+		)
+		set_tests_properties("${name}:${TEST}" PROPERTIES
+			ENVIRONMENT "UMEM_DEBUG=default,verbose"
+		)
+	endforeach()
+endmacro()
