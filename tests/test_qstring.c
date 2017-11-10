@@ -25,6 +25,8 @@
 #include <jeffpc/qstring.h>
 #include <jeffpc/io.h>
 
+#include "test-file.c"
+
 static int onefile(char *ibuf, size_t len)
 {
 	struct nvlist *vars;
@@ -43,25 +45,15 @@ static int onefile(char *ibuf, size_t len)
 	return 0;
 }
 
-int main(int argc, char **argv)
+static void test(const char *fname)
 {
 	char *in;
-	int i;
-	int result;
 
-	result = 0;
+	in = read_file(fname);
+	ASSERT(!IS_ERR(in));
 
-	ASSERT0(putenv("UMEM_DEBUG=default,verbose"));
+	if (onefile(in, strlen(in)))
+		fail("failed");
 
-	for (i = 1; i < argc; i++) {
-		in = read_file(argv[i]);
-		ASSERT(!IS_ERR(in));
-
-		if (onefile(in, strlen(in)))
-			result = 1;
-
-		free(in);
-	}
-
-	return result;
+	free(in);
 }

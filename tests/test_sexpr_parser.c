@@ -27,20 +27,7 @@
 #include <jeffpc/val.h>
 #include <jeffpc/io.h>
 
-static void fail(const char *fmt, ...)
-{
-	va_list ap;
-
-	fprintf(stderr, "TEST FAILED: ");
-
-	va_start(ap, fmt);
-	vfprintf(stderr, fmt, ap);
-	va_end(ap);
-
-	fprintf(stderr, "\n");
-
-	exit(1);
-}
+#include "test-file.c"
 
 static void trim(char *ptr)
 {
@@ -82,13 +69,11 @@ static void check_file(struct val *got, char *fname, bool raw)
 	str_putref(dumped);
 }
 
-static void onefile(char *fname)
+static void test(const char *fname)
 {
 	char expfname[FILENAME_MAX];
 	struct val *lv;
 	char *in;
-
-	fprintf(stderr, "Checking %s...\n", fname);
 
 	in = read_file(fname);
 	if (IS_ERR(in))
@@ -115,14 +100,4 @@ static void onefile(char *fname)
 	check_file(lv, expfname, false);
 
 	val_putref(lv);
-}
-
-int main(int argc, char **argv)
-{
-	int i;
-
-	for (i = 1; i < argc; i++)
-		onefile(argv[i]);
-
-	return 0;
 }
