@@ -20,16 +20,6 @@
 # SOFTWARE.
 #
 
-function(simple_c_test type section bin data)
-	add_test(NAME "${type}:${section}:${data}"
-		 COMMAND "${CMAKE_BINARY_DIR}/tests/test_${bin}"
-			 "${CMAKE_CURRENT_SOURCE_DIR}/${data}"
-	)
-	set_tests_properties("${type}:${section}:${data}" PROPERTIES
-		ENVIRONMENT "UMEM_DEBUG=default,verbose"
-	)
-endfunction()
-
 macro(build_test_bin name)
 	add_executable("test_${name}"
 		"test_${name}.c"
