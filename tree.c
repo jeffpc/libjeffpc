@@ -96,6 +96,7 @@ static inline void __swap_nodes(struct tree_tree *tree,
 	const enum tree_dir right = 1 - left;
 	const bool root = tree->root == x;
 	enum tree_dir dir_to_orig_x;
+	bool tmp;
 
 	ASSERT3P(x, !=, y);
 	ASSERT3P(y->children[left], ==, NULL);
@@ -182,6 +183,11 @@ static inline void __swap_nodes(struct tree_tree *tree,
 			tree->root = y;
 		D->children[left] = x;
 	}
+
+	/* swap the colors */
+	tmp = x->red;
+	x->red = y->red;
+	y->red = tmp;
 }
 
 static inline void __promote_node_child(struct tree_tree *tree,

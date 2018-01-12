@@ -30,6 +30,7 @@
 struct tree_node {
 	struct tree_node *children[2];
 	struct tree_node *parent;
+	bool red;
 };
 
 struct tree_tree {
@@ -40,6 +41,7 @@ struct tree_tree {
 	size_t num_nodes;
 	enum {
 		TREE_FLAVOR_UNBALANCED,
+		TREE_FLAVOR_RED_BLACK,
 	} flavor;
 };
 

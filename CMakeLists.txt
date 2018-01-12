@@ -102,6 +102,7 @@ add_library(jeffpc SHARED
 	padding.c
 	qstring.c
 	rand.c
+	rbtree.c
 	sexpr.c
 	sexpr_dump.c
 	sexpr_eval.c
@@ -165,6 +166,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/padding.h
 		include/jeffpc/qstring.h
 		include/jeffpc/rand.h
+		include/jeffpc/rbtree.h
 		include/jeffpc/refcnt.h
 		include/jeffpc/scgi.h
 		include/jeffpc/scgisvc.h

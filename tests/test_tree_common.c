@@ -22,6 +22,7 @@
 
 #include <jeffpc/types.h>
 #include <jeffpc/bst.h>
+#include <jeffpc/rbtree.h>
 
 #include "test.c"
 
@@ -36,6 +37,17 @@
 #define TREE_FOR_EACH		bst_for_each
 #define TREE_NUMNODES		bst_numnodes
 #define TREE_DESTROY_NODES	bst_destroy_nodes
+#elif defined(TEST_TREE_RB)
+#define TREE_TREE		rb_tree
+#define TREE_NODE		rb_node
+#define TREE_COOKIE		rb_cookie
+#define TREE_CREATE		rb_create
+#define TREE_DESTROY		rb_destroy
+#define TREE_ADD		rb_add
+#define TREE_REMOVE		rb_remove
+#define TREE_FOR_EACH		rb_for_each
+#define TREE_NUMNODES		rb_numnodes
+#define TREE_DESTROY_NODES	rb_destroy_nodes
 #else
 #error "Unspecified test type"
 #endif
@@ -181,7 +193,10 @@ static void __verify_nodes(struct tree_node *node, size_t numnodes,
 		return;
 	}
 
-	VERIFY3P(node, ==, &exp[idx]->node.node);
+	if (node != &exp[idx]->node.node) {
+		panic("node (%p) != expected (%p) at index %zu",
+		      node, &exp[idx]->node.node, idx);
+	}
 
 	__verify_nodes(node->children[TREE_LEFT], numnodes, exp,
 		       level + 1, leveloff * 2);
@@ -233,6 +248,11 @@ static void test_nodes(const char *testname, struct node *remove,
 	struct TREE_TREE tree;
 
 	init(&tree, testname, remove ? remove->name : "(none)", numinsert, inserts, true);
+#if 0
+	fprintf(stderr, "   node dump:\n");
+	for (size_t i = 0; i < numinsert; i++)
+		fprintf(stderr, "       [%zu] = %p\n", i, inserts[i]);
+#endif
 	verify_nodes(&tree, npre, pre);
 	verify_iter(&tree, numinsert);
 	destroy(&tree, numinsert, !remove);
