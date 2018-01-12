@@ -1,5 +1,6 @@
 syntax: glob
 
+perf_tree
 test_array
 test_atomic-single-thread
 test_bswap
