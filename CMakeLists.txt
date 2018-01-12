@@ -90,6 +90,7 @@ add_library(jeffpc SHARED
 	buffer_sink.c
 	cstr.c
 	error.c
+	fmt_cbor.c
 	hexdump.c
 	init.c
 	io.c

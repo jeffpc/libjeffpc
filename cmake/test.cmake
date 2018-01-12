@@ -20,16 +20,6 @@
 # SOFTWARE.
 #
 
-function(simple_c_test type section bin data)
-	add_test(NAME "${type}:${section}:${data}"
-		 COMMAND "${CMAKE_BINARY_DIR}/tests/test_${bin}"
-			 "${CMAKE_CURRENT_SOURCE_DIR}/${data}"
-	)
-	set_tests_properties("${type}:${section}:${data}" PROPERTIES
-		ENVIRONMENT "UMEM_DEBUG=default,verbose"
-	)
-endfunction()
-
 macro(build_perf_bin name)
 	add_executable("perf_${name}"
 		"perf_${name}.c"
@@ -58,4 +48,18 @@ macro(build_test_bin_and_run name)
 	set_tests_properties("${name}" PROPERTIES
 		ENVIRONMENT "UMEM_DEBUG=default,verbose"
 	)
+endmacro()
+
+macro(build_test_bin_and_run_files name files)
+	build_test_bin(${name})
+	file(GLOB TESTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${files})
+	foreach(TEST ${TESTS})
+		add_test(NAME "${name}:${TEST}"
+			 COMMAND "${CMAKE_BINARY_DIR}/tests/test_${name}"
+			 	 "${TEST}"
+		)
+		set_tests_properties("${name}:${TEST}" PROPERTIES
+			ENVIRONMENT "UMEM_DEBUG=default,verbose"
+		)
+	endforeach()
 endmacro()

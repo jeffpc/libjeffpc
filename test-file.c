@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,40 +20,50 @@
  * SOFTWARE.
  */
 
+#include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
+#include <alloca.h>
+#include <string.h>
 
-#include <jeffpc/qstring.h>
-#include <jeffpc/io.h>
+#include <jeffpc/version.h>
+#include <jeffpc/error.h>
 
-#include "test-file.c"
+static void test(const char *fname);
 
-static int onefile(char *ibuf, size_t len)
+/*
+ * Do not make this static or the compiler may complain about an unused
+ * static function.
+ */
+void NORETURN fail(const char *fmt, ...)
 {
-	struct nvlist *vars;
-	int ret;
+	va_list ap;
 
-	vars = nvl_alloc();
-	if (!vars)
-		return -ENOMEM;
+	fprintf(stderr, "TEST FAILED: ");
 
-	ret = qstring_parse_len(vars, ibuf, len);
-	if (!ret)
-		nvl_dump_file(stderr, vars);
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
 
-	nvl_putref(vars);
+	fprintf(stderr, "\n");
 
-	return 0;
+	exit(1);
 }
 
-static void test(const char *fname)
+int main(int argc, char **argv)
 {
-	char *in;
+	int i;
 
-	in = read_file(fname);
-	ASSERT(!IS_ERR(in));
+	fprintf(stderr, "libjeffpc.so version %s\n", jeffpc_version);
+	fprintf(stderr, "Running tests (%s)\n", argv[0]);
 
-	if (onefile(in, strlen(in)))
-		fail("failed");
+	for (i = 1; i < argc; i++) {
+		fprintf(stderr, "Checking %s...\n", argv[i]);
 
-	free(in);
+		test(argv[i]);
+	}
+
+	fprintf(stderr, "Tests passed.\n");
+
+	return 0;
 }

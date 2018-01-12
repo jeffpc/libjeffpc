@@ -22,8 +22,9 @@
 
 build_perf_bin(tree)
 
-build_test_bin(sexpr_parser)
-build_test_bin(qstring)
+build_test_bin_and_run_files(qstring qstring-basic/*.qs)
+build_test_bin_and_run_files(sexpr_parser sexpr-parser/*.lisp)
+
 build_test_bin_and_run(array)
 build_test_bin_and_run(atomic-single-thread)
 build_test_bin_and_run(bswap)
@@ -40,6 +41,3 @@ build_test_bin_and_run(sexpr_eval)
 build_test_bin_and_run(sexpr_iter)
 build_test_bin_and_run(urldecode)
 build_test_bin_and_run(version)
-
-add_subdirectory(qstring-basic)
-add_subdirectory(sexpr-parser)
