@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+# Copyright (c) 2016-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,16 @@ function(simple_c_test type section bin data)
 		ENVIRONMENT "UMEM_DEBUG=default,verbose"
 	)
 endfunction()
+
+macro(build_perf_bin name)
+	add_executable("perf_${name}"
+		"perf_${name}.c"
+	)
+
+	target_link_libraries("perf_${name}"
+		jeffpc
+	)
+endmacro()
 
 macro(build_test_bin name)
 	add_executable("test_${name}"
