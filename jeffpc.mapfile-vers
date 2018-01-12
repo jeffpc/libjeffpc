@@ -28,6 +28,19 @@ JEFFPC_0.10 {
 		array_size;
 		array_truncate;
 
+		# bst
+		bst_add;
+		bst_create;
+		bst_destroy;
+		bst_find;
+		bst_first;
+		bst_insert_here;
+		bst_last;
+		bst_next;
+		bst_prev;
+		bst_remove;
+		bst_swap;
+
 		# buffer
 		buffer_alloc;
 		buffer_append;

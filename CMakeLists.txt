@@ -83,6 +83,7 @@ ADD_FLEX_BISON_DEPENDENCY(sexpr sexpr)
 
 add_library(jeffpc SHARED
 	array.c
+	bst.c
 	buffer.c
 	buffer_const.c
 	buffer_heap.c
@@ -112,6 +113,7 @@ add_library(jeffpc SHARED
 	str.c
 	synch.c
 	taskq.c
+	tree.c
 	urldecode.c
 	uuid.c
 	val.c
@@ -142,6 +144,7 @@ install(TARGETS	jeffpc
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 install(FILES	include/jeffpc/atomic.h
+		include/jeffpc/bst.h
 		include/jeffpc/buffer.h
 		include/jeffpc/cstr.h
 		include/jeffpc/error.h
@@ -166,6 +169,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/taskq.h
 		include/jeffpc/thread.h
 		include/jeffpc/time.h
+		include/jeffpc/tree_private.h
 		include/jeffpc/types.h
 		include/jeffpc/urldecode.h
 		include/jeffpc/uuid.h
