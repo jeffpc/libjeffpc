@@ -220,26 +220,6 @@ void bst_remove(struct bst_tree *_tree, void *item)
 	tree->num_nodes--;
 }
 
-void *bst_first(struct bst_tree *tree)
-{
-	return firstlast_obj(&tree->tree, TREE_LEFT);
-}
-
-void *bst_last(struct bst_tree *tree)
-{
-	return firstlast_obj(&tree->tree, TREE_RIGHT);
-}
-
-void *bst_next(struct bst_tree *tree, void *item)
-{
-	return tree_next_dir(&tree->tree, item, true);
-}
-
-void *bst_prev(struct bst_tree *tree, void *item)
-{
-	return tree_next_dir(&tree->tree, item, false);
-}
-
 void bst_swap(struct bst_tree *tree1, struct bst_tree *tree2)
 {
 	tree_swap(&tree1->tree, &tree2->tree);

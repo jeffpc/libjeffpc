@@ -51,6 +51,11 @@ struct tree_cookie {
 	} dir;
 };
 
+extern void *tree_first(struct tree_tree *tree);
+extern void *tree_last(struct tree_tree *tree);
+extern void *tree_next(struct tree_tree *tree, void *item);
+extern void *tree_prev(struct tree_tree *tree, void *item);
+
 static inline bool tree_is_empty(struct tree_tree *tree)
 {
 	return tree->num_nodes == 0;

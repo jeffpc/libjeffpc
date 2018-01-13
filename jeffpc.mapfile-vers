@@ -33,11 +33,7 @@ JEFFPC_0.10 {
 		bst_create;
 		bst_destroy;
 		bst_find;
-		bst_first;
 		bst_insert_here;
-		bst_last;
-		bst_next;
-		bst_prev;
 		bst_remove;
 		bst_swap;
 
@@ -201,6 +197,12 @@ JEFFPC_0.10 {
 		taskq_destroy;
 		taskq_dispatch;
 		taskq_wait;
+
+		# tree
+		tree_first;
+		tree_last;
+		tree_next;
+		tree_prev;
 
 		# uuid
 		xdr_xuuid;

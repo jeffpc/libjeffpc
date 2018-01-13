@@ -58,3 +58,24 @@ void *tree_insert_here(struct tree_tree *tree, void *newitem,
 
 	return NULL;
 }
+
+void *tree_first(struct tree_tree *tree)
+{
+	return firstlast_obj(tree, TREE_LEFT);
+}
+
+void *tree_last(struct tree_tree *tree)
+{
+	return firstlast_obj(tree, TREE_RIGHT);
+}
+
+void *tree_next(struct tree_tree *tree, void *item)
+{
+	return tree_next_dir(tree, item, true);
+}
+
+void *tree_prev(struct tree_tree *tree, void *item)
+{
+	return tree_next_dir(tree, item, false);
+}
+

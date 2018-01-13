@@ -56,13 +56,7 @@ extern void *bst_insert_here(struct bst_tree *tree, void *item,
 #define bst_insert(tree, item)	bst_insert_here((tree), (item), NULL)
 extern void bst_remove(struct bst_tree *tree, void *item);
 
-extern void *bst_first(struct bst_tree *tree);
-extern void *bst_last(struct bst_tree *tree);
-
 /* TODO: bst_destroy_nodes */
-
-extern void *bst_next(struct bst_tree *tree, void *item);
-extern void *bst_prev(struct bst_tree *tree, void *item);
 
 extern void bst_swap(struct bst_tree *tree1, struct bst_tree *tree2);
 
@@ -74,6 +68,29 @@ static inline bool bst_is_empty(struct bst_tree *tree)
 static inline size_t bst_numnodes(struct bst_tree *tree)
 {
 	return tree_numnodes(&tree->tree);
+}
+
+/*
+ * Iteration is completely generic
+ */
+static inline void *bst_first(struct bst_tree *tree)
+{
+	return tree_first(&tree->tree);
+}
+
+static inline void *bst_last(struct bst_tree *tree)
+{
+	return tree_last(&tree->tree);
+}
+
+static inline void *bst_next(struct bst_tree *tree, void *item)
+{
+	return tree_next(&tree->tree, item);
+}
+
+static inline void *bst_prev(struct bst_tree *tree, void *item)
+{
+	return tree_prev(&tree->tree, item);
 }
 
 #endif
