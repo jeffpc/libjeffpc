@@ -71,10 +71,15 @@ static inline void *tree_next_dir(struct tree_tree *tree, void *item, bool fwd)
 
 	if (node->children[right])
 		return node2obj(tree, firstlast(node->children[right], left));
-	else if (node->parent && which_dir(node->parent, node) == left)
-		return node2obj(tree, node->parent);
-	else
-		return NULL;
+
+	while (node->parent) {
+		if (which_dir(node->parent, node) == left)
+			return node2obj(tree, node->parent);
+		else if (which_dir(node->parent, node) == right)
+			node = node->parent;
+	}
+
+	return NULL;
 }
 
 #endif
