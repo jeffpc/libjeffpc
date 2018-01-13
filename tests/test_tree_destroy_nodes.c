@@ -63,22 +63,51 @@ static void insert(struct bst_tree *tree, int val)
 	bst_add(tree, node);
 }
 
-static void destroy(struct bst_tree *tree, size_t expected_numnodes)
+static void __destroy_iter(struct bst_tree *tree, size_t expected_numnodes)
+{
+	struct node *node;
+	size_t found_nodes;
+
+	VERIFY3U(bst_numnodes(tree), ==, expected_numnodes);
+
+	found_nodes = 0;
+	bst_for_each(tree, node)
+		found_nodes++;
+
+	VERIFY3U(bst_numnodes(tree), ==, found_nodes);
+	VERIFY3U(bst_numnodes(tree), ==, expected_numnodes);
+}
+
+static size_t __destroy_destroy(struct bst_tree *tree)
 {
 	struct bst_cookie cookie;
 	struct bst_node *node;
-	size_t remaining_nodes;
+	size_t removed_nodes;
 
 	memset(&cookie, 0, sizeof(cookie));
+	removed_nodes = 0;
+
+	while ((node = bst_destroy_nodes(tree, &cookie))) {
+		memset(node, 0xba, sizeof(struct node));
+		removed_nodes++;
+	}
+
+	return removed_nodes;
+}
+
+static void destroy(struct bst_tree *tree, size_t expected_numnodes)
+{
+	size_t remaining_nodes;
 
 	remaining_nodes = bst_numnodes(tree);
 
 	VERIFY3U(remaining_nodes, ==, expected_numnodes);
 
-	while ((node = bst_destroy_nodes(tree, &cookie))) {
-		memset(node, 0xba, sizeof(struct node));
-		remaining_nodes--;
-	}
+	/* test iteration */
+	__destroy_iter(tree, expected_numnodes);
+
+	/* test destruction */
+	remaining_nodes -= __destroy_destroy(tree);
 
 	VERIFY0(remaining_nodes);
 	VERIFY0(bst_numnodes(tree));
