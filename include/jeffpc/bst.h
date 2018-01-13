@@ -39,6 +39,9 @@ struct bst_cookie {
 	struct tree_cookie cookie;
 };
 
+#define bst_for_each(tree, pos) \
+	for (pos = bst_first(tree); pos; pos = bst_next(tree, pos))
+
 extern void bst_create(struct bst_tree *tree,
 		       int (*cmp)(const void *, const void *),
 		       size_t size, size_t off);
