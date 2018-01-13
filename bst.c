@@ -46,16 +46,6 @@ void bst_destroy(struct bst_tree *tree)
 	memset(tree, 0, sizeof(struct bst_tree));
 }
 
-void *bst_find(struct bst_tree *tree, const void *key,
-	       struct bst_cookie *cookie)
-{
-	struct tree_node *node;
-
-	node = __tree_find(&tree->tree, key, &cookie->cookie);
-
-	return node ? node2obj(&tree->tree, node) : NULL;
-}
-
 void bst_add(struct bst_tree *tree, void *item)
 {
 	struct bst_node *orig;

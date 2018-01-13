@@ -51,6 +51,8 @@ struct tree_cookie {
 	} dir;
 };
 
+extern void *tree_find(struct tree_tree *tree, const void *key,
+		       struct tree_cookie *cookie);
 extern void *tree_first(struct tree_tree *tree);
 extern void *tree_last(struct tree_tree *tree);
 extern void *tree_next(struct tree_tree *tree, void *item);

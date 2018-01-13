@@ -47,9 +47,6 @@ extern void bst_create(struct bst_tree *tree,
 		       size_t size, size_t off);
 extern void bst_destroy(struct bst_tree *tree);
 
-extern void *bst_find(struct bst_tree *tree, const void *key,
-		      struct bst_cookie *cookie);
-
 extern void bst_add(struct bst_tree *tree, void *item);
 extern void *bst_insert_here(struct bst_tree *tree, void *item,
 			     struct bst_cookie *cookie);
@@ -71,8 +68,14 @@ static inline size_t bst_numnodes(struct bst_tree *tree)
 }
 
 /*
- * Iteration is completely generic
+ * Search & iteration are completely generic
  */
+static inline void *bst_find(struct bst_tree *tree, const void *key,
+			     struct bst_cookie *cookie)
+{
+	return tree_find(&tree->tree, key, &cookie->cookie);
+}
+
 static inline void *bst_first(struct bst_tree *tree)
 {
 	return tree_first(&tree->tree);

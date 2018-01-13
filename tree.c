@@ -26,6 +26,46 @@
 
 #include "tree_impl.h"
 
+static inline struct tree_node *__tree_find(struct tree_tree *tree,
+					    const void *key,
+					    struct tree_cookie *cookie)
+{
+	struct tree_node *cur;
+	struct tree_cookie where;
+
+	memset(&where, 0, sizeof(where));
+
+	cur = tree->root;
+
+	while (cur) {
+		int cmp;
+
+		cmp = tree->cmp(key, node2obj(tree, cur));
+		if (cmp == 0)
+			return cur;
+
+		where.node = cur;
+		where.dir = (cmp < 0) ? TREE_LEFT : TREE_RIGHT;
+
+		cur = where.node->children[where.dir];
+	}
+
+	if (cookie)
+		*cookie = where;
+
+	return NULL;
+}
+
+void *tree_find(struct tree_tree *tree, const void *key,
+		struct tree_cookie *cookie)
+{
+	struct tree_node *node;
+
+	node = __tree_find(tree, key, cookie);
+
+	return node ? node2obj(tree, node) : NULL;
+}
+
 void *tree_insert_here(struct tree_tree *tree, void *newitem,
 		       struct tree_cookie *cookie)
 {

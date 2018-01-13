@@ -61,36 +61,6 @@ static inline void *firstlast_obj(struct tree_tree *tree, enum tree_dir dir)
 	return node2obj(tree, firstlast(tree->root, dir));
 }
 
-static inline struct tree_node *__tree_find(struct tree_tree *tree,
-					    const void *key,
-					    struct tree_cookie *cookie)
-{
-	struct tree_node *cur;
-	struct tree_cookie where;
-
-	memset(&where, 0, sizeof(where));
-
-	cur = tree->root;
-
-	while (cur) {
-		int cmp;
-
-		cmp = tree->cmp(key, node2obj(tree, cur));
-		if (cmp == 0)
-			return cur;
-
-		where.node = cur;
-		where.dir = (cmp < 0) ? TREE_LEFT : TREE_RIGHT;
-
-		cur = where.node->children[where.dir];
-	}
-
-	if (cookie)
-		*cookie = where;
-
-	return NULL;
-}
-
 static inline void *tree_next_dir(struct tree_tree *tree, void *item, bool fwd)
 {
 	const enum tree_dir right = fwd ? TREE_RIGHT : TREE_LEFT;

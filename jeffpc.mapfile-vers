@@ -32,7 +32,6 @@ JEFFPC_0.10 {
 		bst_add;
 		bst_create;
 		bst_destroy;
-		bst_find;
 		bst_insert_here;
 		bst_remove;
 		bst_swap;
@@ -199,6 +198,7 @@ JEFFPC_0.10 {
 		taskq_wait;
 
 		# tree
+		tree_find;
 		tree_first;
 		tree_last;
 		tree_next;
