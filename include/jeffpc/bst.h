@@ -53,8 +53,6 @@ extern void *bst_insert_here(struct bst_tree *tree, void *item,
 #define bst_insert(tree, item)	bst_insert_here((tree), (item), NULL)
 extern void bst_remove(struct bst_tree *tree, void *item);
 
-/* TODO: bst_destroy_nodes */
-
 static inline bool bst_is_empty(struct bst_tree *tree)
 {
 	return tree_is_empty(&tree->tree);
@@ -92,6 +90,12 @@ static inline void *bst_next(struct bst_tree *tree, void *item)
 static inline void *bst_prev(struct bst_tree *tree, void *item)
 {
 	return tree_prev(&tree->tree, item);
+}
+
+static inline void *bst_destroy_nodes(struct bst_tree *tree,
+				      struct bst_cookie *cookie)
+{
+	return tree_destroy_nodes(&tree->tree, &cookie->cookie);
 }
 
 static inline void bst_swap(struct bst_tree *tree1, struct bst_tree *tree2)

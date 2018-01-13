@@ -197,6 +197,7 @@ JEFFPC_0.10 {
 		taskq_wait;
 
 		# tree
+		tree_destroy_nodes;
 		tree_find;
 		tree_first;
 		tree_last;

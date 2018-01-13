@@ -108,6 +108,93 @@ void *tree_prev(struct tree_tree *tree, void *item)
 	return tree_next_dir(tree, item, false);
 }
 
+#define DESTROY_NODES_DONE	((struct tree_node *)(uintptr_t)~0ul)
+
+static inline void destroy_nodes_save_parent(struct tree_tree *tree,
+					     struct tree_node *node,
+					     struct tree_cookie *cookie)
+{
+	if (node != tree->root) {
+		cookie->node = node->parent;
+		cookie->dir = 1 - which_dir(node->parent, node);
+	} else {
+		/* indicate end of iteration */
+		cookie->node = DESTROY_NODES_DONE;
+	}
+}
+
+static struct tree_node *destroy_nodes_step(struct tree_tree *tree,
+					    struct tree_node *node,
+					    struct tree_cookie *cookie)
+{
+	ASSERT3P(node, !=, NULL);
+
+	for (;;) {
+		struct tree_node *tmp;
+
+		tmp = firstlast(node, TREE_LEFT);
+
+		if (!tmp->children[TREE_RIGHT]) {
+			destroy_nodes_save_parent(tree, tmp, cookie);
+			return tmp;
+		}
+
+		node = tmp->children[TREE_RIGHT];
+	}
+}
+
+/*
+ * This function does a post-order traversal of the tree, returning each
+ * node and using the cookie as a cursor.  Once a node is returned, it's
+ * memory is assumed to be free.
+ *
+ * The cookie's ->node is used as pointer to the next item to process (not
+ * necessarily return!) and the ->dir member is used to indicate which child
+ * of the next node to look at.
+ *
+ *   node |  dir  | meaning
+ *  ------+-------+------------------------------------------
+ *   NULL |   *   | first invocation, return first node
+ *   DONE |   *   | all nodes destroyed already, return NULL
+ *    *   | RIGHT | process node's right subtree next
+ *    *   | LEFT  | process node itself next
+ *
+ * Note that since we traverse the tree left to right, we go as far left
+ * every time we descend to the right.  That is why there is no explicit
+ * go-left state.
+ */
+void *tree_destroy_nodes(struct tree_tree *tree, struct tree_cookie *cookie)
+{
+	struct tree_node *node;
+
+	if (!tree->root)
+		return NULL;
+
+	if (cookie->node == DESTROY_NODES_DONE) {
+		tree->root = NULL;
+		tree->num_nodes = 0;
+		return NULL;
+	}
+
+	if (!cookie->node)
+		return destroy_nodes_step(tree, tree->root, cookie);
+
+	/* descend down right subtree */
+	if (cookie->dir == TREE_RIGHT) {
+		node = cookie->node->children[TREE_RIGHT];
+
+		if (node)
+			return destroy_nodes_step(tree, node, cookie);
+	}
+
+	/* process current node */
+	node = cookie->node;
+
+	destroy_nodes_save_parent(tree, cookie->node, cookie);
+
+	return node;
+}
+
 void tree_swap(struct tree_tree *tree1, struct tree_tree *tree2)
 {
 	struct tree_node *tmp_root;
