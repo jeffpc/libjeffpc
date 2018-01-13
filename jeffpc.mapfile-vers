@@ -34,7 +34,6 @@ JEFFPC_0.10 {
 		bst_destroy;
 		bst_insert_here;
 		bst_remove;
-		bst_swap;
 
 		# buffer
 		buffer_alloc;
@@ -203,6 +202,7 @@ JEFFPC_0.10 {
 		tree_last;
 		tree_next;
 		tree_prev;
+		tree_swap;
 
 		# uuid
 		xdr_xuuid;

@@ -55,8 +55,6 @@ extern void bst_remove(struct bst_tree *tree, void *item);
 
 /* TODO: bst_destroy_nodes */
 
-extern void bst_swap(struct bst_tree *tree1, struct bst_tree *tree2);
-
 static inline bool bst_is_empty(struct bst_tree *tree)
 {
 	return tree_is_empty(&tree->tree);
@@ -68,7 +66,7 @@ static inline size_t bst_numnodes(struct bst_tree *tree)
 }
 
 /*
- * Search & iteration are completely generic
+ * Search, iteration, and swapping are completely generic
  */
 static inline void *bst_find(struct bst_tree *tree, const void *key,
 			     struct bst_cookie *cookie)
@@ -94,6 +92,11 @@ static inline void *bst_next(struct bst_tree *tree, void *item)
 static inline void *bst_prev(struct bst_tree *tree, void *item)
 {
 	return tree_prev(&tree->tree, item);
+}
+
+static inline void bst_swap(struct bst_tree *tree1, struct bst_tree *tree2)
+{
+	tree_swap(&tree1->tree, &tree2->tree);
 }
 
 #endif

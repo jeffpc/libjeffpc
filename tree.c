@@ -108,3 +108,22 @@ void *tree_prev(struct tree_tree *tree, void *item)
 	return tree_next_dir(tree, item, false);
 }
 
+void tree_swap(struct tree_tree *tree1, struct tree_tree *tree2)
+{
+	struct tree_node *tmp_root;
+	size_t tmp_num_nodes;
+
+	VERIFY3P(tree1->cmp, ==, tree2->cmp);
+	VERIFY3U(tree1->node_size, ==, tree2->node_size);
+	VERIFY3U(tree1->node_off, ==, tree2->node_off);
+	VERIFY3U(tree1->flavor, ==, tree2->flavor);
+
+	tmp_root = tree1->root;
+	tmp_num_nodes = tree1->num_nodes;
+
+	tree1->root = tree2->root;
+	tree1->num_nodes = tree2->num_nodes;
+
+	tree2->root = tmp_root;
+	tree2->num_nodes = tmp_num_nodes;
+}

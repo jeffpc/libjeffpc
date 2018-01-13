@@ -209,8 +209,3 @@ void bst_remove(struct bst_tree *_tree, void *item)
 
 	tree->num_nodes--;
 }
-
-void bst_swap(struct bst_tree *tree1, struct bst_tree *tree2)
-{
-	tree_swap(&tree1->tree, &tree2->tree);
-}
