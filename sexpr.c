@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -109,14 +109,16 @@ int sexpr_list_to_array(struct val *list, struct val **array, int alen)
 	struct val *tmp;
 	int nvals = 0;
 
-	for (tmp = list; tmp && (alen > nvals); tmp = tmp->cons.tail, nvals++) {
+	for (tmp = list;
+	     !sexpr_is_null(tmp) && (alen > nvals);
+	     tmp = tmp->cons.tail, nvals++) {
 		if (tmp->type != VT_CONS)
 			goto err;
 
 		array[nvals] = val_getref(tmp->cons.head);
 	}
 
-	if ((alen == nvals) && tmp)
+	if ((alen == nvals) && !sexpr_is_null(tmp))
 		goto err;
 
 	return nvals;
