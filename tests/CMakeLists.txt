@@ -22,6 +22,7 @@
 
 build_perf_bin(tree)
 
+build_test_bin_and_run_files(nvl_pack nvl-pack/*.lisp)
 build_test_bin_and_run_files(qstring qstring-basic/*.qs)
 build_test_bin_and_run_files(sexpr_parser sexpr-parser/*.lisp)
 
@@ -35,7 +36,6 @@ build_test_bin_and_run(errno)
 build_test_bin_and_run(hexdump)
 build_test_bin_and_run(list)
 build_test_bin_and_run(nvl)
-build_test_bin_and_run(nvl_pack)
 build_test_bin_and_run(padding)
 build_test_bin_and_run(sexpr_eval)
 build_test_bin_and_run(sexpr_iter)
