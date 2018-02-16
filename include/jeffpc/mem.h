@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,21 @@
 #include <string.h>
 
 /*
+ * zeroed allocation
+ */
+
+static inline void *zalloc(size_t len)
+{
+	void *buf;
+
+	buf = malloc(len);
+	if (buf)
+		memset(buf, 0, len);
+
+	return buf;
+}
+
+/*
  * slab allocator
  */
 
@@ -42,16 +57,5 @@ extern void mem_cache_destroy(struct mem_cache *cache);
 
 extern void *mem_cache_alloc(struct mem_cache *cache);
 extern void mem_cache_free(struct mem_cache *cache, void *buf);
-
-static inline void *zalloc(size_t len)
-{
-	void *buf;
-
-	buf = malloc(len);
-	if (buf)
-		memset(buf, 0, len);
-
-	return buf;
-}
 
 #endif
