@@ -62,6 +62,13 @@ static inline void mem_freezero(void *buf, size_t len)
 }
 
 /*
+ * array allocator
+ */
+extern void *mem_reallocarray(void *ptr, size_t nelem, size_t size);
+extern void *mem_recallocarray(void *ptr, size_t old_nelem, size_t new_nelem,
+			       size_t size);
+
+/*
  * slab allocator
  */
 

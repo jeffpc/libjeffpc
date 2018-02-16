@@ -95,6 +95,7 @@ add_library(jeffpc SHARED
 	init.c
 	io.c
 	list.c
+	mem_array.c
 	nvl.c
 	nvl_convert.c
 	nvl_dump.c
