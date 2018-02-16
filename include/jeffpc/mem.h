@@ -32,7 +32,8 @@
  * zeroed allocation
  */
 
-static inline void *zalloc(size_t len)
+#define zalloc(len)	mem_zalloc(len)
+static inline void *mem_zalloc(size_t len)
 {
 	void *buf;
 
