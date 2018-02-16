@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -112,11 +112,7 @@ static struct nvval *val_dup_array(const struct nvval *user_vals, size_t nelem)
 	struct nvval *vals;
 	size_t i;
 
-#ifdef HAVE_REALLOCARRAY
-	vals = reallocarray(NULL, nelem, sizeof(struct nvval));
-#else
-	vals = malloc(nelem * sizeof(struct nvval));
-#endif
+	vals = mem_reallocarray(NULL, nelem, sizeof(struct nvval));
 	if (!vals)
 		return NULL;
 
