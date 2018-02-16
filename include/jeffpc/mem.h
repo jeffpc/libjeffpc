@@ -44,6 +44,16 @@ static inline void *mem_zalloc(size_t len)
 	return buf;
 }
 
+static inline void mem_freezero(void *buf, size_t len)
+{
+	if (!buf)
+		return;
+
+	memset(buf, 0, len);
+
+	free(buf);
+}
+
 /*
  * slab allocator
  */
