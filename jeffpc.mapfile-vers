@@ -209,6 +209,7 @@ JEFFPC_0.10 {
 
 		# unicode
 		utf8_to_utf32;
+		utf32_to_utf8;
 
 		# uuid
 		xdr_xuuid;

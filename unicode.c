@@ -98,3 +98,41 @@ size_t utf8_to_utf32(const char *in, size_t inlen, uint32_t *out)
 
 	return len;
 }
+
+ssize_t utf32_to_utf8(uint32_t cp, char *buf, size_t buflen)
+{
+	ssize_t len;
+	ssize_t i;
+
+	if (!utf32_is_valid(cp))
+		return -EINVAL; /* invalid codepoint */
+
+	if (cp <= 0x7f)
+		len = 1;
+	else if (cp <= 0x7ff)
+		len = 2;
+	else if (cp <= 0xffff)
+		len = 3;
+	else
+		len = 4;
+
+	ASSERT3U(cp, <=, 0x10ffff);
+
+	if (len > buflen)
+		return -ENOMEM; /* not enough space */
+
+	/* fast-path for ASCII */
+	if (len == 1) {
+		buf[0] = cp;
+		return 1;
+	}
+
+	/* first byte */
+	buf[0] = (cp >> (6 * (len - 1))) | (0xff << (8 - len));
+
+	/* second...fourth byte */
+	for (i = 1; i < len; i++)
+		buf[i] = 0x80 | ((cp >> (6 * (len - i - 1))) & 0x3f);
+
+	return len;
+}

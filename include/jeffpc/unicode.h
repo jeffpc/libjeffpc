@@ -28,6 +28,7 @@
 #include <stdbool.h>
 
 extern size_t utf8_to_utf32(const char *in, size_t inlen, uint32_t *out);
+extern ssize_t utf32_to_utf8(uint32_t cp, char *buf, size_t buflen);
 
 static inline bool utf32_is_valid(uint32_t cp)
 {
