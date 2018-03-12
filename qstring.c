@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2014-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -62,7 +62,7 @@ static int insert(struct nvlist *nvl, const char *namestart, size_t namelen,
 		struct str *val;
 
 		if (!vallen)
-			val = str_dup(NULL);
+			val = str_empty_string();
 		else
 			val = urldecode_str(valstart, vallen);
 
