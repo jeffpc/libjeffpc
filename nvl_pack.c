@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -94,7 +94,12 @@ static int pack_cstring(const struct nvpackops *ops, struct buffer *buffer,
 static int pack_string(const struct nvpackops *ops, struct buffer *buffer,
 		       struct str *str)
 {
-	return pack_cstring(ops, buffer, str_cstr(str));
+	/*
+	 * Even though we try to avoid NULL pointers to indicate empty
+	 * strings, they can crop up from many places.  So, it is safer to
+	 * do the check here.
+	 */
+	return pack_cstring(ops, buffer, str ? str_cstr(str) : "");
 }
 
 static int pack_val(const struct nvpackops *ops, struct buffer *buffer,
