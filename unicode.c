@@ -136,3 +136,21 @@ ssize_t utf32_to_utf8(uint32_t cp, char *buf, size_t buflen)
 
 	return len;
 }
+
+int utf8_is_valid_str(const char *src, size_t slen)
+{
+	size_t i = 0;
+
+	while (i < slen) {
+		uint32_t cp;
+		size_t cplen;
+
+		cplen = utf8_to_utf32(src + i, slen - i, &cp);
+		if (!cplen)
+			return -EILSEQ;
+
+		i += cplen;
+	}
+
+	return 0;
+}

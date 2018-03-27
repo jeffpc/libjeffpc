@@ -30,6 +30,8 @@
 extern size_t utf8_to_utf32(const char *in, size_t inlen, uint32_t *out);
 extern ssize_t utf32_to_utf8(uint32_t cp, char *buf, size_t buflen);
 
+extern int utf8_is_valid_str(const char *src, size_t slen);
+
 static inline bool utf32_is_valid(uint32_t cp)
 {
 	/* UTF-16 surrogates */
