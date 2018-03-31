@@ -124,6 +124,7 @@ extern struct val *val_alloc_bool(bool v);
 extern struct val *val_alloc_char(uint64_t v);
 extern struct val *val_alloc_int(uint64_t v);
 extern struct val *val_alloc_null(void);
+
 /* val_alloc_cons always consume the passed in references */
 extern struct val *val_alloc_cons(struct val *head, struct val *tail);
 
