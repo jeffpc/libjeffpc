@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2014-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -339,7 +339,7 @@ static inline const char *sym_cstr(const struct sym *sym)
 #define VAL_ALLOC_CHAR(v)	_VAL_ALLOC(struct val, val_alloc_char(v))
 #define VAL_ALLOC_INT(v)	_VAL_ALLOC(struct val, val_alloc_int(v))
 #define VAL_ALLOC_BOOL(v)	val_alloc_bool(v) /* never fails */
-#define VAL_ALLOC_NULL(v)	val_alloc_null(v) /* never fails */
+#define VAL_ALLOC_NULL()	val_alloc_null() /* never fails */
 #define VAL_ALLOC_CONS(h, t)	_VAL_ALLOC(struct val, val_alloc_cons((h), (t)))
 
 #define STR_ALLOC(s)		_VAL_ALLOC(struct str, str_alloc(s))
