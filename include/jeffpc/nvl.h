@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,24 +25,11 @@
 
 #include <stdbool.h>
 
-#include <jeffpc/list.h>
 #include <jeffpc/val.h>
-#include <jeffpc/refcnt.h>
 #include <jeffpc/buffer.h>
 
 struct nvlist {
-	struct list values;
-	refcnt_t refcnt;
-};
-
-enum nvtype {
-	NVT_ARRAY,
-	NVT_BLOB,
-	NVT_BOOL,
-	NVT_INT,
-	NVT_NULL,
-	NVT_NVL,
-	NVT_STR,
+	struct val val;
 };
 
 /* serialization formats */
@@ -53,26 +40,10 @@ enum nvformat {
 
 /* do not access these directly */
 struct nvpair {
-	struct list_node node;
+	struct bst_node node;
 
-	const char *name;
-	struct nvval {
-		enum nvtype type;
-		union {
-			struct {
-				struct nvval *vals;
-				size_t nelem;
-			} array;
-			struct {
-				void *ptr;
-				size_t size;
-			} blob;
-			bool b;
-			uint64_t i;
-			struct nvlist *nvl;
-			struct str *str;
-		};
-	} value;
+	struct str *name;
+	struct val *value;
 };
 
 enum nvcvtcond {
@@ -82,14 +53,45 @@ enum nvcvtcond {
 
 struct nvl_convert_info {
 	const char *name;
-	enum nvtype tgt_type;
+	enum val_type tgt_type;
 	enum nvcvtcond cond;
 };
 
-extern struct nvlist *nvl_alloc(void);
-extern void nvl_free(struct nvlist *nvl);
+#define nvl_alloc()	((struct nvlist *) val_alloc_nvl())
+
+/*
+ * struct val reference counting & casting to struct nvl
+ */
+
+static inline struct nvlist *val_cast_to_nvl(struct val *val)
+{
+	ASSERT(!val || (val->type == VT_NVL));
+
+	return container_of(val, struct nvlist, val);
+}
+
+#define val_getref_nvl(v)	val_cast_to_nvl(val_getref(v))
+
+/*
+ * struct nvl reference counting & casting to struct val
+ */
+
+#define nvl_getref(nvl)		((struct nvlist *) val_getref(nvl_cast_to_val(nvl)))
+
+#define nvl_putref(nvl)		val_putref(nvl_cast_to_val(nvl))
+
+#define nvl_getref_val(nvl)	val_getref(nvl_cast_to_val(nvl))
+
+static inline struct val *nvl_cast_to_val(struct nvlist *nvl)
+{
+	return &nvl->val;
+}
+
+/*
+ * Misc functions
+ */
+
 extern int nvl_merge(struct nvlist *dest, struct nvlist *src);
-extern void nvl_dump_file(FILE *out, struct nvlist *nvl);
 
 /*
  * If convert_all is true, then all errors except -ENOTSUP encountered
@@ -105,13 +107,9 @@ extern struct nvlist *nvl_unpack(const void *ptr, size_t len,
 				 enum nvformat format);
 
 /* iteration */
+extern const struct nvpair *nvl_iter_start(struct nvlist *nvl);
 extern const struct nvpair *nvl_iter_next(struct nvlist *nvl,
 					  const struct nvpair *prev);
-
-static inline const struct nvpair *nvl_iter_start(struct nvlist *nvl)
-{
-	return nvl_iter_next(nvl, NULL);
-}
 
 #define nvl_for_each(pair, nvl)			\
 	for (pair = nvl_iter_start(nvl);	\
@@ -129,7 +127,7 @@ static inline const struct nvpair *nvl_iter_start(struct nvlist *nvl)
  * -ERANGE = wrong type (e.g., looking up an int, but stored value is a string)
  */
 extern int nvl_lookup_array(struct nvlist *nvl, const char *name,
-			    const struct nvval **vals, size_t *nelem);
+			    struct val ***vals, size_t *nelem);
 extern int nvl_lookup_blob(struct nvlist *nvl, const char *name,
 			   const void **ptr, size_t *size);
 extern int nvl_lookup_bool(struct nvlist *nvl, const char *name, bool *out);
@@ -147,11 +145,11 @@ extern struct str *nvl_lookup_str(struct nvlist *nvl, const char *name);
  *
  * -ENOMEM = out of memory
  */
-extern int nvl_set(struct nvlist *nvl, const char *name, struct nvval *val);
+extern int nvl_set(struct nvlist *nvl, const char *name, struct val *val);
 extern int nvl_set_array(struct nvlist *nvl, const char *name,
-			 struct nvval *vals, size_t nelem);
+			 struct val **vals, size_t nelem);
 extern int nvl_set_array_copy(struct nvlist *nvl, const char *name,
-			      const struct nvval *vals, size_t nelem);
+			      struct val **vals, size_t nelem);
 extern int nvl_set_blob(struct nvlist *nvl, const char *name, void *ptr,
 			size_t size);
 extern int nvl_set_blob_copy(struct nvlist *nvl, const char *name,
@@ -171,7 +169,7 @@ extern int nvl_set_str(struct nvlist *nvl, const char *name, struct str *val);
  * -ERANGE = existing item's type doesn't match requested type
  */
 extern int nvl_unset(struct nvlist *nvl, const char *name);
-extern int nvl_unset_type(struct nvlist *nvl, const char *name, enum nvtype type);
+extern int nvl_unset_type(struct nvlist *nvl, const char *name, enum val_type type);
 
 /*
  * Check existence of a specific key, or key-valuetype pair from the list.
@@ -187,7 +185,7 @@ extern int nvl_unset_type(struct nvlist *nvl, const char *name, enum nvtype type
  */
 extern bool nvl_exists(struct nvlist *nvl, const char *name);
 extern int nvl_exists_type(struct nvlist *nvl, const char *name,
-			   enum nvtype type);
+			   enum val_type type);
 
 /*
  * nvpair related functions
@@ -195,12 +193,12 @@ extern int nvl_exists_type(struct nvlist *nvl, const char *name,
 
 static inline const char *nvpair_name(const struct nvpair *pair)
 {
-	return pair->name;
+	return str_cstr(pair->name);
 }
 
-static inline enum nvtype nvpair_type(const struct nvpair *pair)
+static inline enum val_type nvpair_type(const struct nvpair *pair)
 {
-	return pair->value.type;
+	return pair->value->type;
 }
 
 /*
@@ -208,7 +206,7 @@ static inline enum nvtype nvpair_type(const struct nvpair *pair)
  * integer.  The meaning of the return values is the same as well.
  */
 extern int nvpair_value_array(const struct nvpair *pair,
-			      const struct nvval **vals, size_t *nelem);
+			      struct val ***vals, size_t *nelem);
 extern int nvpair_value_blob(const struct nvpair *pair,
 			     const void **ptr, size_t *size);
 extern int nvpair_value_bool(const struct nvpair *pair, bool *out);
@@ -216,19 +214,5 @@ extern int nvpair_value_int(const struct nvpair *pair, uint64_t *out);
 extern int nvpair_value_null(const struct nvpair *pair);
 extern struct nvlist *nvpair_value_nvl(const struct nvpair *pair);
 extern struct str *nvpair_value_str(const struct nvpair *pair);
-
-/*
- * nvval related functions
- */
-
-extern void nvval_release_array(struct nvval *vals, size_t nelem);
-
-static inline void nvval_release(struct nvval *val)
-{
-	if (val)
-		nvval_release_array(val, 1);
-}
-
-REFCNT_INLINE_FXNS(struct nvlist, nvl, refcnt, nvl_free, NULL)
 
 #endif

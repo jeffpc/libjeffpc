@@ -99,7 +99,6 @@ add_library(jeffpc SHARED
 	mem_array.c
 	nvl.c
 	nvl_convert.c
-	nvl_dump.c
 	nvl_fmt_cbor.c
 	nvl_fmt_json.c
 	nvl_pack.c
@@ -122,6 +121,7 @@ add_library(jeffpc SHARED
 	uuid.c
 	val.c
 	val_array.c
+	val_nvl.c
 	version.c
 	${UMEM_EXTRA_SOURCE}
 )

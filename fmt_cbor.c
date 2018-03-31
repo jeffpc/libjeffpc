@@ -21,6 +21,7 @@
  */
 
 #include <jeffpc/cbor.h>
+#include <jeffpc/nvl.h>
 
 enum major_type {
 	CMT_UINT  = 0,
@@ -231,6 +232,35 @@ int cbor_pack_map_end(struct buffer *buffer, size_t npairs)
 	return cbor_pack_break(buffer);
 }
 
+int cbor_pack_map_val(struct buffer *buffer, struct val *val)
+{
+	struct bst_tree *tree = &val->_set_nvl.values;
+	struct nvpair *cur;
+	size_t npairs;
+	int ret;
+
+	if (val->type != VT_NVL)
+		return -EINVAL;
+
+	npairs = bst_numnodes(tree);
+
+	ret = cbor_pack_map_start(buffer, npairs);
+	if (ret)
+		return ret;
+
+	bst_for_each(tree, cur) {
+		ret = cbor_pack_str(buffer, cur->name);
+		if (ret)
+			return ret;
+
+		ret = cbor_pack_val(buffer, cur->value);
+		if (ret)
+			return ret;
+	}
+
+	return cbor_pack_map_end(buffer, npairs);
+}
+
 int cbor_pack_val(struct buffer *buffer, struct val *val)
 {
 	switch (val->type) {
@@ -258,6 +288,8 @@ int cbor_pack_val(struct buffer *buffer, struct val *val)
 			 */
 			return cbor_pack_array_vals(buffer, val->_set_array.vals,
 						    val->array.nelem);
+		case VT_NVL:
+			return cbor_pack_map_val(buffer, val);
 	}
 
 	return -ENOTSUP;

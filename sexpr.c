@@ -343,6 +343,33 @@ bool sexpr_equal(struct val *lhs, struct val *rhs)
 
 			goto out;
 		}
+		case VT_NVL: {
+			struct bst_tree *ltree = &lhs->_set_nvl.values;
+			struct bst_tree *rtree = &rhs->_set_nvl.values;
+			struct nvpair *lcur;
+			struct nvpair *rcur;
+
+			lcur = bst_first(ltree);
+			rcur = bst_first(rtree);
+
+			while (lcur && rcur) {
+				ret = (str_cmp(lcur->name, rcur->name) == 0);
+				if (!ret)
+					goto out;
+
+				ret = sexpr_equal(val_getref(lcur->value),
+						  val_getref(rcur->value));
+				if (!ret)
+					goto out;
+
+				lcur = bst_next(ltree, lcur);
+				rcur = bst_next(rtree, rcur);
+			}
+
+			/* if both sides reached the end, then they are equal */
+			ret = !lcur && !rcur;
+			goto out;
+		}
 	}
 
 	panic("unknown struct val type %u", lhs->type);

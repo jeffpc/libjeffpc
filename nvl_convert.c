@@ -42,14 +42,14 @@ static int check_condition_str(struct str *str, enum nvcvtcond cond)
 }
 
 static int cvt_string(struct nvlist *nvl, const struct nvpair *pair,
-		      enum nvtype tgt, enum nvcvtcond cond)
+		      enum val_type tgt, enum nvcvtcond cond)
 {
 	const char *name = nvpair_name(pair);
 	struct str *str;
 	uint64_t intval;
 	int ret = -ENOTSUP;
 
-	ASSERT3U(nvpair_type(pair), ==, NVT_STR);
+	ASSERT3U(nvpair_type(pair), ==, VT_STR);
 
 	str = nvpair_value_str(pair);
 	if (IS_ERR(str)) {
@@ -66,23 +66,26 @@ static int cvt_string(struct nvlist *nvl, const struct nvpair *pair,
 	}
 
 	switch (tgt) {
-		case NVT_ARRAY:
-		case NVT_BLOB:
-		case NVT_BOOL:
+		case VT_ARRAY:
+		case VT_BLOB:
+		case VT_BOOL:
+		case VT_SYM:
+		case VT_CONS:
+		case VT_CHAR:
 			ret = -ENOTSUP;
 			break;
-		case NVT_INT:
+		case VT_INT:
 			ret = str2u64(str_cstr(str), &intval);
 			if (!ret)
 				ret = nvl_set_int(nvl, name, intval);
 			break;
-		case NVT_NULL:
+		case VT_NULL:
 			ret = nvl_set_null(nvl, name);
 			break;
-		case NVT_NVL:
+		case VT_NVL:
 			ret = -ENOTSUP;
 			break;
-		case NVT_STR:
+		case VT_STR:
 			/* nothing to do */
 			ret = 0;
 			break;
@@ -121,14 +124,17 @@ int nvl_convert(struct nvlist *nvl, const struct nvl_convert_info *table,
 		}
 
 		switch (nvpair_type(pair)) {
-			case NVT_ARRAY:
-			case NVT_BLOB:
-			case NVT_BOOL:
-			case NVT_INT:
-			case NVT_NULL:
-			case NVT_NVL:
+			case VT_ARRAY:
+			case VT_BLOB:
+			case VT_BOOL:
+			case VT_INT:
+			case VT_NULL:
+			case VT_NVL:
+			case VT_SYM:
+			case VT_CONS:
+			case VT_CHAR:
 				return -ENOTSUP;
-			case NVT_STR:
+			case VT_STR:
 				ret = cvt_string(nvl, pair, table->tgt_type,
 						 table->cond);
 				break;

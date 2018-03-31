@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,13 +39,13 @@ static int cbor_nvl_epilogue(struct buffer *buffer, struct nvlist *nvl)
 	return cbor_pack_map_end(buffer, CBOR_UNKNOWN_NELEM);
 }
 
-static int cbor_array_prologue(struct buffer *buffer, const struct nvval *vals,
+static int cbor_array_prologue(struct buffer *buffer, struct val *const *vals,
 			       size_t nelem)
 {
 	return cbor_pack_array_start(buffer, nelem);
 }
 
-static int cbor_array_epilogue(struct buffer *buffer, const struct nvval *vals,
+static int cbor_array_epilogue(struct buffer *buffer, struct val *const *vals,
 			       size_t nelem)
 {
 	return cbor_pack_array_end(buffer, nelem);

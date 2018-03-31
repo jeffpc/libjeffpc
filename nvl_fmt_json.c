@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,18 +44,18 @@ static int json_nvl_epilogue(struct buffer *buffer, struct nvlist *nvl)
 	return buffer_append_c(buffer, '}');
 }
 
-static int json_array_prologue(struct buffer *buffer, const struct nvval *vals,
+static int json_array_prologue(struct buffer *buffer, struct val *const *vals,
 			       size_t nelem)
 {
 	return buffer_append_c(buffer, '[');
 }
 
-static int json_array_val_sep(struct buffer *buffer, const struct nvval *val)
+static int json_array_val_sep(struct buffer *buffer, const struct val *val)
 {
 	return buffer_append_c(buffer, ',');
 }
 
-static int json_array_epilogue(struct buffer *buffer, const struct nvval *vals,
+static int json_array_epilogue(struct buffer *buffer, struct val *const *vals,
 			       size_t nelem)
 {
 	return buffer_append_c(buffer, ']');

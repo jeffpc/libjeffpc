@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -80,10 +80,10 @@ struct nvpackops {
 	 * Required: At least one of prologue or epilogue.
 	 * Optional: The rest.
 	 */
-	int (*array_prologue)(struct buffer *buffer, const struct nvval *vals,
+	int (*array_prologue)(struct buffer *buffer, struct val *const *vals,
 			      size_t nelem);
-	int (*array_val_sep)(struct buffer *buffer, const struct nvval *val);
-	int (*array_epilogue)(struct buffer *buffer, const struct nvval *vals,
+	int (*array_val_sep)(struct buffer *buffer, const struct val *val);
+	int (*array_epilogue)(struct buffer *buffer, struct val *const *vals,
 			      size_t nelem);
 
 	/*

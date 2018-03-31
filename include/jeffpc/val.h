@@ -30,6 +30,8 @@
 #include <jeffpc/refcnt.h>
 #include <jeffpc/error.h>
 #include <jeffpc/types.h>
+#include <jeffpc/list.h>
+#include <jeffpc/bst.h>
 
 /*
  * A typed value structure.
@@ -54,6 +56,7 @@ enum val_type {
 	VT_CHAR,	/* a single (unicode) character */
 	VT_BLOB,	/* a byte string */
 	VT_ARRAY,	/* an array of values */
+	VT_NVL,		/* an nvlist */
 };
 
 #define STR_INLINE_LEN	15
@@ -81,6 +84,15 @@ struct val {
 			struct val **vals;
 			size_t nelem;
 		} array;
+		const struct {
+			/*
+			 * TODO: Using an unbalanced binary search tree is
+			 * not great, but it will do for now.  Once we have
+			 * a balanced binary search tree implementation, we
+			 * should switch to it.
+			 */
+			struct bst_tree values;
+		} nvl;
 
 		/*
 		 * We want to keep the normal members const to catch
@@ -109,6 +121,9 @@ struct val {
 			struct val **vals;
 			size_t nelem;
 		} _set_array;
+		struct {
+			struct bst_tree values;
+		} _set_nvl;
 	};
 };
 
@@ -133,6 +148,7 @@ extern struct val *val_alloc_bool(bool v);
 extern struct val *val_alloc_char(uint64_t v);
 extern struct val *val_alloc_int(uint64_t v);
 extern struct val *val_alloc_null(void);
+extern struct val *val_alloc_nvl(void);
 
 /* val_alloc_cons always consume the passed in references */
 extern struct val *val_alloc_cons(struct val *head, struct val *tail);
@@ -362,6 +378,7 @@ static inline const char *sym_cstr(const struct sym *sym)
 #define VAL_ALLOC_BOOL(v)	val_alloc_bool(v) /* never fails */
 #define VAL_ALLOC_NULL()	val_alloc_null() /* never fails */
 #define VAL_ALLOC_CONS(h, t)	_VAL_ALLOC(struct val, val_alloc_cons((h), (t)))
+#define VAL_ALLOC_NVL()		_VAL_ALLOC(struct val, val_alloc_nvl())
 
 #define VAL_ALLOC_ARRAY(v, l)		_VAL_ALLOC(struct val, val_alloc_array((v), (l)))
 #define VAL_ALLOC_ARRAY_DUP(v, l)	_VAL_ALLOC(struct val, val_alloc_array_dup((v), (l)))

@@ -91,24 +91,36 @@ static struct val *convert_input(struct val *input)
 	if (input->type != VT_CONS)
 		return input;
 
-	len = sexpr_length(val_getref(input));
-	if (len < 0)
-		fail("failed to get length of array");
+	/*
+	 * We are dealing with either a list or an assoc, we need to figure
+	 * out which it is...
+	 * FIXME
+	 */
 
-	arr = mem_reallocarray(NULL, len, sizeof(struct val *));
-	if (!arr)
-		fail("failed to allocate val array");
+	if (0) {
+		/* it is an assoc; turn it into a VT_NVL */
+		fail("not yet implemented");
+	} else {
+		/* it is a list; turn it into a VT_ARRAY */
+		len = sexpr_length(val_getref(input));
+		if (len < 0)
+			fail("failed to get length of array");
 
-	ret = sexpr_list_to_array(input, arr, len);
-	if (ret < 0)
-		fail("failed to construct an array");
+		arr = mem_reallocarray(NULL, len, sizeof(struct val *));
+		if (!arr)
+			fail("failed to allocate val array");
 
-	for (i = 0; i < len; i++)
-		arr[i] = convert_input(arr[i]);
+		ret = sexpr_list_to_array(input, arr, len);
+		if (ret < 0)
+			fail("failed to construct an array");
 
-	val_putref(input);
+		for (i = 0; i < len; i++)
+			arr[i] = convert_input(arr[i]);
 
-	return VAL_ALLOC_ARRAY(arr, len);
+		val_putref(input);
+
+		return VAL_ALLOC_ARRAY(arr, len);
+	}
 }
 
 static void onefile(struct val *input, struct buffer *expected)
@@ -122,7 +134,7 @@ static void onefile(struct val *input, struct buffer *expected)
 	if (IS_ERR(got))
 		fail("failed to allocate output buffer");
 
-	/* possibly an VT_ARRAY in sexpr list form */
+	/* possibly an VT_ARRAY or VT_NVL in sexpr list form */
 	if (input->type == VT_CONS)
 		input = convert_input(input);
 
@@ -149,6 +161,10 @@ static void onefile(struct val *input, struct buffer *expected)
 			TEST_ONE(cbor_pack_array_vals(got, input->array.vals,
 						      input->array.nelem),
 				 got, expected, input);
+			break;
+		case VT_NVL:
+			TEST_ONE(cbor_pack_map_val(got, input), got,
+				 expected, input);
 			break;
 		case VT_SYM:
 		case VT_CONS:

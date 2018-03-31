@@ -137,6 +137,7 @@ static struct str *dump_atom(struct val *lv)
 			panic("%s: VT_CONS is not an atom", __func__);
 		case VT_BLOB:
 		case VT_ARRAY:
+		case VT_NVL:
 			return ERR_PTR(-ENOTSUP);
 	}
 
@@ -258,6 +259,7 @@ static struct str *do_sexpr_dump(struct val *lv, bool raw, bool wrap)
 		case VT_INT:
 		case VT_BLOB:
 		case VT_ARRAY:
+		case VT_NVL:
 			return dump_atom(lv);
 		case VT_CONS:
 			if (raw)

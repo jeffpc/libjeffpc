@@ -28,6 +28,7 @@
 #include <ctype.h>
 #include <inttypes.h>
 
+#include <jeffpc/val.h>
 #include <jeffpc/jeffpc.h>
 #include <jeffpc/error.h>
 #include <jeffpc/types.h>
@@ -117,6 +118,9 @@ void val_free(struct val *val)
 				free(val->_set_array.vals);
 			break;
 		}
+		case VT_NVL:
+			__val_free_nvl(val);
+			break;
 	}
 
 	mem_cache_free(val_cache, val);
@@ -309,6 +313,10 @@ void val_dump_file(FILE *out, struct val *val, int indent)
 					      indent + 2);
 			break;
 		}
+		case VT_NVL:
+			/* TODO: dump the contents of the pairs */
+			fprintf(out, "%*snvlist\n", indent, "");
+			break;
 		default:
 			fprintf(out, "Unknown type %d\n", val->type);
 			break;

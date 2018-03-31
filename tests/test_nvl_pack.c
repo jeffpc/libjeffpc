@@ -260,11 +260,13 @@ static void onefile(struct val *prog,
 					break;
 				case VT_BLOB:
 				case VT_ARRAY:
+				case VT_NVL:
 					/*
 					 * We couldn't have possibly read
 					 * this from the input sexpr!
 					 */
-					fail("sexprs don't support blobs/arrays");
+					fail("sexprs don't support "
+					     "blobs/arrays/nvlists");
 					break;
 				case VT_BOOL:
 					set_bool(nvl, var, op[2]->b, 0);

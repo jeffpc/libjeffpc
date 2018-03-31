@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,6 +49,7 @@ extern int cbor_pack_array_vals(struct buffer *buffer, struct val **vals,
 extern int cbor_pack_map_start(struct buffer *buffer, size_t npairs);
 extern int cbor_pack_map_end(struct buffer *buffer, size_t npairs);
 extern int cbor_pack_val(struct buffer *buffer, struct val *val);
+extern int cbor_pack_map_val(struct buffer *buffer, struct val *val);
 
 static inline int cbor_pack_cstr(struct buffer *buffer, const char *str)
 {

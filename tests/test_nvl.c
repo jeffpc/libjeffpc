@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -96,7 +96,7 @@ static inline void __check_lookup_err(bool iserr, bool expected_iserr,
 static void check_key_not_exists(struct nvlist *nvl, const char *key)
 {
 	const struct nvpair *pair;
-	const struct nvval *vals;
+	struct val **vals;
 	struct nvlist *cnvl;
 	size_t nelem, size;
 	const void *ptr;
@@ -134,10 +134,10 @@ static void check_key_not_exists(struct nvlist *nvl, const char *key)
 }
 
 static void check_key_exists(struct nvlist *nvl, const char *key,
-			     enum nvtype type)
+			     enum val_type type)
 {
 	const struct nvpair *pair;
-	const struct nvval *vals;
+	struct val **vals;
 	struct nvlist *cnvl;
 	size_t nelem, size;
 	const void *ptr;
@@ -150,36 +150,36 @@ static void check_key_exists(struct nvlist *nvl, const char *key,
 	__check_lookup_err(IS_ERR(pair), false, PTR_ERR(pair), 0, "nvl_lookup",
 			   key);
 
-	if (pair->value.type != type)
+	if (pair->value->type != type)
 		fail("nvl_lookup(..., '%s') returned wrong type; got %u, "
-		     "expected %u", key, pair->value.type, type);
+		     "expected %u", key, pair->value->type, type);
 
 	ret = nvl_lookup_array(nvl, key, &vals, &nelem);
-	__check_lookup_err(!!ret, type != NVT_ARRAY, ret, -ERANGE,
+	__check_lookup_err(!!ret, type != VT_ARRAY, ret, -ERANGE,
 			   "nvl_lookup_array", key);
 
 	ret = nvl_lookup_blob(nvl, key, &ptr, &size);
-	__check_lookup_err(!!ret, type != NVT_BLOB, ret, -ERANGE,
+	__check_lookup_err(!!ret, type != VT_BLOB, ret, -ERANGE,
 			   "nvl_lookup_blob", key);
 
 	ret = nvl_lookup_bool(nvl, key, &bool_val);
-	__check_lookup_err(!!ret, type != NVT_BOOL, ret, -ERANGE,
+	__check_lookup_err(!!ret, type != VT_BOOL, ret, -ERANGE,
 			   "nvl_lookup_bool", key);
 
 	ret = nvl_lookup_int(nvl, key, &int_val);
-	__check_lookup_err(!!ret, type != NVT_INT, ret, -ERANGE,
+	__check_lookup_err(!!ret, type != VT_INT, ret, -ERANGE,
 			   "nvl_lookup_int", key);
 
 	ret = nvl_lookup_null(nvl, key);
-	__check_lookup_err(!!ret, type != NVT_NULL, ret, -ERANGE,
+	__check_lookup_err(!!ret, type != VT_NULL, ret, -ERANGE,
 			   "nvl_lookup_null", key);
 
 	cnvl = nvl_lookup_nvl(nvl, key);
-	__check_lookup_err(IS_ERR(cnvl), type != NVT_NVL, PTR_ERR(cnvl),
+	__check_lookup_err(IS_ERR(cnvl), type != VT_NVL, PTR_ERR(cnvl),
 			   -ERANGE, "nvl_lookup_nvl", key);
 
 	str = nvl_lookup_str(nvl, key);
-	__check_lookup_err(IS_ERR(str), type != NVT_STR, PTR_ERR(str),
+	__check_lookup_err(IS_ERR(str), type != VT_STR, PTR_ERR(str),
 			   -ERANGE, "nvl_lookup_str", key);
 }
 
@@ -259,20 +259,20 @@ static void test_lookup_simple(void)
 	set_int(nvl, "abc", 1);
 
 	check_key_not_exists(nvl, "non-existent");
-	check_key_exists(nvl, "abc", NVT_INT);
+	check_key_exists(nvl, "abc", VT_INT);
 
 	set_bool(nvl, "def", true);
 
 	check_key_not_exists(nvl, "non-existent");
-	check_key_exists(nvl, "abc", NVT_INT);
-	check_key_exists(nvl, "def", NVT_BOOL);
+	check_key_exists(nvl, "abc", VT_INT);
+	check_key_exists(nvl, "def", VT_BOOL);
 
 	set_null(nvl, "ghi");
 
 	check_key_not_exists(nvl, "non-existent");
-	check_key_exists(nvl, "abc", NVT_INT);
-	check_key_exists(nvl, "def", NVT_BOOL);
-	check_key_exists(nvl, "ghi", NVT_NULL);
+	check_key_exists(nvl, "abc", VT_INT);
+	check_key_exists(nvl, "def", VT_BOOL);
+	check_key_exists(nvl, "ghi", VT_NULL);
 
 	nvl_putref(nvl);
 
@@ -295,9 +295,9 @@ static inline void check_merge_set(struct nvlist *nvl, unsigned imask,
 		if ((mask & bit) == 0)
 			check_key_not_exists(nvl, name);
 		else if (imask & bit)
-			check_key_exists(nvl, name, NVT_INT);
+			check_key_exists(nvl, name, VT_INT);
 		else if (bmask & bit)
-			check_key_exists(nvl, name, NVT_BOOL);
+			check_key_exists(nvl, name, VT_BOOL);
 	}
 }
 

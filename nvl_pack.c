@@ -28,10 +28,10 @@
 static int pack_nvl(const struct nvpackops *ops, struct buffer *buffer,
 		    struct nvlist *nvl);
 static int pack_val(const struct nvpackops *ops, struct buffer *buffer,
-		    const struct nvval *val);
+		    struct val *val);
 
 static int pack_array(const struct nvpackops *ops, struct buffer *buffer,
-		      const struct nvval *vals, size_t nelem)
+		      struct val **vals, size_t nelem)
 {
 	bool first = true;
 	size_t i;
@@ -44,7 +44,7 @@ static int pack_array(const struct nvpackops *ops, struct buffer *buffer,
 		return ret;
 
 	for (i = 0; i < nelem; i++) {
-		const struct nvval *val = &vals[i];
+		struct val *val = vals[i];
 
 		if (first) {
 			first = false;
@@ -85,51 +85,54 @@ static int pack_null(const struct nvpackops *ops, struct buffer *buffer)
 	return CALL_OR_FAIL(ops, val_null, (buffer));
 }
 
-static int pack_cstring(const struct nvpackops *ops, struct buffer *buffer,
-			const char *str)
-{
-	return CALL_OR_FAIL(ops, val_str, (buffer, str));
-}
-
 static int pack_string(const struct nvpackops *ops, struct buffer *buffer,
 		       struct str *str)
 {
+	const char *s;
+
 	/*
 	 * Even though we try to avoid NULL pointers to indicate empty
 	 * strings, they can crop up from many places.  So, it is safer to
 	 * do the check here.
 	 */
-	return pack_cstring(ops, buffer, str ? str_cstr(str) : "");
+	s = str ? str_cstr(str) : "";
+
+	return CALL_OR_FAIL(ops, val_str, (buffer, s));
 }
 
 static int pack_val(const struct nvpackops *ops, struct buffer *buffer,
-		    const struct nvval *val)
+		    struct val *val)
 {
 	int ret = -ENOTSUP;
 
 	switch (val->type) {
-		case NVT_ARRAY:
+		case VT_ARRAY:
 			ret = pack_array(ops, buffer, val->array.vals,
 					 val->array.nelem);
 			break;
-		case NVT_BLOB:
+		case VT_BLOB:
 			ret = pack_blob(ops, buffer, val->blob.ptr,
 					val->blob.size);
 			break;
-		case NVT_BOOL:
+		case VT_BOOL:
 			ret = pack_bool(ops, buffer, val->b);
 			break;
-		case NVT_INT:
+		case VT_INT:
 			ret = pack_int(ops, buffer, val->i);
 			break;
-		case NVT_NULL:
+		case VT_NULL:
 			ret = pack_null(ops, buffer);
 			break;
-		case NVT_NVL:
-			ret = pack_nvl(ops, buffer, val->nvl);
+		case VT_NVL:
+			ret = pack_nvl(ops, buffer, val_cast_to_nvl(val));
 			break;
-		case NVT_STR:
-			ret = pack_string(ops, buffer, val->str);
+		case VT_STR:
+			ret = pack_string(ops, buffer, val_cast_to_str(val));
+			break;
+		case VT_SYM:
+		case VT_CONS:
+		case VT_CHAR:
+			/* not supported */
 			break;
 	}
 
@@ -144,13 +147,13 @@ static int pack_pair(const struct nvpackops *ops, struct buffer *buffer,
 	if ((ret = CALL(ops, pair_prologue, (buffer, pair))))
 		return ret;
 
-	if ((ret = pack_cstring(ops, buffer, pair->name)))
+	if ((ret = pack_string(ops, buffer, pair->name)))
 		return ret;
 
 	if ((ret = CALL(ops, nvl_name_sep, (buffer, pair))))
 		return ret;
 
-	if ((ret = pack_val(ops, buffer, &pair->value)))
+	if ((ret = pack_val(ops, buffer, pair->value)))
 		return ret;
 
 	if ((ret = CALL(ops, pair_epilogue, (buffer, pair))))

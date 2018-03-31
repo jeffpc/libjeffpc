@@ -55,6 +55,7 @@ JEFFPC_0.10 {
 		cbor_pack_int;
 		cbor_pack_map_end;
 		cbor_pack_map_start;
+		cbor_pack_map_val;
 		cbor_pack_nint;
 		cbor_pack_null;
 		cbor_pack_str;
@@ -104,13 +105,11 @@ JEFFPC_0.10 {
 		mem_recallocarray;
 
 		# nvlist
-		nvl_alloc;
 		nvl_convert;
-		nvl_dump_file;
 		nvl_exists;
 		nvl_exists_type;
-		nvl_free;
 		nvl_iter_next;
+		nvl_iter_start;
 		nvl_lookup;
 		nvl_lookup_array;
 		nvl_lookup_blob;
@@ -143,7 +142,6 @@ JEFFPC_0.10 {
 		nvpair_value_null;
 		nvpair_value_nvl;
 		nvpair_value_str;
-		nvval_release_array;
 
 		# padding
 		check_padding;
@@ -251,6 +249,7 @@ JEFFPC_0.10 {
 		val_alloc_cons;
 		val_alloc_int;
 		val_alloc_null;
+		val_alloc_nvl;
 		val_empty_cons;
 
 		# urldecode

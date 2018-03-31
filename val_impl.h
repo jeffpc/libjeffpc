@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,8 +24,13 @@
 #define __VAL_IMPL_H
 
 #include <jeffpc/val.h>
+#include <jeffpc/nvl.h>
 
 extern struct val *__val_alloc(enum val_type type);
+extern void __val_free_nvl(struct val *val);
+
+extern struct nvpair *__nvpair_alloc(const char *name);
+extern void __nvpair_free(struct nvpair *pair);
 
 static inline bool val_is_null_cons(struct val *v)
 {

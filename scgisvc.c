@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2014-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -150,10 +150,10 @@ static int read_netstring(struct scgi *req)
  */
 
 static const struct nvl_convert_info scgi_convert_headers[] = {
-	{ .name = "SCGI",		.tgt_type = NVT_INT, },
-	{ .name = SCGI_CONTENT_LENGTH,	.tgt_type = NVT_INT, },
-	{ .name = SCGI_REMOTE_PORT,	.tgt_type = NVT_INT, },
-	{ .name = SCGI_SERVER_PORT,	.tgt_type = NVT_INT, },
+	{ .name = "SCGI",		.tgt_type = VT_INT, },
+	{ .name = SCGI_CONTENT_LENGTH,	.tgt_type = VT_INT, },
+	{ .name = SCGI_REMOTE_PORT,	.tgt_type = VT_INT, },
+	{ .name = SCGI_SERVER_PORT,	.tgt_type = VT_INT, },
 	{ .name = NULL, },
 };
 
