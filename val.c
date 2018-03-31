@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2014-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -107,6 +107,16 @@ void val_free(struct val *val)
 			val_putref(val->cons.head);
 			val_putref(val->cons.tail);
 			break;
+		case VT_ARRAY: {
+			size_t i;
+
+			for (i = 0; i < val->array.nelem; i++)
+				val_putref(val->_set_array.vals[i]);
+
+			if (!val->static_alloc)
+				free(val->_set_array.vals);
+			break;
+		}
 	}
 
 	mem_cache_free(val_cache, val);
@@ -288,6 +298,17 @@ void val_dump_file(FILE *out, struct val *val, int indent)
 				val->blob.ptr, val->blob.size,
 				val->static_alloc ? "static" : "heap");
 			break;
+		case VT_ARRAY: {
+			size_t i;
+
+			fprintf(out, "%*sarray[%zu]:\n", indent, "",
+				val->array.nelem);
+
+			for (i = 0; i < val->array.nelem; i++)
+				val_dump_file(out, val->array.vals[i],
+					      indent + 2);
+			break;
+		}
 		default:
 			fprintf(out, "Unknown type %d\n", val->type);
 			break;

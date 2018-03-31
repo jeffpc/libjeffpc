@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -136,6 +136,7 @@ static struct str *dump_atom(struct val *lv)
 		case VT_CONS:
 			panic("%s: VT_CONS is not an atom", __func__);
 		case VT_BLOB:
+		case VT_ARRAY:
 			return ERR_PTR(-ENOTSUP);
 	}
 
@@ -256,6 +257,7 @@ static struct str *do_sexpr_dump(struct val *lv, bool raw, bool wrap)
 		case VT_CHAR:
 		case VT_INT:
 		case VT_BLOB:
+		case VT_ARRAY:
 			return dump_atom(lv);
 		case VT_CONS:
 			if (raw)

@@ -53,6 +53,7 @@ enum val_type {
 	VT_CONS,	/* cons cell */
 	VT_CHAR,	/* a single (unicode) character */
 	VT_BLOB,	/* a byte string */
+	VT_ARRAY,	/* an array of values */
 };
 
 #define STR_INLINE_LEN	15
@@ -76,6 +77,10 @@ struct val {
 			const void *ptr;
 			size_t size;
 		} blob;
+		const struct {
+			struct val **vals;
+			size_t nelem;
+		} array;
 
 		/*
 		 * We want to keep the normal members const to catch
@@ -100,6 +105,10 @@ struct val {
 			void *ptr;
 			size_t size;
 		} _set_blob;
+		struct {
+			struct val **vals;
+			size_t nelem;
+		} _set_array;
 	};
 };
 
@@ -130,6 +139,17 @@ extern struct val *val_alloc_cons(struct val *head, struct val *tail);
 
 /* assorted preallocated values */
 extern struct val *val_empty_cons(void);
+
+/*
+ * The passed in struct val references are always consumed.
+ *
+ * val_alloc_array takes consumes the heap allocated vals array
+ * val_alloc_array_dup duplicates the vals array
+ * val_alloc_array_static uses the vals array as-is
+ */
+extern struct val *val_alloc_array(struct val **vals, size_t nelem);
+extern struct val *val_alloc_array_dup(struct val **vals, size_t nelem);
+extern struct val *val_alloc_array_static(struct val **vals, size_t nelem);
 
 /*
  * Passed in string must be freed by the str code.  (I.e., we're adopting
@@ -342,6 +362,10 @@ static inline const char *sym_cstr(const struct sym *sym)
 #define VAL_ALLOC_BOOL(v)	val_alloc_bool(v) /* never fails */
 #define VAL_ALLOC_NULL()	val_alloc_null() /* never fails */
 #define VAL_ALLOC_CONS(h, t)	_VAL_ALLOC(struct val, val_alloc_cons((h), (t)))
+
+#define VAL_ALLOC_ARRAY(v, l)		_VAL_ALLOC(struct val, val_alloc_array((v), (l)))
+#define VAL_ALLOC_ARRAY_DUP(v, l)	_VAL_ALLOC(struct val, val_alloc_array_dup((v), (l)))
+#define VAL_ALLOC_ARRAY_STATIC(v, l)	_VAL_ALLOC(struct val, val_alloc_array_static((v), (l)))
 
 #define STR_ALLOC(s)		_VAL_ALLOC(struct str, str_alloc(s))
 #define SYM_ALLOC(s)		_VAL_ALLOC(struct sym, sym_alloc(s))

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -196,6 +196,8 @@ static struct val *eval_cons(struct val *expr, struct sexpr_eval_env *env)
 			panic("function name cannot be a VT_CONS");
 		case VT_BLOB:
 			panic("function name cannot be a VT_BLOB");
+		case VT_ARRAY:
+			panic("function name cannot be a VT_ARRAY");
 		case VT_SYM:
 			break; /* ok */
 	}
@@ -249,6 +251,7 @@ struct val *sexpr_eval(struct val *expr,
 		case VT_BOOL:
 		case VT_CHAR:
 		case VT_BLOB:
+		case VT_ARRAY:
 			return expr;
 		case VT_SYM:
 			if (!env->symlookup)

@@ -24,6 +24,7 @@
 #include <jeffpc/sexpr.h>
 #include <jeffpc/cbor.h>
 #include <jeffpc/io.h>
+#include <jeffpc/mem.h>
 
 #include "test-file.c"
 
@@ -80,6 +81,36 @@ static void cmp_buffers(struct buffer *exp, struct buffer *got)
 		cmp_buffers((exp), (got));				\
 	} while (0)
 
+static struct val *convert_input(struct val *input)
+{
+	struct val **arr;
+	size_t len;
+	size_t i;
+	int ret;
+
+	if (input->type != VT_CONS)
+		return input;
+
+	len = sexpr_length(val_getref(input));
+	if (len < 0)
+		fail("failed to get length of array");
+
+	arr = mem_reallocarray(NULL, len, sizeof(struct val *));
+	if (!arr)
+		fail("failed to allocate val array");
+
+	ret = sexpr_list_to_array(input, arr, len);
+	if (ret < 0)
+		fail("failed to construct an array");
+
+	for (i = 0; i < len; i++)
+		arr[i] = convert_input(arr[i]);
+
+	val_putref(input);
+
+	return VAL_ALLOC_ARRAY(arr, len);
+}
+
 static void onefile(struct val *input, struct buffer *expected)
 {
 	struct buffer *got;
@@ -90,6 +121,13 @@ static void onefile(struct val *input, struct buffer *expected)
 	got = buffer_alloc(1000);
 	if (IS_ERR(got))
 		fail("failed to allocate output buffer");
+
+	/* possibly an VT_ARRAY in sexpr list form */
+	if (input->type == VT_CONS)
+		input = convert_input(input);
+
+	fprintf(stderr, "modified input: ");
+	val_dump_file(stderr, input, 0);
 
 	switch (input->type) {
 		case VT_NULL:
@@ -107,27 +145,13 @@ static void onefile(struct val *input, struct buffer *expected)
 			TEST_ONE(cbor_pack_str(got, val_cast_to_str(input)),
 				 got, expected, input);
 			break;
-		case VT_CONS: {
-			/* possibly an VT_ARRAY in sexpr list form */
-			size_t len;
-			int ret;
-
-			len = sexpr_length(val_getref(input));
-			if (len < 0)
-				fail("failed to get length of array");
-
-			struct val *arr[len];
-
-			ret = sexpr_list_to_array(input, arr, len);
-			if (ret < 0)
-				fail("failed to construct an array");
-
-			TEST_ONE(cbor_pack_array_vals(got, arr, len),
+		case VT_ARRAY:
+			TEST_ONE(cbor_pack_array_vals(got, input->array.vals,
+						      input->array.nelem),
 				 got, expected, input);
-
 			break;
-		}
 		case VT_SYM:
+		case VT_CONS:
 		case VT_CHAR:
 		case VT_BLOB:
 			fail("Unsupported val type");

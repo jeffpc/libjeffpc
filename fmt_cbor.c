@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -251,6 +251,13 @@ int cbor_pack_val(struct buffer *buffer, struct val *val)
 		case VT_BLOB:
 			return cbor_pack_blob(buffer, val->blob.ptr,
 					      val->blob.size);
+		case VT_ARRAY:
+			/*
+			 * We need to pass non-const struct vals so that we
+			 * can use val_cast_to_*().
+			 */
+			return cbor_pack_array_vals(buffer, val->_set_array.vals,
+						    val->array.nelem);
 	}
 
 	return -ENOTSUP;

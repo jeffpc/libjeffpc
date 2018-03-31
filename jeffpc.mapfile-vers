@@ -240,6 +240,9 @@ JEFFPC_0.10 {
 		# val
 		val_dump_file;
 		val_free;
+		val_alloc_array;
+		val_alloc_array_dup;
+		val_alloc_array_static;
 		val_alloc_blob;
 		val_alloc_blob_dup;
 		val_alloc_blob_static;

@@ -121,6 +121,7 @@ add_library(jeffpc SHARED
 	unicode.c
 	uuid.c
 	val.c
+	val_array.c
 	version.c
 	${UMEM_EXTRA_SOURCE}
 )

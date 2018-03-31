@@ -327,6 +327,22 @@ bool sexpr_equal(struct val *lhs, struct val *rhs)
 			      sexpr_equal(val_getref(lhs->cons.tail),
 					  val_getref(rhs->cons.tail));
 			goto out;
+		case VT_ARRAY: {
+			size_t i;
+
+			ret = (lhs->array.nelem == rhs->array.nelem);
+			if (!ret)
+				goto out;
+
+			for (i = 0; i < lhs->array.nelem; i++) {
+				ret = sexpr_equal(val_getref(lhs->_set_array.vals[i]),
+						  val_getref(rhs->_set_array.vals[i]));
+				if (!ret)
+					break;
+			}
+
+			goto out;
+		}
 	}
 
 	panic("unknown struct val type %u", lhs->type);
