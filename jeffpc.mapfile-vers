@@ -44,6 +44,22 @@ JEFFPC_0.10 {
 		buffer_seek;
 		buffer_truncate;
 
+		# cbor
+		cbor_pack_array_end;
+		cbor_pack_array_start;
+		cbor_pack_blob;
+		cbor_pack_bool;
+		cbor_pack_break;
+		cbor_pack_cstr_len;
+		cbor_pack_int;
+		cbor_pack_map_end;
+		cbor_pack_map_start;
+		cbor_pack_nint;
+		cbor_pack_null;
+		cbor_pack_str;
+		cbor_pack_uint;
+		cbor_pack_val;
+
 		# cstr
 		strcpy_safe;
 
