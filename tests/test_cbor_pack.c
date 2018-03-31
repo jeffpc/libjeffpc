@@ -107,8 +107,27 @@ static void onefile(struct val *input, struct buffer *expected)
 			TEST_ONE(cbor_pack_str(got, val_cast_to_str(input)),
 				 got, expected, input);
 			break;
+		case VT_CONS: {
+			/* possibly an VT_ARRAY in sexpr list form */
+			size_t len;
+			int ret;
+
+			len = sexpr_length(val_getref(input));
+			if (len < 0)
+				fail("failed to get length of array");
+
+			struct val *arr[len];
+
+			ret = sexpr_list_to_array(input, arr, len);
+			if (ret < 0)
+				fail("failed to construct an array");
+
+			TEST_ONE(cbor_pack_array_vals(got, arr, len),
+				 got, expected, input);
+
+			break;
+		}
 		case VT_SYM:
-		case VT_CONS:
 		case VT_CHAR:
 		case VT_BLOB:
 			fail("Unsupported val type");

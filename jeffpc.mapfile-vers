@@ -47,6 +47,7 @@ JEFFPC_0.10 {
 		# cbor
 		cbor_pack_array_end;
 		cbor_pack_array_start;
+		cbor_pack_array_vals;
 		cbor_pack_blob;
 		cbor_pack_bool;
 		cbor_pack_break;

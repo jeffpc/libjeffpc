@@ -44,6 +44,8 @@ extern int cbor_pack_null(struct buffer *buffer);
 extern int cbor_pack_break(struct buffer *buffer);
 extern int cbor_pack_array_start(struct buffer *buffer, size_t nelem);
 extern int cbor_pack_array_end(struct buffer *buffer, size_t nelem);
+extern int cbor_pack_array_vals(struct buffer *buffer, struct val **vals,
+				size_t nelem);
 extern int cbor_pack_map_start(struct buffer *buffer, size_t npairs);
 extern int cbor_pack_map_end(struct buffer *buffer, size_t npairs);
 extern int cbor_pack_val(struct buffer *buffer, struct val *val);

@@ -193,6 +193,24 @@ int cbor_pack_array_end(struct buffer *buffer, size_t nelem)
 	return cbor_pack_break(buffer);
 }
 
+int cbor_pack_array_vals(struct buffer *buffer, struct val **vals, size_t nelem)
+{
+	size_t i;
+	int ret;
+
+	ret = cbor_pack_array_start(buffer, nelem);
+	if (ret)
+		return ret;
+
+	for (i = 0; i < nelem; i++) {
+		ret = cbor_pack_val(buffer, vals[i]);
+		if (ret)
+			return ret;
+	}
+
+	return cbor_pack_array_end(buffer, nelem);
+}
+
 int cbor_pack_map_start(struct buffer *buffer, size_t npairs)
 {
 	static const uint8_t byte = MKTYPE_STATIC(CMT_MAP, ADDL_MAP_INDEF);
