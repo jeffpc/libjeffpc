@@ -194,12 +194,12 @@ static inline void check_packing(struct nvlist *nvl,
 	struct buffer *buf;
 
 	/* JSON */
-	buf = nvl_pack(nvl, NVF_JSON);
+	buf = nvl_pack(nvl, VF_JSON);
 	cmp_buffers("JSON", false, expected_json, buf);
 	buffer_free(buf);
 
 	/* CBOR */
-	buf = nvl_pack(nvl, NVF_CBOR);
+	buf = nvl_pack(nvl, VF_CBOR);
 	cmp_buffers("CBOR", true, expected_cbor, buf);
 	buffer_free(buf);
 }

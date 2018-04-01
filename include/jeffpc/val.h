@@ -59,6 +59,12 @@ enum val_type {
 	VT_NVL,		/* an nvlist */
 };
 
+/* serialization formats */
+enum val_format {
+	VF_CBOR,	/* RFC 7049 */
+	VF_JSON,	/* RFC 7159 */
+};
+
 #define STR_INLINE_LEN	15
 
 struct val {

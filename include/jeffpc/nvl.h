@@ -32,12 +32,6 @@ struct nvlist {
 	struct val val;
 };
 
-/* serialization formats */
-enum nvformat {
-	NVF_CBOR,	/* RFC 7049 */
-	NVF_JSON,	/* RFC 7159 */
-};
-
 /* do not access these directly */
 struct nvpair {
 	struct bst_node node;
@@ -101,10 +95,10 @@ extern int nvl_convert(struct nvlist *nvl, const struct nvl_convert_info *table,
 		       bool convert_all);
 
 /* serialization & deserialization */
-extern ssize_t nvl_size(struct nvlist *nvl, enum nvformat format);
-extern struct buffer *nvl_pack(struct nvlist *nvl, enum nvformat format);
+extern ssize_t nvl_size(struct nvlist *nvl, enum val_format format);
+extern struct buffer *nvl_pack(struct nvlist *nvl, enum val_format format);
 extern struct nvlist *nvl_unpack(const void *ptr, size_t len,
-				 enum nvformat format);
+				 enum val_format format);
 
 /* iteration */
 extern const struct nvpair *nvl_iter_start(struct nvlist *nvl);

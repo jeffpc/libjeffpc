@@ -208,7 +208,7 @@ static int __nvl_pack(const struct nvpackops *ops, struct buffer *buffer,
 	return CALL(ops, buffer_finish, (buffer));
 }
 
-struct buffer *nvl_pack(struct nvlist *nvl, enum nvformat format)
+struct buffer *nvl_pack(struct nvlist *nvl, enum val_format format)
 {
 	const struct nvops *ops;
 	struct buffer *buffer;
@@ -230,7 +230,7 @@ struct buffer *nvl_pack(struct nvlist *nvl, enum nvformat format)
 	return ERR_PTR(ret);
 }
 
-ssize_t nvl_size(struct nvlist *nvl, enum nvformat format)
+ssize_t nvl_size(struct nvlist *nvl, enum val_format format)
 {
 	const struct nvops *ops;
 	struct buffer buffer;

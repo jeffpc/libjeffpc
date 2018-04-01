@@ -118,12 +118,12 @@ struct nvops {
 extern const struct nvops nvops_cbor;
 extern const struct nvops nvops_json;
 
-static inline const struct nvops *select_ops(enum nvformat format)
+static inline const struct nvops *select_ops(enum val_format format)
 {
 	switch (format) {
-		case NVF_CBOR:
+		case VF_CBOR:
 			return &nvops_cbor;
-		case NVF_JSON:
+		case VF_JSON:
 			return &nvops_json;
 	}
 

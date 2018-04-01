@@ -31,7 +31,7 @@ static int unpack_nvl(const struct nvunpackops *ops, const struct buffer *buffer
 	return -ENOTSUP; /* FIXME */
 }
 
-struct nvlist *nvl_unpack(const void *ptr, size_t len, enum nvformat format)
+struct nvlist *nvl_unpack(const void *ptr, size_t len, enum val_format format)
 {
 	const struct buffer buffer = {
 		.data = (void *) ptr,
