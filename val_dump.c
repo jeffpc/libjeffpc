@@ -59,10 +59,10 @@ void val_dump_file(FILE *out, struct val *val, int indent)
 			break;
 		case VT_CONS:
 			fprintf(out, "cons head:\n");
-			val_dump(val->cons.head, indent + 2);
+			val_dump_file(out, val->cons.head, indent + 2);
 			doindent(out, indent);
 			fprintf(out, "cons tail:\n");
-			val_dump(val->cons.tail, indent + 2);
+			val_dump_file(out, val->cons.tail, indent + 2);
 			break;
 		case VT_BLOB:
 			fprintf(out, "blob @ %p.%zu (%s)\n",
