@@ -30,8 +30,8 @@
 	({								\
 		int _ret = 0;						\
 									\
-		if (ops->op)						\
-			_ret = ops->op args;				\
+		if ((ops)->op)						\
+			_ret = (ops)->op args;				\
 									\
 		_ret;							\
 	 })
@@ -40,8 +40,8 @@
 	({								\
 		int _ret = -ENOTSUP;					\
 									\
-		if (ops->op)						\
-			_ret = ops->op args;				\
+		if ((ops)->op)						\
+			_ret = (ops)->op args;				\
 									\
 		_ret;							\
 	 })
