@@ -77,6 +77,16 @@ void buffer_init_const(struct buffer *buffer, const void *data, size_t size)
 	buffer->ops = &const_buffer;
 }
 
+void buffer_init_stdio(struct buffer *buffer, FILE *f)
+{
+	buffer->data = NULL;
+	buffer->off = 0;
+	buffer->used = 0;
+	buffer->allocsize = SIZE_MAX;
+	buffer->ops = &stdio_buffer;
+	buffer->private = f;
+}
+
 static int resize(struct buffer *buffer, size_t newsize)
 {
 	void *tmp;

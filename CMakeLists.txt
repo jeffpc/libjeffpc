@@ -88,6 +88,7 @@ add_library(jeffpc SHARED
 	buffer_const.c
 	buffer_heap.c
 	buffer_sink.c
+	buffer_stdio.c
 	cstr.c
 	error.c
 	fmt_cbor.c

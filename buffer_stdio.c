@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,30 +20,40 @@
  * SOFTWARE.
  */
 
-#ifndef __JEFFPC_BUFFER_IMPL_H
-#define __JEFFPC_BUFFER_IMPL_H
+#include "buffer_impl.h"
 
-#include <jeffpc/buffer.h>
+static int stdio_buffer_check_truncate(struct buffer *buffer, size_t size)
+{
+	return -ESPIPE;
+}
 
-extern const struct buffer_ops heap_buffer;
-extern const struct buffer_ops sink_buffer;
-extern const struct buffer_ops const_buffer;
-extern const struct buffer_ops stdio_buffer;
+static ssize_t stdio_buffer_check_seek(struct buffer *buffer, off_t offset,
+				       int whence, size_t newoff)
+{
+	/* allow no-op seeks */
+	if (newoff == buffer->used)
+		return 0;
 
-/* clear implementations */
-extern void generic_buffer_clear_memset(struct buffer *buffer, size_t off,
-					size_t len);
-extern void generic_buffer_clear_nop(struct buffer *buffer, size_t off,
-				     size_t len);
-extern void generic_buffer_clear_panic(struct buffer *buffer, size_t off,
-				       size_t len);
+	return -ENOTSUP;
+}
 
-/* copyin implementations */
-extern void generic_buffer_copyin_memcpy(struct buffer *buffer, size_t off,
-					 const void *newdata, size_t newdatalen);
-extern void generic_buffer_copyin_nop(struct buffer *buffer, size_t off,
-				      const void *newdata, size_t newdatalen);
-extern void generic_buffer_copyin_panic(struct buffer *buffer, size_t off,
-					const void *newdata, size_t newdatalen);
+static void stdio_buffer_copyin(struct buffer *buffer, size_t off,
+				const void *newdata, size_t newdatalen)
+{
+	if (fwrite(newdata, newdatalen, 1, buffer->private) != 1)
+		panic("%s: failed to write data to buffer", __func__);
+}
 
-#endif
+const struct buffer_ops stdio_buffer = {
+	.check_truncate = stdio_buffer_check_truncate,
+	.check_seek = stdio_buffer_check_seek,
+
+	/*
+	 * no need for:
+	 *  - realloc since we use SIZE_MAX alloc size
+	 *  - free since there is nothing to free
+	 */
+
+	.clear = generic_buffer_clear_panic,
+	.copyin = stdio_buffer_copyin,
+};
