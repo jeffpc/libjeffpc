@@ -37,10 +37,8 @@ static int onefile(char *ibuf, size_t len)
 		return -ENOMEM;
 
 	ret = qstring_parse_len(vars, ibuf, len);
-#if 0
 	if (!ret)
 		nvl_dump_file(stderr, vars);
-#endif
 
 	nvl_putref(vars);
 

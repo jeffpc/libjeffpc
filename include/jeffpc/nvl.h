@@ -87,6 +87,11 @@ static inline struct val *nvl_cast_to_val(struct nvlist *nvl)
 
 extern int nvl_merge(struct nvlist *dest, struct nvlist *src);
 
+static inline void nvl_dump_file(FILE *out, struct nvlist *nvl)
+{
+	val_dump_file(out, nvl_cast_to_val(nvl), 0);
+}
+
 /*
  * If convert_all is true, then all errors except -ENOTSUP encountered
  * during the conversion are ignored.
