@@ -117,6 +117,7 @@ add_library(jeffpc SHARED
 	uuid.c
 	val.c
 	val_array.c
+	val_dump.c
 	val_fmt_cbor.c
 	val_fmt_json.c
 	val_nvl.c

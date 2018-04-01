@@ -25,7 +25,6 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <ctype.h>
 #include <inttypes.h>
 
 #include <jeffpc/val.h>
@@ -261,64 +260,4 @@ struct val *val_alloc_cons(struct val *head, struct val *tail)
 	val->_set_cons.tail = tail;
 
 	return val;
-}
-
-void val_dump_file(FILE *out, struct val *val, int indent)
-{
-	if (!val)
-		return;
-
-	switch (val->type) {
-		case VT_NULL:
-			fprintf(out, "%*snull\n", indent, "");
-			break;
-		case VT_STR:
-		case VT_SYM:
-			fprintf(out, "%*s'%s'\n", indent, "", val_cstr(val));
-			break;
-		case VT_INT:
-			fprintf(out, "%*s%"PRIu64"\n", indent, "", val->i);
-			break;
-		case VT_BOOL:
-			fprintf(out, "%*s%s\n", indent, "",
-				val->b ? "true" : "false");
-			break;
-		case VT_CHAR:
-			if (isprint(val->i))
-				fprintf(out, "%*s\\u%04"PRIX64": '%c'\n",
-					indent, "", val->i, (char) val->i);
-			else
-				fprintf(out, "%*s\\u%04"PRIX64"\n", indent,
-					"", val->i);
-			break;
-		case VT_CONS:
-			fprintf(out, "%*scons head:\n", indent, "");
-			val_dump(val->cons.head, indent + 2);
-			fprintf(out, "%*scons tail:\n", indent, "");
-			val_dump(val->cons.tail, indent + 2);
-			break;
-		case VT_BLOB:
-			fprintf(out, "%*sblob @ %p.%zu (%s)\n", indent, "",
-				val->blob.ptr, val->blob.size,
-				val->static_alloc ? "static" : "heap");
-			break;
-		case VT_ARRAY: {
-			size_t i;
-
-			fprintf(out, "%*sarray[%zu]:\n", indent, "",
-				val->array.nelem);
-
-			for (i = 0; i < val->array.nelem; i++)
-				val_dump_file(out, val->array.vals[i],
-					      indent + 2);
-			break;
-		}
-		case VT_NVL:
-			/* TODO: dump the contents of the pairs */
-			fprintf(out, "%*snvlist\n", indent, "");
-			break;
-		default:
-			fprintf(out, "Unknown type %d\n", val->type);
-			break;
-	}
 }
