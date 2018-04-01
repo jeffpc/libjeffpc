@@ -51,6 +51,7 @@ struct buffer {
 	size_t used;		/* bytes filled */
 	size_t allocsize;	/* allocated buffer size */
 	const struct buffer_ops *ops;
+	void *private;		/* private data for implementation */
 };
 
 extern struct buffer *buffer_alloc(size_t expected_size);
