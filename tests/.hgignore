@@ -19,4 +19,5 @@ test_sexpr_eval
 test_sexpr_iter
 test_tree_destroy_nodes
 test_urldecode
+test_uuid
 test_version
