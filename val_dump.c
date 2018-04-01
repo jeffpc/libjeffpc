@@ -27,64 +27,107 @@
 
 #define INDENT_STEP	5
 
+static inline const char *typename(int type)
+{
+	static const char *typenames[] = {
+		[VT_NULL] = "null",
+		[VT_INT] = "int",
+		[VT_STR] = "string",
+		[VT_SYM] = "symbol",
+		[VT_BOOL] = "bool",
+		[VT_CONS] = "cons",
+		[VT_CHAR] = "char",
+		[VT_BLOB] = "blob",
+		[VT_ARRAY] = "array",
+		[VT_NVL] = "nvlist",
+	};
+
+	static __thread char badname[10];
+
+	if ((type < 0) || (type > ARRAY_LEN(typenames)))
+		goto bad;
+
+	if (typenames[type] == NULL)
+		goto bad;
+
+	return typenames[type];
+
+bad:
+	snprintf(badname, sizeof(badname), "<%d>", type);
+	return badname;
+
+}
+
 static inline void doindent(FILE *out, int indent)
 {
 	fprintf(out, "%*s", INDENT_STEP * indent, "");
 }
 
-static void do_val_dump_file(FILE *out, struct val *val, int indent,
-			     bool indented)
+static void do_val_dump_file(FILE *out, struct val *val, int indent)
 {
-	if (!val)
+	if (!val) {
+		fprintf(out, "\n");
 		return;
+	}
 
-	if (!indented)
-		doindent(out, indent);
+	fprintf(out, "type=%s", typename(val->type));
 
 	switch (val->type) {
 		case VT_NULL:
-			fprintf(out, "null\n");
+			fprintf(out, "\n");
 			break;
 		case VT_STR:
 		case VT_SYM:
-			fprintf(out, "'%s' (%s)\n", val_cstr(val),
-				(val->type == VT_STR) ? "str" : "sym");
+			fprintf(out, "\n");
+			doindent(out, indent);
+			fprintf(out, "value='%s'\n", val_cstr(val));
 			break;
 		case VT_INT:
-			fprintf(out, "%"PRIu64"\n", val->i);
+			fprintf(out, "\n");
+			doindent(out, indent);
+			fprintf(out, "value=%"PRIu64"\n", val->i);
 			break;
 		case VT_BOOL:
-			fprintf(out, "%s\n", val->b ? "true" : "false");
+			fprintf(out, "\n");
+			doindent(out, indent);
+			fprintf(out, "value=%s\n", val->b ? "true" : "false");
 			break;
 		case VT_CHAR:
+			fprintf(out, "\n");
+			doindent(out, indent);
+			fprintf(out, "value=\\u%04"PRIX64, val->i);
+
 			if (isprint(val->i))
-				fprintf(out, "\\u%04"PRIX64": '%c'\n",
-					val->i, (char) val->i);
-			else
-				fprintf(out, "\\u%04"PRIX64"\n", val->i);
+				fprintf(out, " '%c'", (char) val->i);
+
+			fprintf(out, "\n");
 			break;
 		case VT_CONS:
-			fprintf(out, "cons head:\n");
-			do_val_dump_file(out, val->cons.head, indent + 1, false);
+			fprintf(out, "\n");
 			doindent(out, indent);
-			fprintf(out, "cons tail:\n");
-			do_val_dump_file(out, val->cons.tail, indent + 1, false);
+			fprintf(out, "head ");
+			do_val_dump_file(out, val->cons.head, indent + 1);
+			doindent(out, indent);
+			fprintf(out, "tail ");
+			do_val_dump_file(out, val->cons.tail, indent + 1);
 			break;
 		case VT_BLOB:
-			fprintf(out, "blob @ %p.%zu (%s)\n",
+			fprintf(out, "\n");
+			doindent(out, indent);
+			fprintf(out, "ptr=%p size=%zu location=%s\n",
 				val->blob.ptr, val->blob.size,
 				val->static_alloc ? "static" : "heap");
 			break;
 		case VT_ARRAY: {
 			size_t i;
 
-			fprintf(out, "array[%zu]:\n", val->array.nelem);
+			fprintf(out, " items=%zu\n", val->array.nelem);
 
 			for (i = 0; i < val->array.nelem; i++) {
-				doindent(out, indent + 1);
+				doindent(out, indent);
 				fprintf(out, "[%zu]: ", i);
 				do_val_dump_file(out, val->array.vals[i],
-						 indent + 1, true);
+						 indent + 1);
 			}
 			break;
 		}
@@ -92,24 +135,22 @@ static void do_val_dump_file(FILE *out, struct val *val, int indent,
 			struct bst_tree *tree = &val->_set_nvl.values;
 			struct nvpair *cur;
 
-			fprintf(out, "nvlist[%zu]:\n", bst_numnodes(tree));
+			fprintf(out, " items=%zu\n", bst_numnodes(tree));
 
 			bst_for_each(tree, cur) {
-				doindent(out, indent + 1);
-				fprintf(out, "['%s']: ", str_cstr(cur->name));
-				do_val_dump_file(out, cur->value, indent + 1,
-						 true);
+				doindent(out, indent);
+				fprintf(out, "name='%s' ", str_cstr(cur->name));
+				do_val_dump_file(out, cur->value, indent + 1);
 			}
 
 			break;
 		}
-		default:
-			fprintf(out, "Unknown type %d\n", val->type);
-			break;
 	}
 }
 
 void val_dump_file(FILE *out, struct val *val, int indent)
 {
-	do_val_dump_file(out, val, indent, false);
+	doindent(out, indent);
+
+	do_val_dump_file(out, val, indent + 1);
 }
