@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,8 +24,10 @@
 #define __JEFFPC_RAND_H
 
 #include <inttypes.h>
+#include <stddef.h>
 
 extern uint32_t rand32(void);
 extern uint64_t rand64(void);
+extern void rand_buf(void *buf, size_t len);
 
 #endif

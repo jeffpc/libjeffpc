@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  * Copyright (c) 2015 Holly Sipek
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -60,4 +60,24 @@ uint64_t rand64(void)
 	tmp  |= rand32();
 
 	return tmp;
+}
+
+void rand_buf(void *buf, size_t len)
+{
+#ifdef HAVE_ARC4RANDOM_BUF
+	arc4random_buf(buf, len);
+#else
+	int ret;
+	int fd;
+
+	fd = xopen("/dev/urandom", O_RDONLY, 0);
+	if (fd < 0)
+		panic("Failed to get random buffer: %s", xstrerror(fd));
+
+	ret = xread(fd, buf, len);
+	if (ret)
+		panic("Failed to get random buffer: %s", xstrerror(ret));
+
+	xclose(fd);
+#endif
 }

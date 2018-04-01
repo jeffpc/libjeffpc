@@ -137,6 +137,7 @@ JEFFPC_0.10 {
 		# rand
 		rand32;
 		rand64;
+		rand_buf;
 
 		# sexpr
 		sexpr_alist_lookup_bool;
