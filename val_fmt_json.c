@@ -22,7 +22,7 @@
 
 #include <jeffpc/nvl.h>
 
-#include "nvl_impl.h"
+#include "val_impl_packing.h"
 
 static int json_nvl_prologue(struct buffer *buffer, struct nvlist *nvl)
 {

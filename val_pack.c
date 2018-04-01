@@ -23,7 +23,7 @@
 #include <jeffpc/nvl.h>
 #include <jeffpc/buffer.h>
 
-#include "nvl_impl.h"
+#include "val_impl_packing.h"
 
 static int pack_nvl(const struct nvpackops *ops, struct buffer *buffer,
 		    struct nvlist *nvl);

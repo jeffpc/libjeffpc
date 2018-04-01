@@ -21,48 +21,39 @@
  */
 
 #include <jeffpc/nvl.h>
-#include <jeffpc/cbor.h>
+#include <jeffpc/buffer.h>
 
-#include "nvl_impl.h"
+#include "val_impl_packing.h"
 
-/*
- * nvl packing interface
- */
-
-static int cbor_nvl_prologue(struct buffer *buffer, struct nvlist *nvl)
+static int unpack_nvl(const struct nvunpackops *ops, const struct buffer *buffer,
+		      struct nvlist *nvl)
 {
-	return cbor_pack_map_start(buffer, CBOR_UNKNOWN_NELEM);
+	return -ENOTSUP; /* FIXME */
 }
 
-static int cbor_nvl_epilogue(struct buffer *buffer, struct nvlist *nvl)
+struct nvlist *nvl_unpack(const void *ptr, size_t len, enum nvformat format)
 {
-	return cbor_pack_map_end(buffer, CBOR_UNKNOWN_NELEM);
+	const struct buffer buffer = {
+		.data = (void *) ptr,
+		.used = len,
+		.allocsize = len,
+	};
+	const struct nvops *ops;
+	struct nvlist *nvl;
+	int ret;
+
+	ops = select_ops(format);
+	if (!ops)
+		return ERR_PTR(-ENOTSUP);
+
+	nvl = nvl_alloc();
+	if (!nvl)
+		return ERR_PTR(-ENOMEM);
+
+	ret = unpack_nvl(&ops->unpack, &buffer, nvl);
+	if (!ret)
+		return nvl;
+
+	nvl_putref(nvl);
+	return ERR_PTR(ret);
 }
-
-static int cbor_array_prologue(struct buffer *buffer, struct val *const *vals,
-			       size_t nelem)
-{
-	return cbor_pack_array_start(buffer, nelem);
-}
-
-static int cbor_array_epilogue(struct buffer *buffer, struct val *const *vals,
-			       size_t nelem)
-{
-	return cbor_pack_array_end(buffer, nelem);
-}
-
-const struct nvops nvops_cbor = {
-	.pack = {
-		.nvl_prologue = cbor_nvl_prologue,
-		.nvl_epilogue = cbor_nvl_epilogue,
-
-		.array_prologue = cbor_array_prologue,
-		.array_epilogue = cbor_array_epilogue,
-
-		.val_blob = cbor_pack_blob,
-		.val_bool = cbor_pack_bool,
-		.val_int = cbor_pack_uint,
-		.val_null = cbor_pack_null,
-		.val_str = cbor_pack_cstr,
-	}
-};
