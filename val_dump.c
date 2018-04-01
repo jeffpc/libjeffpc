@@ -23,18 +23,21 @@
 #include <ctype.h>
 
 #include <jeffpc/val.h>
+#include <jeffpc/nvl.h>
 
 static inline void doindent(FILE *out, int indent)
 {
 	fprintf(out, "%*s", indent, "");
 }
 
-void val_dump_file(FILE *out, struct val *val, int indent)
+static void do_val_dump_file(FILE *out, struct val *val, int indent,
+			     bool indented)
 {
 	if (!val)
 		return;
 
-	doindent(out, indent);
+	if (!indented)
+		doindent(out, indent);
 
 	switch (val->type) {
 		case VT_NULL:
@@ -59,10 +62,10 @@ void val_dump_file(FILE *out, struct val *val, int indent)
 			break;
 		case VT_CONS:
 			fprintf(out, "cons head:\n");
-			val_dump_file(out, val->cons.head, indent + 2);
+			do_val_dump_file(out, val->cons.head, indent + 2, false);
 			doindent(out, indent);
 			fprintf(out, "cons tail:\n");
-			val_dump_file(out, val->cons.tail, indent + 2);
+			do_val_dump_file(out, val->cons.tail, indent + 2, false);
 			break;
 		case VT_BLOB:
 			fprintf(out, "blob @ %p.%zu (%s)\n",
@@ -75,16 +78,32 @@ void val_dump_file(FILE *out, struct val *val, int indent)
 			fprintf(out, "array[%zu]:\n", val->array.nelem);
 
 			for (i = 0; i < val->array.nelem; i++)
-				val_dump_file(out, val->array.vals[i],
-					      indent + 2);
+				do_val_dump_file(out, val->array.vals[i],
+						 indent + 2, false);
 			break;
 		}
-		case VT_NVL:
-			/* TODO: dump the contents of the pairs */
-			fprintf(out, "nvlist\n");
+		case VT_NVL: {
+			struct bst_tree *tree = &val->_set_nvl.values;
+			struct nvpair *cur;
+
+			fprintf(out, "nvlist[%zu]:\n", bst_numnodes(tree));
+
+			bst_for_each(tree, cur) {
+				doindent(out, indent + 2);
+				fprintf(out, "['%s']: ", str_cstr(cur->name));
+				do_val_dump_file(out, cur->value, indent + 2,
+						 true);
+			}
+
 			break;
+		}
 		default:
 			fprintf(out, "Unknown type %d\n", val->type);
 			break;
 	}
+}
+
+void val_dump_file(FILE *out, struct val *val, int indent)
+{
+	do_val_dump_file(out, val, indent, false);
 }
