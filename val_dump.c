@@ -77,9 +77,12 @@ static void do_val_dump_file(FILE *out, struct val *val, int indent,
 
 			fprintf(out, "array[%zu]:\n", val->array.nelem);
 
-			for (i = 0; i < val->array.nelem; i++)
+			for (i = 0; i < val->array.nelem; i++) {
+				doindent(out, indent + 2);
+				fprintf(out, "[%zu]: ", i);
 				do_val_dump_file(out, val->array.vals[i],
-						 indent + 2, false);
+						 indent + 2, true);
+			}
 			break;
 		}
 		case VT_NVL: {
