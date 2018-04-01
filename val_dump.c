@@ -25,9 +25,11 @@
 #include <jeffpc/val.h>
 #include <jeffpc/nvl.h>
 
+#define INDENT_STEP	5
+
 static inline void doindent(FILE *out, int indent)
 {
-	fprintf(out, "%*s", indent, "");
+	fprintf(out, "%*s", INDENT_STEP * indent, "");
 }
 
 static void do_val_dump_file(FILE *out, struct val *val, int indent,
@@ -63,10 +65,10 @@ static void do_val_dump_file(FILE *out, struct val *val, int indent,
 			break;
 		case VT_CONS:
 			fprintf(out, "cons head:\n");
-			do_val_dump_file(out, val->cons.head, indent + 2, false);
+			do_val_dump_file(out, val->cons.head, indent + 1, false);
 			doindent(out, indent);
 			fprintf(out, "cons tail:\n");
-			do_val_dump_file(out, val->cons.tail, indent + 2, false);
+			do_val_dump_file(out, val->cons.tail, indent + 1, false);
 			break;
 		case VT_BLOB:
 			fprintf(out, "blob @ %p.%zu (%s)\n",
@@ -79,10 +81,10 @@ static void do_val_dump_file(FILE *out, struct val *val, int indent,
 			fprintf(out, "array[%zu]:\n", val->array.nelem);
 
 			for (i = 0; i < val->array.nelem; i++) {
-				doindent(out, indent + 2);
+				doindent(out, indent + 1);
 				fprintf(out, "[%zu]: ", i);
 				do_val_dump_file(out, val->array.vals[i],
-						 indent + 2, true);
+						 indent + 1, true);
 			}
 			break;
 		}
@@ -93,9 +95,9 @@ static void do_val_dump_file(FILE *out, struct val *val, int indent,
 			fprintf(out, "nvlist[%zu]:\n", bst_numnodes(tree));
 
 			bst_for_each(tree, cur) {
-				doindent(out, indent + 2);
+				doindent(out, indent + 1);
 				fprintf(out, "['%s']: ", str_cstr(cur->name));
-				do_val_dump_file(out, cur->value, indent + 2,
+				do_val_dump_file(out, cur->value, indent + 1,
 						 true);
 			}
 
