@@ -25,12 +25,12 @@
 
 #include "val_impl_packing.h"
 
-static int pack_nvl(const struct nvpackops *ops, struct buffer *buffer,
+static int pack_nvl(const struct packops *ops, struct buffer *buffer,
 		    struct nvlist *nvl);
-static int pack_val(const struct nvpackops *ops, struct buffer *buffer,
+static int pack_val(const struct packops *ops, struct buffer *buffer,
 		    struct val *val);
 
-static int pack_array(const struct nvpackops *ops, struct buffer *buffer,
+static int pack_array(const struct packops *ops, struct buffer *buffer,
 		      struct val **vals, size_t nelem)
 {
 	bool first = true;
@@ -62,30 +62,30 @@ static int pack_array(const struct nvpackops *ops, struct buffer *buffer,
 	return 0;
 }
 
-static int pack_blob(const struct nvpackops *ops, struct buffer *buffer,
+static int pack_blob(const struct packops *ops, struct buffer *buffer,
 		     const void *data, size_t size)
 {
 	return CALL_OR_FAIL(ops, val_blob, (buffer, data, size));
 }
 
-static int pack_bool(const struct nvpackops *ops, struct buffer *buffer,
+static int pack_bool(const struct packops *ops, struct buffer *buffer,
 		     bool b)
 {
 	return CALL_OR_FAIL(ops, val_bool, (buffer, b));
 }
 
-static int pack_int(const struct nvpackops *ops, struct buffer *buffer,
+static int pack_int(const struct packops *ops, struct buffer *buffer,
 		    uint64_t i)
 {
 	return CALL_OR_FAIL(ops, val_int, (buffer, i));
 }
 
-static int pack_null(const struct nvpackops *ops, struct buffer *buffer)
+static int pack_null(const struct packops *ops, struct buffer *buffer)
 {
 	return CALL_OR_FAIL(ops, val_null, (buffer));
 }
 
-static int pack_string(const struct nvpackops *ops, struct buffer *buffer,
+static int pack_string(const struct packops *ops, struct buffer *buffer,
 		       struct str *str)
 {
 	const char *s;
@@ -100,7 +100,7 @@ static int pack_string(const struct nvpackops *ops, struct buffer *buffer,
 	return CALL_OR_FAIL(ops, val_str, (buffer, s));
 }
 
-static int pack_val(const struct nvpackops *ops, struct buffer *buffer,
+static int pack_val(const struct packops *ops, struct buffer *buffer,
 		    struct val *val)
 {
 	int ret = -ENOTSUP;
@@ -139,7 +139,7 @@ static int pack_val(const struct nvpackops *ops, struct buffer *buffer,
 	return ret;
 }
 
-static int pack_pair(const struct nvpackops *ops, struct buffer *buffer,
+static int pack_pair(const struct packops *ops, struct buffer *buffer,
 		     const struct nvpair *pair)
 {
 	int ret;
@@ -162,7 +162,7 @@ static int pack_pair(const struct nvpackops *ops, struct buffer *buffer,
 	return 0;
 }
 
-static int pack_nvl(const struct nvpackops *ops, struct buffer *buffer,
+static int pack_nvl(const struct packops *ops, struct buffer *buffer,
 		    struct nvlist *nvl)
 {
 	const struct nvpair *pair;
@@ -196,7 +196,7 @@ static int pack_nvl(const struct nvpackops *ops, struct buffer *buffer,
 static int do_val_pack(struct buffer *buffer, struct val *val,
 		       enum val_format format)
 {
-	const struct nvops *ops;
+	const struct valops *ops;
 	int ret;
 
 	ops = select_ops(format);

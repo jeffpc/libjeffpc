@@ -51,7 +51,7 @@ static int cbor_array_epilogue(struct buffer *buffer, struct val *const *vals,
 	return cbor_pack_array_end(buffer, nelem);
 }
 
-const struct nvops nvops_cbor = {
+const struct valops valops_cbor = {
 	.pack = {
 		.nvl_prologue = cbor_nvl_prologue,
 		.nvl_epilogue = cbor_nvl_epilogue,

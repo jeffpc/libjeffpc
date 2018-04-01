@@ -27,7 +27,7 @@
 
 struct val *val_unpack(const void *ptr, size_t len, enum val_format format)
 {
-	const struct nvops *ops;
+	const struct valops *ops;
 	int ret;
 
 	ops = select_ops(format);

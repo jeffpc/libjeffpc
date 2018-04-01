@@ -51,11 +51,11 @@
  *
  * A required function pointer is only required when an item of that type
  * must be encoded.  For example, if an encoder doesn't implement packing of
- * strings, packing of all nvlists *with* strings will fail because of this
- * limitation.  Packing of nvlists *without* strings may or may not fail for
+ * strings, packing of all strings vals will fail because of this limitation.
+ * Packing of other (non string) vals may or may not fail for
  * other reasons.
  */
-struct nvpackops {
+struct packops {
 	/*
 	 * top-level encoder hooks
 	 *
@@ -106,25 +106,25 @@ struct nvpackops {
 	int (*val_str)(struct buffer *buffer, const char *str);
 };
 
-struct nvunpackops {
+struct unpackops {
 	/* TODO */
 };
 
-struct nvops {
-	const struct nvpackops pack;
-	const struct nvunpackops unpack;
+struct valops {
+	const struct packops pack;
+	const struct unpackops unpack;
 };
 
-extern const struct nvops nvops_cbor;
-extern const struct nvops nvops_json;
+extern const struct valops valops_cbor;
+extern const struct valops valops_json;
 
-static inline const struct nvops *select_ops(enum val_format format)
+static inline const struct valops *select_ops(enum val_format format)
 {
 	switch (format) {
 		case VF_CBOR:
-			return &nvops_cbor;
+			return &valops_cbor;
 		case VF_JSON:
-			return &nvops_json;
+			return &valops_json;
 	}
 
 	return NULL;

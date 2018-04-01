@@ -155,7 +155,7 @@ static int json_val_str(struct buffer *buffer, const char *str)
 	return 0;
 }
 
-const struct nvops nvops_json = {
+const struct valops valops_json = {
 	.pack = {
 		.nvl_prologue = json_nvl_prologue,	/* { */
 		.nvl_name_sep = json_nvl_name_sep,	/* : */
