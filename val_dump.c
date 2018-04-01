@@ -45,7 +45,8 @@ static void do_val_dump_file(FILE *out, struct val *val, int indent,
 			break;
 		case VT_STR:
 		case VT_SYM:
-			fprintf(out, "'%s'\n", val_cstr(val));
+			fprintf(out, "'%s' (%s)\n", val_cstr(val),
+				(val->type == VT_STR) ? "str" : "sym");
 			break;
 		case VT_INT:
 			fprintf(out, "%"PRIu64"\n", val->i);
