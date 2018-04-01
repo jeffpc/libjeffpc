@@ -25,35 +25,16 @@
 
 #include "val_impl_packing.h"
 
-static int unpack_nvl(const struct nvunpackops *ops, const struct buffer *buffer,
-		      struct nvlist *nvl)
+struct val *val_unpack(const void *ptr, size_t len, enum val_format format)
 {
-	return -ENOTSUP; /* FIXME */
-}
-
-struct nvlist *nvl_unpack(const void *ptr, size_t len, enum val_format format)
-{
-	const struct buffer buffer = {
-		.data = (void *) ptr,
-		.used = len,
-		.allocsize = len,
-	};
 	const struct nvops *ops;
-	struct nvlist *nvl;
 	int ret;
 
 	ops = select_ops(format);
 	if (!ops)
 		return ERR_PTR(-ENOTSUP);
 
-	nvl = nvl_alloc();
-	if (!nvl)
-		return ERR_PTR(-ENOMEM);
+	ret = -ENOTSUP; /* FIXME */
 
-	ret = unpack_nvl(&ops->unpack, &buffer, nvl);
-	if (!ret)
-		return nvl;
-
-	nvl_putref(nvl);
 	return ERR_PTR(ret);
 }

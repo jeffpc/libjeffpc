@@ -95,10 +95,19 @@ extern int nvl_convert(struct nvlist *nvl, const struct nvl_convert_info *table,
 		       bool convert_all);
 
 /* serialization & deserialization */
-extern ssize_t nvl_size(struct nvlist *nvl, enum val_format format);
-extern struct buffer *nvl_pack(struct nvlist *nvl, enum val_format format);
 extern struct nvlist *nvl_unpack(const void *ptr, size_t len,
 				 enum val_format format);
+
+static inline ssize_t nvl_size(struct nvlist *nvl, enum val_format format)
+{
+	return val_size(nvl_cast_to_val(nvl), format);
+}
+
+static inline struct buffer *nvl_pack(struct nvlist *nvl,
+				      enum val_format format)
+{
+	return val_pack(nvl_cast_to_val(nvl), format);
+}
 
 /* iteration */
 extern const struct nvpair *nvl_iter_start(struct nvlist *nvl);

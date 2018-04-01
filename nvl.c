@@ -310,3 +310,23 @@ int nvpair_value_null(const struct nvpair *pair)
 
 VALUE_PTR(nvpair_value_nvl, struct nvlist *, VT_NVL, val_getref_nvl);
 VALUE_PTR(nvpair_value_str, struct str *, VT_STR, val_getref_str);
+
+/*
+ * Packing & unpacking
+ */
+
+struct nvlist *nvl_unpack(const void *ptr, size_t len, enum val_format format)
+{
+	struct val *val;
+
+	val = val_unpack(ptr, len, format);
+	if (IS_ERR(val))
+		return ERR_CAST(val);
+
+	if (val->type != VT_NVL) {
+		val_putref(val);
+		return ERR_PTR(-EINVAL);
+	}
+
+	return val_cast_to_nvl(val);
+}

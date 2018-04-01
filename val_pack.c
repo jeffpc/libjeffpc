@@ -193,36 +193,33 @@ static int pack_nvl(const struct nvpackops *ops, struct buffer *buffer,
 	return 0;
 }
 
-static int __nvl_pack(const struct nvpackops *ops, struct buffer *buffer,
-		      struct nvlist *nvl, bool call_finish)
-{
-	int ret;
-
-	ret = pack_nvl(ops, buffer, nvl);
-	if (ret)
-		return ret;
-
-	if (!call_finish)
-		return 0;
-
-	return CALL(ops, buffer_finish, (buffer));
-}
-
-struct buffer *nvl_pack(struct nvlist *nvl, enum val_format format)
+static int do_val_pack(struct buffer *buffer, struct val *val,
+		       enum val_format format)
 {
 	const struct nvops *ops;
-	struct buffer *buffer;
 	int ret;
 
 	ops = select_ops(format);
 	if (!ops)
-		return ERR_PTR(-ENOTSUP);
+		return -ENOTSUP;
+
+	ret = pack_val(&ops->pack, buffer, val);
+	if (ret)
+		return ret;
+
+	return CALL(&ops->pack, buffer_finish, (buffer));
+}
+
+struct buffer *val_pack(struct val *val, enum val_format format)
+{
+	struct buffer *buffer;
+	int ret;
 
 	buffer = buffer_alloc(1024);
 	if (IS_ERR(buffer))
 		return buffer;
 
-	ret = __nvl_pack(&ops->pack, buffer, nvl, true);
+	ret = do_val_pack(buffer, val, format);
 	if (!ret)
 		return buffer;
 
@@ -230,19 +227,14 @@ struct buffer *nvl_pack(struct nvlist *nvl, enum val_format format)
 	return ERR_PTR(ret);
 }
 
-ssize_t nvl_size(struct nvlist *nvl, enum val_format format)
+ssize_t val_size(struct val *val, enum val_format format)
 {
-	const struct nvops *ops;
 	struct buffer buffer;
 	int ret;
 
-	ops = select_ops(format);
-	if (!ops)
-		return -ENOTSUP;
-
 	buffer_init_sink(&buffer);
 
-	ret = __nvl_pack(&ops->pack, &buffer, nvl, false);
+	ret = do_val_pack(&buffer, val, format);
 
 	return ret ? ret : buffer_used(&buffer);
 }

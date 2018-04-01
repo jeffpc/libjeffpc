@@ -221,6 +221,15 @@ extern struct str *str_empty_string(void);
 extern void val_free(struct val *v);
 
 /*
+ * Serialization functions
+ */
+
+extern ssize_t val_size(struct val *val, enum val_format format);
+extern struct buffer *val_pack(struct val *val, enum val_format format);
+extern struct val *val_unpack(const void *ptr, size_t len,
+			      enum val_format format);
+
+/*
  * Dumping functions
  */
 
