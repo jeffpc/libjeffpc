@@ -126,7 +126,6 @@ add_library(jeffpc SHARED
 target_link_libraries(jeffpc
 	${UMEM_LIBRARY}
 	pthread
-	uuid
 )
 
 add_library(jeffpc-comm SHARED
