@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -166,6 +166,14 @@ ssize_t buffer_seek(struct buffer *buffer, off_t offset, int whence)
 
 	if (newoff > SSIZE_MAX)
 		return -EOVERFLOW;
+
+	if (buffer->ops->check_seek) {
+		ssize_t ret;
+
+		ret = buffer->ops->check_seek(buffer, offset, whence, newoff);
+		if (ret)
+			return ret;
+	}
 
 	buffer->off = newoff;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,7 @@ struct buffer_ops {
 	/* op checking */
 	int (*check_append)(struct buffer *, const void *, size_t);
 	int (*check_truncate)(struct buffer *, size_t);
+	ssize_t (*check_seek)(struct buffer *, off_t, int, size_t);
 
 	/* data manipulation */
 	void *(*realloc)(void *, size_t);
