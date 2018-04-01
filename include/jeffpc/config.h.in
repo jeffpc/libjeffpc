@@ -26,6 +26,7 @@
 #cmakedefine CPU_BIG_ENDIAN
 
 #cmakedefine HAVE_ARC4RANDOM
+#cmakedefine HAVE_ARC4RANDOM_BUF
 #cmakedefine HAVE_ASSFAIL
 #cmakedefine HAVE_ADDRTOSYMSTR
 #cmakedefine HAVE_PTHREAD_COND_RELTIMEDWAIT_NP
