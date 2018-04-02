@@ -27,6 +27,8 @@
 %option never-interactive
 
 %{
+#include <jeffpc/buffer.h>
+
 #include "sexpr_impl.h"
 #include "sexpr.tab.h"
 
@@ -110,35 +112,34 @@ static int getutf8(const char *str, size_t len, uint64_t *out)
 %x string
 
 %%
-	char string_buf[65536];
-	char *string_ptr = NULL;
+	struct buffer *buf = NULL;
 
 \"			{
-				string_ptr = string_buf;
 				BEGIN(string);
+
+				buf = buffer_alloc(1000);
+				ASSERT(!IS_ERR(buf));
 			}
 <string>\"		{
-				*string_ptr = '\0';
-				yylval->s = STR_DUP(string_buf);
+				ASSERT0(buffer_append_c(buf, '\0'));
+				yylval->s = STR_DUP(buffer_data(buf));
+				buffer_free(buf);
 				BEGIN(INITIAL);
 				return STRING;
 			}
 <string>[^\\"]*		{
-				char *tmp = yytext;
-
-				while (*tmp)
-					*string_ptr++ = *tmp++;
+				ASSERT0(buffer_append_cstr(buf, yytext));
 			}
 	/* TODO: handle octal escapes */
 	/* TODO: handle hex escapes */
 	/* TODO: handle unicode escapes */
-<string>\\n		{ *string_ptr++ = '\n'; }
-<string>\\t		{ *string_ptr++ = '\t'; }
-<string>\\r		{ *string_ptr++ = '\r'; }
-<string>\\b		{ *string_ptr++ = '\b'; }
-<string>\\f		{ *string_ptr++ = '\f'; }
-<string>\\\\		{ *string_ptr++ = '\\'; }
-<string>\\\"		{ *string_ptr++ = '"'; }
+<string>\\n		{ ASSERT0(buffer_append_c(buf, '\n')); }
+<string>\\t		{ ASSERT0(buffer_append_c(buf, '\t')); }
+<string>\\r		{ ASSERT0(buffer_append_c(buf, '\r')); }
+<string>\\b		{ ASSERT0(buffer_append_c(buf, '\b')); }
+<string>\\f		{ ASSERT0(buffer_append_c(buf, '\f')); }
+<string>\\\\		{ ASSERT0(buffer_append_c(buf, '\\')); }
+<string>\\\"		{ ASSERT0(buffer_append_c(buf, '"')); }
 
 [().']			{ return *yytext; }
 #[tf]			{ yylval->b = (yytext[1] == 't'); return BOOL; }
