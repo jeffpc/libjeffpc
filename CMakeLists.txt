@@ -127,6 +127,8 @@ add_library(jeffpc SHARED
 target_link_libraries(jeffpc
 	${UMEM_LIBRARY}
 	pthread
+	socket
+	nsl
 )
 
 add_library(jeffpc-comm SHARED
