@@ -208,6 +208,10 @@ JEFFPC_0.10 {
 		tree_prev;
 		tree_swap;
 
+		# unicode
+		utf8_to_utf32;
+		utf32_to_utf8;
+
 		# uuid
 		xdr_xuuid;
 		xuuid_clear;

@@ -118,6 +118,7 @@ add_library(jeffpc SHARED
 	taskq.c
 	tree.c
 	urldecode.c
+	unicode.c
 	uuid.c
 	val.c
 	version.c
@@ -176,6 +177,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/tree_private.h
 		include/jeffpc/types.h
 		include/jeffpc/urldecode.h
+		include/jeffpc/unicode.h
 		include/jeffpc/uuid.h
 		include/jeffpc/val.h
 		include/jeffpc/version.h

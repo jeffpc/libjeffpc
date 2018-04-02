@@ -19,5 +19,7 @@ test_sexpr_eval
 test_sexpr_iter
 test_tree_destroy_nodes
 test_urldecode
+test_utf32-to-utf8
+test_utf8-to-utf32
 test_uuid
 test_version
