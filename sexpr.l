@@ -28,6 +28,7 @@
 
 %{
 #include <jeffpc/buffer.h>
+#include <jeffpc/unicode.h>
 
 #include "sexpr_impl.h"
 #include "sexpr.tab.h"
@@ -62,48 +63,14 @@ static int getint(const char *str, uint64_t *i, int base, const char *type,
 
 static int getutf8(const char *str, size_t len, uint64_t *out)
 {
-	const uint8_t *tmp = (const uint8_t *) str;
-	uint64_t c;
+	uint32_t tmp;
+	int ret;
 
-	/* process the first byte */
-	c = *tmp;
+	ret = utf8_to_utf32(str, len, &tmp);
+	if (ret != len)
+		return ERROR;
 
-	switch (len) {
-		case 1:
-			ASSERT3U(c, >=, 0x00);
-			ASSERT3U(c, <=, 0x7f);
-			c &= 0x7f;
-			break;
-		case 2:
-			ASSERT3U(c, >=, 0xc0);
-			ASSERT3U(c, <=, 0xdf);
-			c &= 0x1f;
-			break;
-		case 3:
-			ASSERT3U(c, >=, 0xe0);
-			ASSERT3U(c, <=, 0xef);
-			c &= 0x0f;
-			break;
-		case 4:
-			ASSERT3U(c, >=, 0xf0);
-			ASSERT3U(c, <=, 0xf7);
-			c &= 0x07;
-			break;
-		default:
-			return ERROR;
-	}
-
-	/* process remaining bytes */
-	for (len--, tmp++; len; len--, tmp++) {
-		uint64_t cur = *tmp;
-
-		ASSERT3U(cur, >=, 0x80);
-		ASSERT3U(cur, <=, 0xbf);
-
-		c = (c << 6) | (*tmp & 0x3f);
-	}
-
-	*out = c;
+	*out = tmp;
 
 	return CHAR;
 }
