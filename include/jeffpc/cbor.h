@@ -28,6 +28,10 @@
 
 #define CBOR_UNKNOWN_NELEM	(~0ul)
 
+/*
+ * On failure, the buffer may contain partially encoded data items.  On
+ * success, a fully encoded data item is appended to the buffer.
+ */
 extern int cbor_pack_uint(struct buffer *buffer, uint64_t v);
 extern int cbor_pack_nint(struct buffer *buffer, uint64_t v);
 extern int cbor_pack_int(struct buffer *buffer, int64_t v);
