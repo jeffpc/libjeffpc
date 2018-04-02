@@ -131,6 +131,7 @@ static int getutf8(const char *str, size_t len, uint64_t *out)
 			}
 	/* TODO: handle octal escapes */
 	/* TODO: handle hex escapes */
+	/* TODO: handle unicode escapes */
 <string>\\n		{ *string_ptr++ = '\n'; }
 <string>\\t		{ *string_ptr++ = '\t'; }
 <string>\\r		{ *string_ptr++ = '\r'; }
