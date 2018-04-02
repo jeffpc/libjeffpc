@@ -46,6 +46,7 @@ static char *escape_str(const char *in)
 			case '\r':
 			case '\b':
 			case '\f':
+			case '\\':
 			case '"':
 				/* "\n", "\t", ... */
 				outlen++;
@@ -79,6 +80,10 @@ static char *escape_str(const char *in)
 				break;
 			case '\f':
 				strcpy(tmp, "\\f");
+				tmp++;
+				break;
+			case '\\':
+				strcpy(tmp, "\\\\");
 				tmp++;
 				break;
 			case '"':
