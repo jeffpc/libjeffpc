@@ -107,6 +107,22 @@ static int getutf8(const char *str, size_t len, uint64_t *out)
 <string>\\f		{ ASSERT0(buffer_append_c(buf, '\f')); }
 <string>\\\\		{ ASSERT0(buffer_append_c(buf, '\\')); }
 <string>\\\"		{ ASSERT0(buffer_append_c(buf, '"')); }
+<string>\\u[0-9A-Fa-f]{4}	{
+					char tmp[5];
+					uint32_t cp;
+					ssize_t len;
+					int ret;
+
+					ret = __str2u32(yytext + 2, &cp, 16);
+					if (ret)
+						return ERROR;
+
+					len = utf32_to_utf8(cp, tmp, sizeof(buf));
+					if (len < 0)
+						return ERROR;
+
+					ASSERT0(buffer_append(buf, tmp, len));
+				}
 
 [().']			{ return *yytext; }
 #[tf]			{ yylval->b = (yytext[1] == 't'); return BOOL; }
