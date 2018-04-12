@@ -66,8 +66,12 @@ struct val {
 	union {
 		const uint64_t i;
 		const bool b;
-		const char *str_ptr;
-		const char str_inline[STR_INLINE_LEN + 1];
+		struct {
+			union {
+				const char *ptr;
+				const char inline_str[STR_INLINE_LEN + 1];
+			};
+		} str;
 		const struct {
 			struct val *head;
 			struct val *tail;
@@ -264,7 +268,7 @@ static inline const char *val_cstr(const struct val *val)
 
 	VERIFY((val->type == VT_STR) || (val->type == VT_SYM));
 
-	return val->inline_alloc ? val->str_inline : val->str_ptr;
+	return val->inline_alloc ? val->str.inline_str : val->str.ptr;
 }
 
 static inline const char *str_cstr(const struct str *str)
@@ -285,7 +289,7 @@ static inline const char *sym_cstr(const struct sym *sym)
 	{						\
 		.val = {				\
 			.type = (t),			\
-			.str_inline = { (v), '\0' },	\
+			.str.inline_str = { (v), '\0' },\
 			.static_struct = true,		\
 			.static_alloc = true,		\
 			.inline_alloc = true,		\
@@ -300,7 +304,7 @@ static inline const char *sym_cstr(const struct sym *sym)
 	{						\
 		.val = {				\
 			.type = (t),			\
-			.str_ptr = (v),			\
+			.str.ptr = (v),			\
 			.static_struct = true,		\
 			.static_alloc = true,		\
 		}					\
