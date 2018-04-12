@@ -234,6 +234,7 @@ JEFFPC_0.10 {
 		xuuid_unparse;
 
 		# val
+		__val_typename;
 		val_dump_file;
 		val_free;
 		val_alloc_array;

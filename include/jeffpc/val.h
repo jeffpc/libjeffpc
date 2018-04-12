@@ -233,11 +233,26 @@ extern struct val *val_unpack(const void *ptr, size_t len,
  * Dumping functions
  */
 
+extern const char *__val_typename(int type, bool human);
 extern void val_dump_file(FILE *out, struct val *v, int indent);
 
 static inline void val_dump(struct val *v, int indent)
 {
 	val_dump_file(stderr, v, indent);
+}
+
+/*
+ * NOTE: The typename functions below may return a thread-local buffer when
+ * given an unknown type.
+ */
+static inline const char *val_typename(int type)
+{
+	return __val_typename(type, true);
+}
+
+static inline const char *val_rawtypename(int type)
+{
+	return __val_typename(type, false);
 }
 
 /*

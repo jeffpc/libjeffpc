@@ -27,7 +27,7 @@
 
 #define INDENT_STEP	5
 
-static inline const char *typename(int type)
+const char *__val_typename(int type, bool human)
 {
 	static __thread char badname[10];
 
@@ -64,7 +64,7 @@ static void do_val_dump_file(FILE *out, struct val *val, int indent)
 		return;
 	}
 
-	fprintf(out, "type=%s", typename(val->type));
+	fprintf(out, "type=%s", val_typename(val->type));
 
 	switch (val->type) {
 		case VT_NULL:
