@@ -33,7 +33,8 @@ int nvl_merge(struct nvlist *dest, struct nvlist *src)
 	nvl_for_each(spair, src) {
 		int ret;
 
-		ret = nvl_set(dest, str_cstr(spair->name), spair->value);
+		ret = nvl_set(dest, str_cstr(spair->name),
+			      val_getref(spair->value));
 		if (ret)
 			return ret;
 	}
