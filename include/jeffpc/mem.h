@@ -29,13 +29,6 @@
 #include <string.h>
 
 /*
- * malloc/free wrappers for consistency
- */
-
-#define mem_alloc(len)	malloc(len)
-#define mem_free(buf)	free(buf)
-
-/*
  * zeroed allocation
  */
 
