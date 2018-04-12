@@ -29,33 +29,27 @@
 
 static inline const char *typename(int type)
 {
-	static const char *typenames[] = {
-		[VT_NULL] = "null",
-		[VT_INT] = "int",
-		[VT_STR] = "string",
-		[VT_SYM] = "symbol",
-		[VT_BOOL] = "bool",
-		[VT_CONS] = "cons",
-		[VT_CHAR] = "char",
-		[VT_BLOB] = "blob",
-		[VT_ARRAY] = "array",
-		[VT_NVL] = "nvlist",
-	};
-
 	static __thread char badname[10];
 
-	if ((type < 0) || (type > ARRAY_LEN(typenames)))
-		goto bad;
+#define TYPE(t, h)	case t: return human ? #h : #t
 
-	if (typenames[type] == NULL)
-		goto bad;
+	switch ((enum val_type) type) {
+		TYPE(VT_ARRAY, array);
+		TYPE(VT_BLOB,  blob);
+		TYPE(VT_BOOL,  bool);
+		TYPE(VT_CHAR,  char);
+		TYPE(VT_CONS,  cons);
+		TYPE(VT_INT,   int);
+		TYPE(VT_NULL,  null);
+		TYPE(VT_NVL,   nvlist);
+		TYPE(VT_STR,   string);
+		TYPE(VT_SYM,   symbol);
+	}
 
-	return typenames[type];
+#undef TYPE
 
-bad:
 	snprintf(badname, sizeof(badname), "<%d>", type);
 	return badname;
-
 }
 
 static inline void doindent(FILE *out, int indent)
