@@ -169,6 +169,7 @@ JEFFPC_0.10 {
 		sexpr_eval;
 		sexpr_length;
 		sexpr_list_to_array;
+		sexpr_list_to_val_array;
 		sexpr_nth;
 		sexpr_parse;
 

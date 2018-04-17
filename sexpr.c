@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include <jeffpc/sexpr.h>
+#include <jeffpc/mem.h>
 
 #include "sexpr_impl.h"
 
@@ -128,6 +129,42 @@ err:
 		val_putref(array[--nvals]);
 
 	return -1;
+}
+
+/*
+ * Convert a sexpr list into a C array of vals.  E.g.,
+ *
+ *     '(A B C)
+ *
+ * turns into a VT_ARRAY containing:
+ *
+ *     { A, B, C }
+ */
+struct val *sexpr_list_to_val_array(struct val *list)
+{
+	struct val **arr;
+	ssize_t len;
+	int ret;
+
+	len = sexpr_length(val_getref(list));
+	if (len < 0) {
+		val_putref(list);
+		return ERR_PTR(-EINVAL);
+	}
+
+	arr = mem_reallocarray(NULL, len, sizeof(struct val *));
+	if (!arr) {
+		val_putref(list);
+		return ERR_PTR(-ENOMEM);
+	}
+
+	ret = sexpr_list_to_array(list, arr, len);
+	if (ret != len) {
+		free(arr);
+		return ERR_PTR(-EINVAL);
+	}
+
+	return val_alloc_array(arr, len);
 }
 
 struct val *sexpr_car(struct val *lv)

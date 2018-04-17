@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,6 +39,7 @@ extern int sexpr_dump_file(FILE *out, struct val *lv, bool raw);
 extern struct val *sexpr_array_to_list(struct val **vals, size_t nvals);
 extern struct val *sexpr_args_to_list(size_t nvals, ...);
 extern int sexpr_list_to_array(struct val *list, struct val **array, int alen);
+extern struct val *sexpr_list_to_val_array(struct val *list);
 
 static inline struct val *sexpr_parse_str(struct str *str)
 {
