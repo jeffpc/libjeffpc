@@ -119,26 +119,40 @@ LOOKUP_PTR(nvl_lookup_str, struct str *, nvpair_value_str);
  * nvlist set
  */
 
-int nvl_set(struct nvlist *nvl, const char *name, struct val *val)
+static inline int do_nvl_set(struct nvlist *nvl, const char *cname,
+			     struct str *name, struct val *val)
 {
 	struct nvpair *pair;
 
-	pair = find(nvl, name);
+	pair = find(nvl, cname);
 	if (!pair) {
 		/* not found - allocate a new pair */
-		pair = __nvpair_alloc(str_dup(name));
+		pair = __nvpair_alloc(name ? name : str_dup(cname));
 		if (!pair) {
 			val_putref(val);
 			return -ENOMEM;
 		}
 
 		bst_add(&nvl->val._set_nvl.values, pair);
+	} else {
+		str_putref(name);
 	}
 
 	val_putref(pair->value);
 	pair->value = val;
 
 	return 0;
+}
+
+int nvl_set_pair(struct nvlist *nvl, const struct nvpair *value)
+{
+	return do_nvl_set(nvl, nvpair_name(value), nvpair_name_str(value),
+			  nvpair_value(value));
+}
+
+int nvl_set(struct nvlist *nvl, const char *name, struct val *val)
+{
+	return do_nvl_set(nvl, name, NULL, val);
 }
 
 #define SET(nvl, name, valalloc)					\

@@ -170,6 +170,8 @@ extern int nvl_set_null(struct nvlist *nvl, const char *name);
 extern int nvl_set_nvl(struct nvlist *nvl, const char *name, struct nvlist *val);
 extern int nvl_set_str(struct nvlist *nvl, const char *name, struct str *val);
 
+extern int nvl_set_pair(struct nvlist *nvl, const struct nvpair *pair);
+
 /*
  * Remove a key-value pair from the list.
  *

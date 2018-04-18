@@ -129,6 +129,7 @@ JEFFPC_0.10 {
 		nvl_set_int;
 		nvl_set_null;
 		nvl_set_nvl;
+		nvl_set_pair;
 		nvl_set_str;
 		nvl_unpack;
 		nvl_unset;
