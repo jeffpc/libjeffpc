@@ -204,9 +204,19 @@ static inline const char *nvpair_name(const struct nvpair *pair)
 	return str_cstr(pair->name);
 }
 
+static inline struct str *nvpair_name_str(const struct nvpair *pair)
+{
+	return str_getref(pair->name);
+}
+
 static inline enum val_type nvpair_type(const struct nvpair *pair)
 {
 	return pair->value->type;
+}
+
+static inline struct val *nvpair_value(const struct nvpair *pair)
+{
+	return val_getref(pair->value);
 }
 
 /*
