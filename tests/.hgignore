@@ -35,6 +35,7 @@ test_nvl_pack
 test_padding
 test_qstring
 test_sexpr_parser
+test_sexpr_compact
 test_sexpr_eval
 test_sexpr_iter
 test_str2uint

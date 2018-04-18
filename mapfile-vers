@@ -178,6 +178,7 @@ JEFFPC_0.10 {
 		sexpr_assoc;
 		sexpr_car;
 		sexpr_cdr;
+		sexpr_compact;
 		sexpr_dump;
 		sexpr_dump_file;
 		sexpr_equal;

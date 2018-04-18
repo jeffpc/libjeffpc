@@ -107,6 +107,7 @@ add_library(jeffpc SHARED
 	rbtree.c
 	scgisvc.c
 	sexpr.c
+	sexpr_compact.c
 	sexpr_dump.c
 	sexpr_eval.c
 	${FLEX_sexpr_OUTPUTS} ${BISON_sexpr_OUTPUTS}
