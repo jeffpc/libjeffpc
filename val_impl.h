@@ -29,7 +29,7 @@
 extern struct val *__val_alloc(enum val_type type);
 extern void __val_free_nvl(struct val *val);
 
-extern struct nvpair *__nvpair_alloc(const char *name);
+extern struct nvpair *__nvpair_alloc(struct str *name);
 extern void __nvpair_free(struct nvpair *pair);
 
 static inline bool val_is_null_cons(struct val *v)

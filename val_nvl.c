@@ -33,17 +33,13 @@ static void __attribute__((constructor)) init_val_subsys(void)
 	ASSERT(!IS_ERR(nvpair_cache));
 }
 
-struct nvpair *__nvpair_alloc(const char *name)
+struct nvpair *__nvpair_alloc(struct str *name)
 {
 	struct nvpair *pair;
 
 	pair = mem_cache_alloc(nvpair_cache);
-	if (!pair)
-		return NULL;
-
-	pair->name = str_dup(name);
-	if (IS_ERR(pair->name)) {
-		mem_cache_free(nvpair_cache, pair);
+	if (!pair) {
+		str_putref(name);
 		return NULL;
 	}
 
@@ -55,6 +51,7 @@ struct nvpair *__nvpair_alloc(const char *name)
 	 * ->value is valid later on, even though we could have used
 	 *  val_alloc_null directly as it never fails.)
 	 */
+	pair->name = name;
 	pair->value = VAL_ALLOC_NULL();
 
 	return pair;

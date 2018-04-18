@@ -126,7 +126,7 @@ int nvl_set(struct nvlist *nvl, const char *name, struct val *val)
 	pair = find(nvl, name);
 	if (!pair) {
 		/* not found - allocate a new pair */
-		pair = __nvpair_alloc(name);
+		pair = __nvpair_alloc(str_dup(name));
 		if (!pair) {
 			val_putref(val);
 			return -ENOMEM;
