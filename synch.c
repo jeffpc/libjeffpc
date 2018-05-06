@@ -27,23 +27,53 @@
 #include <jeffpc/synch.h>
 #include <jeffpc/config.h>
 
+/*
+ * state checking
+ */
+static void verify_lock_init(struct lock *l)
+{
+}
+
+static void verify_lock_destroy(struct lock *l)
+{
+}
+
+static void verify_lock_lock(struct lock *l)
+{
+}
+
+static void verify_lock_unlock(struct lock *l)
+{
+}
+
+/*
+ * synch API
+ */
 void mxinit(struct lock *l)
 {
+	verify_lock_init(l);
+
 	VERIFY0(pthread_mutex_init(&l->lock, NULL));
 }
 
 void mxdestroy(struct lock *l)
 {
+	verify_lock_destroy(l);
+
 	VERIFY0(pthread_mutex_destroy(&l->lock));
 }
 
 void mxlock(struct lock *l)
 {
+	verify_lock_lock(l);
+
 	VERIFY0(pthread_mutex_lock(&l->lock));
 }
 
 void mxunlock(struct lock *l)
 {
+	verify_lock_unlock(l);
+
 	VERIFY0(pthread_mutex_unlock(&l->lock));
 }
 
