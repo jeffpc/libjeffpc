@@ -49,6 +49,18 @@ struct barrier {
 	pthread_barrier_t bar;
 };
 
+/* the API */
+#define MXINIT(l, lc)	mxinit((l), (lc))
+#define MXDESTROY(l)	mxdestroy(l)
+#define MXLOCK(l)	mxlock(l)
+#define MXUNLOCK(l)	mxunlock(l)
+#define CONDINIT(c)	condinit(c)
+#define CONDDESTROY(c)	conddestroy(c)
+#define CONDWAIT(c,m)	condwait((c),(m))
+#define CONDSIG(c)	condsig(c)
+#define CONDBCAST(c)	condbcast(c)
+
+/* Do *NOT* use directly */
 extern void mxinit(struct lock *m, const struct lock_class *lc);
 extern void mxdestroy(struct lock *m);
 extern void mxlock(struct lock *m);
@@ -70,16 +82,5 @@ extern void condbcast(struct cond *c);
 extern void barrierinit(struct barrier *b, unsigned count);
 extern void barrierdestroy(struct barrier *b);
 extern bool barrierwait(struct barrier *b);
-
-/* compat macros */
-#define MXINIT(l, lc)	mxinit((l), (lc))
-#define MXDESTROY(l)	mxdestroy(l)
-#define MXLOCK(l)	mxlock(l)
-#define MXUNLOCK(l)	mxunlock(l)
-#define CONDINIT(c)	condinit(c)
-#define CONDDESTROY(c)	conddestroy(c)
-#define CONDWAIT(c,m)	condwait((c),(m))
-#define CONDSIG(c)	condsig(c)
-#define CONDBCAST(c)	condbcast(c)
 
 #endif

@@ -51,7 +51,7 @@ static void *taskq_worker(void *arg)
 {
 	struct taskq *tq = arg;
 
-	mxlock(&tq->lock);
+	MXLOCK(&tq->lock);
 
 	/* process */
 	while (!tq->shutdown) {
@@ -59,23 +59,23 @@ static void *taskq_worker(void *arg)
 
 		item = dequeue(tq);
 		if (!item) {
-			condwait(&tq->cond_parent2worker, &tq->lock);
+			CONDWAIT(&tq->cond_parent2worker, &tq->lock);
 			continue;
 		}
 
-		condbcast(&tq->cond_worker2parent);
-		mxunlock(&tq->lock);
+		CONDBCAST(&tq->cond_worker2parent);
+		MXUNLOCK(&tq->lock);
 
 		item->fxn(item->arg);
 
 		free(item);
 
-		mxlock(&tq->lock);
+		MXLOCK(&tq->lock);
 
 		tq->processed++;
 	}
 
-	mxunlock(&tq->lock);
+	MXUNLOCK(&tq->lock);
 
 	return NULL;
 }
@@ -87,7 +87,7 @@ static int start_threads(struct taskq *tq)
 
 	VERIFY(tq->nthreads);
 
-	mxlock(&tq->lock);
+	MXLOCK(&tq->lock);
 
 	for (i = 0; i < tq->nthreads; i++) {
 		ret = xthr_create(&tq->threads[i], taskq_worker, tq);
@@ -97,7 +97,7 @@ static int start_threads(struct taskq *tq)
 		tq->nstarted_threads++;
 	}
 
-	mxunlock(&tq->lock);
+	MXUNLOCK(&tq->lock);
 
 	return ret;
 }
@@ -149,9 +149,9 @@ struct taskq *taskq_create_fixed(const char *name, long nthreads)
 
 	list_create(&tq->queue, sizeof(struct taskq_item),
 		    offsetof(struct taskq_item, node));
-	mxinit(&tq->lock, &taskq_lc);
-	condinit(&tq->cond_worker2parent);
-	condinit(&tq->cond_parent2worker);
+	MXINIT(&tq->lock, &taskq_lc);
+	CONDINIT(&tq->cond_worker2parent);
+	CONDINIT(&tq->cond_parent2worker);
 
 	ret = start_threads(tq);
 	if (ret) {
@@ -182,10 +182,10 @@ int taskq_dispatch(struct taskq *tq, void (*fxn)(void *), void *arg)
 	item->fxn = fxn;
 	item->arg = arg;
 
-	mxlock(&tq->lock);
+	MXLOCK(&tq->lock);
 	enqueue(tq, item);
-	condsig(&tq->cond_parent2worker);
-	mxunlock(&tq->lock);
+	CONDSIG(&tq->cond_parent2worker);
+	MXUNLOCK(&tq->lock);
 
 	return 0;
 }
@@ -195,14 +195,14 @@ int taskq_dispatch(struct taskq *tq, void (*fxn)(void *), void *arg)
  */
 void taskq_wait(struct taskq *tq)
 {
-	mxlock(&tq->lock);
+	MXLOCK(&tq->lock);
 
 	while (!list_is_empty(&tq->queue))
-		condwait(&tq->cond_worker2parent, &tq->lock);
+		CONDWAIT(&tq->cond_worker2parent, &tq->lock);
 
 	VERIFY(list_is_empty(&tq->queue));
 
-	mxunlock(&tq->lock);
+	MXUNLOCK(&tq->lock);
 }
 
 /*
@@ -212,25 +212,25 @@ void taskq_destroy(struct taskq *tq)
 {
 	long i;
 
-	mxlock(&tq->lock);
+	MXLOCK(&tq->lock);
 
 	/* the queue should be empty */
 	VERIFY(list_is_empty(&tq->queue));
 
 	/* make everyone aware that we are shutting down */
 	tq->shutdown = true;
-	condbcast(&tq->cond_parent2worker);
+	CONDBCAST(&tq->cond_parent2worker);
 
-	mxunlock(&tq->lock);
+	MXUNLOCK(&tq->lock);
 
 	/* wait for all the threads to terminate */
 	for (i = 0; i < tq->nstarted_threads; i++)
 		xthr_join(tq->threads[i], NULL);
 
 	/* free */
-	conddestroy(&tq->cond_parent2worker);
-	conddestroy(&tq->cond_worker2parent);
-	mxdestroy(&tq->lock);
+	CONDDESTROY(&tq->cond_parent2worker);
+	CONDDESTROY(&tq->cond_worker2parent);
+	MXDESTROY(&tq->lock);
 	list_destroy(&tq->queue);
 	free(tq->threads);
 	free(tq);
