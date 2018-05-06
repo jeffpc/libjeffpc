@@ -23,4 +23,6 @@
 #ifndef __JEFFPC_CONFIG_SYNCH_H
 #define __JEFFPC_CONFIG_SYNCH_H
 
+#cmakedefine JEFFPC_LOCK_TRACKING
+
 #endif
