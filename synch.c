@@ -28,22 +28,44 @@
 #include <jeffpc/config.h>
 
 /*
+ * error printing
+ */
+static void print_lock(struct lock *lock)
+{
+	cmn_err(CE_CRIT, " %p <%c>", lock,
+		(lock->magic != (uintptr_t) lock) ? 'M' : '.');
+}
+
+/*
  * state checking
  */
+static void check_lock_magic(struct lock *lock, const char *op)
+{
+	if (lock->magic == (uintptr_t) lock)
+		return;
+
+	cmn_err(CE_CRIT, "thread trying to %s lock with bad magic", op);
+	print_lock(lock);
+}
+
 static void verify_lock_init(struct lock *l)
 {
+	l->magic = (uintptr_t) l;
 }
 
 static void verify_lock_destroy(struct lock *l)
 {
+	check_lock_magic(l, "destroy");
 }
 
 static void verify_lock_lock(struct lock *l)
 {
+	check_lock_magic(l, "acquire");
 }
 
 static void verify_lock_unlock(struct lock *l)
 {
+	check_lock_magic(l, "release");
 }
 
 /*
