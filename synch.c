@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ static void check_lock_magic(struct lock *lock, const char *op)
 	print_lock(lock);
 }
 
-static void verify_lock_init(struct lock *l)
+static void verify_lock_init(struct lock *l, const struct lock_class *lc)
 {
 	l->magic = (uintptr_t) l;
 }
@@ -71,9 +71,9 @@ static void verify_lock_unlock(struct lock *l)
 /*
  * synch API
  */
-void mxinit(struct lock *l)
+void mxinit(struct lock *l, const struct lock_class *lc)
 {
-	verify_lock_init(l);
+	verify_lock_init(l, lc);
 
 	VERIFY0(pthread_mutex_init(&l->lock, NULL));
 }

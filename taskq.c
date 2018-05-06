@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,8 @@
 #include <jeffpc/error.h>
 #include <jeffpc/taskq.h>
 #include <jeffpc/cstr.h>
+
+static LOCK_CLASS(taskq_lc);
 
 static void enqueue(struct taskq *tq, struct taskq_item *item)
 {
@@ -147,7 +149,7 @@ struct taskq *taskq_create_fixed(const char *name, long nthreads)
 
 	list_create(&tq->queue, sizeof(struct taskq_item),
 		    offsetof(struct taskq_item, node));
-	mxinit(&tq->lock);
+	mxinit(&tq->lock, &taskq_lc);
 	condinit(&tq->cond_worker2parent);
 	condinit(&tq->cond_parent2worker);
 

@@ -49,7 +49,7 @@ struct barrier {
 	pthread_barrier_t bar;
 };
 
-extern void mxinit(struct lock *m);
+extern void mxinit(struct lock *m, const struct lock_class *lc);
 extern void mxdestroy(struct lock *m);
 extern void mxlock(struct lock *m);
 extern void mxunlock(struct lock *m);
@@ -72,7 +72,7 @@ extern void barrierdestroy(struct barrier *b);
 extern bool barrierwait(struct barrier *b);
 
 /* compat macros */
-#define MXINIT(l)	mxinit(l)
+#define MXINIT(l, lc)	mxinit((l), (lc))
 #define MXDESTROY(l)	mxdestroy(l)
 #define MXLOCK(l)	mxlock(l)
 #define MXUNLOCK(l)	mxunlock(l)
