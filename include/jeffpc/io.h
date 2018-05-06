@@ -99,6 +99,13 @@ static inline int xstat(const char *restrict path, struct stat *restrict buf)
 	return 0;
 }
 
+static inline int xfstat(int fd, struct stat *restrict buf)
+{
+	if (fstat(fd, buf) == -1)
+		return -errno;
+	return 0;
+}
+
 static inline int xlstat(const char *restrict path, struct stat *restrict buf)
 {
 	if (lstat(path, buf) == -1)
