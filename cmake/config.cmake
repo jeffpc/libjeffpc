@@ -47,4 +47,7 @@ set(HAVE_UMEM ${UMEM_FOUND})
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/jeffpc/config.h.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/include/jeffpc/config.h")
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/jeffpc/config-synch.h.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/include/jeffpc/config-synch.h")
+
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")

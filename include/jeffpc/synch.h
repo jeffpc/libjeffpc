@@ -26,6 +26,8 @@
 #include <stdbool.h>
 #include <pthread.h>
 
+#include <jeffpc/config-synch.h>
+
 struct lock_class {
 	const char *name;
 };
