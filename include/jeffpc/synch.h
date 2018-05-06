@@ -26,6 +26,12 @@
 #include <stdbool.h>
 #include <pthread.h>
 
+struct lock_class {
+	const char *name;
+};
+
+#define LOCK_CLASS(n)	const struct lock_class n = { .name = #n };
+
 struct lock {
 	pthread_mutex_t lock;
 	uintptr_t magic;
