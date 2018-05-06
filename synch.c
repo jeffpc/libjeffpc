@@ -28,6 +28,52 @@
 #include <jeffpc/config.h>
 
 /*
+ * held stack management
+ */
+#ifdef JEFFPC_LOCK_TRACKING
+#define LOCKDEP_STACK_DEPTH	32
+
+struct held_lock {
+	struct lock *lock;
+};
+
+static __thread struct held_lock held_stack[LOCKDEP_STACK_DEPTH];
+static __thread size_t held_stack_count;
+
+#define for_each_held_lock(idx, cur)	\
+	for (idx = 0, cur = &held_stack[0]; \
+	     idx < held_stack_count; \
+	     idx++, cur = &held_stack[idx])
+
+static inline struct held_lock *last_acquired_lock(void)
+{
+	VERIFY3U(held_stack_count, >, 0);
+
+	return &held_stack[held_stack_count - 1];
+}
+
+static inline struct held_lock *held_stack_alloc(void)
+{
+	if (held_stack_count == LOCKDEP_STACK_DEPTH)
+		return NULL;
+
+	return &held_stack[held_stack_count++];
+}
+
+static inline void held_stack_remove(struct held_lock *held)
+{
+	struct held_lock *last = last_acquired_lock();
+
+	if (held != last)
+		memmove(held, held + 1,
+			(last - held) * sizeof(struct held_lock));
+
+	held_stack_count--;
+}
+
+#endif
+
+/*
  * error printing
  */
 static void print_invalid_call(const char *fxn, const struct lock_context *where)
