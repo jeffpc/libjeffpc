@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2014-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,8 +26,15 @@
 #include <stdbool.h>
 #include <pthread.h>
 
+struct lock_class {
+	const char *name;
+};
+
+#define LOCK_CLASS(n)	const struct lock_class n = { .name = #n };
+
 struct lock {
 	pthread_mutex_t lock;
+	uintptr_t magic;
 };
 
 struct rwlock {
@@ -42,7 +49,19 @@ struct barrier {
 	pthread_barrier_t bar;
 };
 
-extern void mxinit(struct lock *m);
+/* the API */
+#define MXINIT(l, lc)	mxinit((l), (lc))
+#define MXDESTROY(l)	mxdestroy(l)
+#define MXLOCK(l)	mxlock(l)
+#define MXUNLOCK(l)	mxunlock(l)
+#define CONDINIT(c)	condinit(c)
+#define CONDDESTROY(c)	conddestroy(c)
+#define CONDWAIT(c,m)	condwait((c),(m))
+#define CONDSIG(c)	condsig(c)
+#define CONDBCAST(c)	condbcast(c)
+
+/* Do *NOT* use directly */
+extern void mxinit(struct lock *m, const struct lock_class *lc);
 extern void mxdestroy(struct lock *m);
 extern void mxlock(struct lock *m);
 extern void mxunlock(struct lock *m);
@@ -63,16 +82,5 @@ extern void condbcast(struct cond *c);
 extern void barrierinit(struct barrier *b, unsigned count);
 extern void barrierdestroy(struct barrier *b);
 extern bool barrierwait(struct barrier *b);
-
-/* compat macros */
-#define MXINIT(l)	mxinit(l)
-#define MXDESTROY(l)	mxdestroy(l)
-#define MXLOCK(l)	mxlock(l)
-#define MXUNLOCK(l)	mxunlock(l)
-#define CONDINIT(c)	condinit(c)
-#define CONDDESTROY(c)	conddestroy(c)
-#define CONDWAIT(c,m)	condwait((c),(m))
-#define CONDSIG(c)	condsig(c)
-#define CONDBCAST(c)	condbcast(c)
 
 #endif
