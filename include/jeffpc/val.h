@@ -294,7 +294,7 @@ static inline struct val *_val_cast_to_strsym(struct val *val,
 {
 	ASSERT(!val || (val->type == type));
 
-	return val_getref(val);
+	return val;
 }
 
 #define val_getref_str(v)	val_cast_to_str(val_getref(v))
