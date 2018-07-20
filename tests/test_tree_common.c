@@ -32,6 +32,7 @@
 #define TREE_CREATE		bst_create
 #define TREE_DESTROY		bst_destroy
 #define TREE_ADD		bst_add
+#define TREE_REMOVE		bst_remove
 #define TREE_FOR_EACH		bst_for_each
 #define TREE_NUMNODES		bst_numnodes
 #define TREE_DESTROY_NODES	bst_destroy_nodes
@@ -234,6 +235,18 @@ static void test_nodes(const char *testname, struct node *remove,
 	init(&tree, testname, remove ? remove->name : "(none)", numinsert, inserts, true);
 	verify_nodes(&tree, npre, pre);
 	verify_iter(&tree, numinsert);
+	destroy(&tree, numinsert, !remove);
+
+	if (!remove)
+		return;
+
+	init(&tree, NULL, NULL, numinsert, inserts, false);
+	verify_nodes(&tree, npre, pre);
+	verify_iter(&tree, numinsert);
+	fprintf(stderr, "remove...");
+	TREE_REMOVE(&tree, remove);
+	verify_nodes(&tree, npost, post);
+	verify_iter(&tree, numinsert - 1);
 	destroy(&tree, numinsert - 1, true);
 }
 
