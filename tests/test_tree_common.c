@@ -25,8 +25,22 @@
 
 #include "test.c"
 
+#if defined(TEST_TREE_BST)
+#define TREE_TREE		bst_tree
+#define TREE_NODE		bst_node
+#define TREE_COOKIE		bst_cookie
+#define TREE_CREATE		bst_create
+#define TREE_DESTROY		bst_destroy
+#define TREE_ADD		bst_add
+#define TREE_FOR_EACH		bst_for_each
+#define TREE_NUMNODES		bst_numnodes
+#define TREE_DESTROY_NODES	bst_destroy_nodes
+#else
+#error "Unspecified test type"
+#endif
+
 struct node {
-	struct bst_node node;
+	struct TREE_NODE node;
 	int v;
 };
 
@@ -42,16 +56,16 @@ static int cmp(const void *va, const void *vb)
 	return 0;
 }
 
-static void init(struct bst_tree *tree, const char *testname,
+static void init(struct TREE_TREE *tree, const char *testname,
 		 size_t numnodes)
 {
 	fprintf(stderr, "Testing %zu (%s)...", numnodes, testname);
 
-	bst_create(tree, cmp, sizeof(struct node),
-		   offsetof(struct node, node));
+	TREE_CREATE(tree, cmp, sizeof(struct node),
+		    offsetof(struct node, node));
 }
 
-static void insert(struct bst_tree *tree, int val)
+static void insert(struct TREE_TREE *tree, int val)
 {
 	struct node *node;
 
@@ -60,34 +74,34 @@ static void insert(struct bst_tree *tree, int val)
 
 	node->v = val;
 
-	bst_add(tree, node);
+	TREE_ADD(tree, node);
 }
 
-static void __destroy_iter(struct bst_tree *tree, size_t expected_numnodes)
+static void __destroy_iter(struct TREE_TREE *tree, size_t expected_numnodes)
 {
 	struct node *node;
 	size_t found_nodes;
 
-	VERIFY3U(bst_numnodes(tree), ==, expected_numnodes);
+	VERIFY3U(TREE_NUMNODES(tree), ==, expected_numnodes);
 
 	found_nodes = 0;
-	bst_for_each(tree, node)
+	TREE_FOR_EACH(tree, node)
 		found_nodes++;
 
-	VERIFY3U(bst_numnodes(tree), ==, found_nodes);
-	VERIFY3U(bst_numnodes(tree), ==, expected_numnodes);
+	VERIFY3U(TREE_NUMNODES(tree), ==, found_nodes);
+	VERIFY3U(TREE_NUMNODES(tree), ==, expected_numnodes);
 }
 
-static size_t __destroy_destroy(struct bst_tree *tree)
+static size_t __destroy_destroy(struct TREE_TREE *tree)
 {
-	struct bst_cookie cookie;
-	struct bst_node *node;
+	struct TREE_COOKIE cookie;
+	struct node *node;
 	size_t removed_nodes;
 
 	memset(&cookie, 0, sizeof(cookie));
 	removed_nodes = 0;
 
-	while ((node = bst_destroy_nodes(tree, &cookie))) {
+	while ((node = TREE_DESTROY_NODES(tree, &cookie))) {
 		memset(node, 0xba, sizeof(struct node));
 		removed_nodes++;
 	}
@@ -95,11 +109,11 @@ static size_t __destroy_destroy(struct bst_tree *tree)
 	return removed_nodes;
 }
 
-static void destroy(struct bst_tree *tree, size_t expected_numnodes)
+static void destroy(struct TREE_TREE *tree, size_t expected_numnodes)
 {
 	size_t remaining_nodes;
 
-	remaining_nodes = bst_numnodes(tree);
+	remaining_nodes = TREE_NUMNODES(tree);
 
 	VERIFY3U(remaining_nodes, ==, expected_numnodes);
 
@@ -110,16 +124,16 @@ static void destroy(struct bst_tree *tree, size_t expected_numnodes)
 	remaining_nodes -= __destroy_destroy(tree);
 
 	VERIFY0(remaining_nodes);
-	VERIFY0(bst_numnodes(tree));
+	VERIFY0(TREE_NUMNODES(tree));
 
-	bst_destroy(tree);
+	TREE_DESTROY(tree);
 
 	fprintf(stderr, "ok.\n");
 }
 
 static void test_nodes(const char *testname, size_t numnodes, ...)
 {
-	struct bst_tree tree;
+	struct TREE_TREE tree;
 	va_list ap;
 	size_t i;
 
