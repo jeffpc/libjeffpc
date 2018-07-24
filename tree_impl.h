@@ -27,6 +27,7 @@
 
 extern void *tree_insert_here(struct tree_tree *tree, void *newitem,
 			      struct tree_cookie *cookie);
+extern void tree_remove(struct tree_tree *tree, void *item);
 
 static inline void *node2obj(struct tree_tree *tree, struct tree_node *node)
 {
