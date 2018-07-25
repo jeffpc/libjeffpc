@@ -24,8 +24,13 @@
 #include <stdlib.h>
 
 #include <jeffpc/error.h>
+#include <jeffpc/atomic.h>
 #include <jeffpc/synch.h>
 #include <jeffpc/config.h>
+
+#ifdef JEFFPC_LOCK_TRACKING
+static atomic_t lockdep_on = ATOMIC_INITIALIZER(1);
+#endif
 
 /*
  * held stack management
@@ -35,6 +40,7 @@
 
 struct held_lock {
 	struct lock *lock;
+	struct lock_context where;
 };
 
 static __thread struct held_lock held_stack[LOCKDEP_STACK_DEPTH];
@@ -86,11 +92,95 @@ static void print_invalid_call(const char *fxn, const struct lock_context *where
 static void print_lock(struct lock *lock, const struct lock_context *where)
 {
 	cmn_err(CE_CRIT, "lockdep:     %s (%p) <%c> at %s:%d",
+#ifdef JEFFPC_LOCK_TRACKING
+		lock->name,
+#else
 		"<unknown>",
+#endif
 		lock,
 		(lock->magic != (uintptr_t) lock) ? 'M' : '.',
 		where->file, where->line);
 }
+
+#ifdef JEFFPC_LOCK_TRACKING
+static void print_held_locks(struct held_lock *highlight)
+{
+	struct held_lock *cur;
+	size_t i;
+
+	for_each_held_lock(i, cur) {
+		struct lock *lock = cur->lock;
+
+		cmn_err(CE_CRIT, "lockdep:  %s #%zd: %s (%p) <%c> acquired at %s:%d",
+			(cur == highlight) ? "->" : "  ",
+			i, lock->name, lock,
+			(lock->magic != (uintptr_t) lock) ? 'M' : '.',
+			cur->where.file, cur->where.line);
+	}
+}
+
+static void error_destroy(struct held_lock *held,
+			  const struct lock_context *where)
+{
+	cmn_err(CE_CRIT, "lockdep: thread is trying to destroy a lock it is "
+		"still holding:");
+	print_lock(held->lock, where);
+	cmn_err(CE_CRIT, "lockdep: while holding:");
+	print_held_locks(held);
+
+	atomic_set(&lockdep_on, 0);
+}
+
+static void error_lock(struct held_lock *held, struct lock *new,
+		       const struct lock_context *where)
+{
+	const bool deadlock = (new == held->lock);
+
+	if (deadlock)
+		cmn_err(CE_CRIT, "lockdep: deadlock detected");
+	else
+		cmn_err(CE_CRIT, "lockdep: possible recursive locking detected");
+
+	cmn_err(CE_CRIT, "lockdep: thread is trying to acquire lock:");
+	print_lock(new, where);
+
+	if (deadlock)
+		cmn_err(CE_CRIT, "lockdep: but the thread is already "
+			"holding it:");
+	else
+		cmn_err(CE_CRIT, "lockdep: but the thread is already "
+			"holding a lock of same class:");
+
+	print_held_locks(held);
+
+	if (deadlock)
+		panic("lockdep: found a fatal situation...aborting.");
+
+	atomic_set(&lockdep_on, 0);
+}
+
+static void error_unlock(struct lock *lock, const struct lock_context *where)
+{
+	cmn_err(CE_CRIT, "lockdep: thread is trying to release lock it "
+		"doesn't hold:");
+	print_lock(lock, where);
+	cmn_err(CE_CRIT, "lockdep: while holding:");
+	print_held_locks(NULL);
+
+	atomic_set(&lockdep_on, 0);
+}
+
+static void error_alloc(struct lock *lock, const struct lock_context *where)
+{
+	cmn_err(CE_CRIT, "lockdep: lock nesting limit reached");
+	cmn_err(CE_CRIT, "lockdep: thread trying to acquire lock:");
+	print_lock(lock, where);
+	cmn_err(CE_CRIT, "lockdep: while holding:");
+	print_held_locks(NULL);
+
+	atomic_set(&lockdep_on, 0);
+}
+#endif
 
 /*
  * state checking
@@ -103,6 +193,10 @@ static void check_lock_magic(struct lock *lock, const char *op,
 
 	cmn_err(CE_CRIT, "lockdep: thread trying to %s lock with bad magic", op);
 	print_lock(lock, where);
+#ifdef JEFFPC_LOCK_TRACKING
+	cmn_err(CE_CRIT, "lockdep: while holding:");
+	print_held_locks(NULL);
+#endif
 	panic("lockdep: Aborting.");
 }
 
@@ -113,6 +207,11 @@ static void verify_lock_init(const struct lock_context *where, struct lock *l,
 		print_invalid_call("MXINIT", where);
 
 	l->magic = (uintptr_t) l;
+
+#ifdef JEFFPC_LOCK_TRACKING
+	l->lc = lc;
+	l->name = where->lockname;
+#endif
 }
 
 static void verify_lock_destroy(const struct lock_context *where, struct lock *l)
@@ -121,6 +220,19 @@ static void verify_lock_destroy(const struct lock_context *where, struct lock *l
 		print_invalid_call("MXDESTROY", where);
 
 	check_lock_magic(l, "destroy", where);
+
+#ifdef JEFFPC_LOCK_TRACKING
+	struct held_lock *held;
+	size_t i;
+
+	/* check that we're not holding it */
+	for_each_held_lock(i, held) {
+		if (held->lock == l) {
+			error_destroy(held, where);
+			return;
+		}
+	}
+#endif
 }
 
 static void verify_lock_lock(const struct lock_context *where, struct lock *l)
@@ -129,6 +241,31 @@ static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 		print_invalid_call("MXLOCK", where);
 
 	check_lock_magic(l, "acquire", where);
+
+#ifdef JEFFPC_LOCK_TRACKING
+	struct held_lock *held;
+	size_t i;
+
+	if (!atomic_read(&lockdep_on))
+		return;
+
+	/* check for deadlocks & recursive locking */
+	for_each_held_lock(i, held) {
+		if ((held->lock == l) || (held->lock->lc == l->lc)) {
+			error_lock(held, l, where);
+			return;
+		}
+	}
+
+	held = held_stack_alloc();
+	if (!held) {
+		error_alloc(l, where);
+		return;
+	}
+
+	held->lock = l;
+	held->where = *where;
+#endif
 }
 
 static void verify_lock_unlock(const struct lock_context *where, struct lock *l)
@@ -137,6 +274,29 @@ static void verify_lock_unlock(const struct lock_context *where, struct lock *l)
 		print_invalid_call("MXUNLOCK", where);
 
 	check_lock_magic(l, "release", where);
+
+#ifdef JEFFPC_LOCK_TRACKING
+	struct held_lock *held;
+	size_t i;
+
+	if (!atomic_read(&lockdep_on))
+		return;
+
+	for_each_held_lock(i, held) {
+		if (held->lock != l)
+			continue;
+
+		held_stack_remove(held);
+
+		goto out;
+	}
+
+	error_unlock(l, where);
+	return;
+
+out:
+	return;
+#endif
 }
 
 /*

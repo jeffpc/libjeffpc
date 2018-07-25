@@ -43,6 +43,10 @@ struct lock_context {
 struct lock {
 	pthread_mutex_t lock;
 	uintptr_t magic;
+#ifdef JEFFPC_LOCK_TRACKING
+	const struct lock_class *lc;
+	const char *name;
+#endif
 };
 
 struct rwlock {
