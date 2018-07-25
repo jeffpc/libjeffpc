@@ -28,8 +28,26 @@
 
 #define NITERS		100000
 
+#define PERF_TREE_BST
+
+#if defined(PERF_TREE_BST)
+#define TREE_TREE		bst_tree
+#define TREE_NODE		bst_node
+#define TREE_COOKIE		bst_cookie
+#define TREE_CREATE		bst_create
+#define TREE_DESTROY		bst_destroy
+#define TREE_FIND		bst_find
+#define TREE_INSERT		bst_insert
+#define TREE_REMOVE		bst_remove
+#define TREE_FOR_EACH		bst_for_each
+#define TREE_NUMNODES		bst_numnodes
+#define TREE_DESTROY_NODES	bst_destroy_nodes
+#else
+#error "Unspecified test type"
+#endif
+
 struct node {
-	struct bst_node node;
+	struct TREE_NODE node;
 	uint32_t v;
 };
 
@@ -68,37 +86,37 @@ static void seq_reset(void)
 	seq_v = 0;
 }
 
-static void insert(struct bst_tree *tree, struct node *nodes,
+static void insert(struct TREE_TREE *tree, struct node *nodes,
 		   uint32_t (*f)(void))
 {
 	uint64_t start, end;
 	size_t i, ok;
 
-	ASSERT3U(bst_numnodes(tree), ==, 0);
+	ASSERT3U(TREE_NUMNODES(tree), ==, 0);
 
 	start = gettick();
 	for (i = 0, ok = 0; i < NITERS; i++) {
 		nodes[i].v = f();
 
-		if (!bst_insert(tree, &nodes[i]))
+		if (!TREE_INSERT(tree, &nodes[i]))
 			ok++;
 	}
 	end = gettick();
 
-	ASSERT3U(bst_numnodes(tree), ==, ok);
+	ASSERT3U(TREE_NUMNODES(tree), ==, ok);
 
 	cmn_err(CE_INFO, "%zu/%zu insertions in %"PRIu64" ns", ok, NITERS,
 		end - start);
 }
 
-static void find_or_delete(struct bst_tree *tree, struct node *nodes,
+static void find_or_delete(struct TREE_TREE *tree, struct node *nodes,
 			   uint32_t (*f)(void), bool find_only)
 {
 	uint64_t start, end;
 	size_t orig_numnodes;
 	size_t i, ok;
 
-	orig_numnodes = bst_numnodes(tree);
+	orig_numnodes = TREE_NUMNODES(tree);
 
 	start = gettick();
 	for (i = 0, ok = 0; i < NITERS * 10; i++) {
@@ -107,19 +125,19 @@ static void find_or_delete(struct bst_tree *tree, struct node *nodes,
 		};
 		struct node *node;
 
-		node = bst_find(tree, &key, NULL);
+		node = TREE_FIND(tree, &key, NULL);
 		if (node) {
 			if (!find_only)
-				bst_remove(tree, node);
+				TREE_REMOVE(tree, node);
 			ok++;
 		}
 	}
 	end = gettick();
 
 	if (find_only)
-		ASSERT3U(bst_numnodes(tree), ==, orig_numnodes);
+		ASSERT3U(TREE_NUMNODES(tree), ==, orig_numnodes);
 	else
-		ASSERT3U(bst_numnodes(tree), ==, orig_numnodes - ok);
+		ASSERT3U(TREE_NUMNODES(tree), ==, orig_numnodes - ok);
 
 	cmn_err(CE_INFO, "%zu/%zu %s in %"PRIu64" ns", ok, NITERS,
 		find_only ? "finds" : "deletions", end - start);
@@ -127,11 +145,11 @@ static void find_or_delete(struct bst_tree *tree, struct node *nodes,
 
 static void test(uint32_t (*f)(void), void (*reset)(void))
 {
-	struct bst_tree tree;
+	struct TREE_TREE tree;
 	struct node *nodes;
 
-	bst_create(&tree, cmp, sizeof(struct node),
-		   offsetof(struct node, node));
+	TREE_CREATE(&tree, cmp, sizeof(struct node),
+		    offsetof(struct node, node));
 
 	nodes = calloc(NITERS, sizeof(struct node));
 	if (!nodes)
@@ -146,7 +164,7 @@ static void test(uint32_t (*f)(void), void (*reset)(void))
 
 	free(nodes);
 
-	bst_destroy(&tree);
+	TREE_DESTROY(&tree);
 }
 
 static void usage(const char *prog)
