@@ -29,7 +29,7 @@
 
 #define NITERS		1000000
 
-#define PERF_TREE_BST
+#define PERF_TREE_RB
 
 #if defined(PERF_TREE_BST)
 /*
