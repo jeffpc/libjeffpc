@@ -23,13 +23,50 @@
 #include <jeffpc/jeffpc.h>
 #include <jeffpc/error.h>
 #include <jeffpc/bst.h>
+#include <jeffpc/rbtree.h>
 #include <jeffpc/rand.h>
 #include <jeffpc/time.h>
 
-#define NITERS		100000
+#define NITERS		1000000
+
+#define PERF_TREE_RB
+
+#if defined(PERF_TREE_BST)
+/*
+ * Use fewer iterations to avoid pathological behavior with sequential
+ * insertions taking O(n^2) with a large n.
+ */
+#undef NITERS
+#define NITERS			100000
+#define TREE_TREE		bst_tree
+#define TREE_NODE		bst_node
+#define TREE_COOKIE		bst_cookie
+#define TREE_CREATE		bst_create
+#define TREE_DESTROY		bst_destroy
+#define TREE_FIND		bst_find
+#define TREE_INSERT		bst_insert
+#define TREE_REMOVE		bst_remove
+#define TREE_FOR_EACH		bst_for_each
+#define TREE_NUMNODES		bst_numnodes
+#define TREE_DESTROY_NODES	bst_destroy_nodes
+#elif defined(PERF_TREE_RB)
+#define TREE_TREE		rb_tree
+#define TREE_NODE		rb_node
+#define TREE_COOKIE		rb_cookie
+#define TREE_CREATE		rb_create
+#define TREE_DESTROY		rb_destroy
+#define TREE_FIND		rb_find
+#define TREE_INSERT		rb_insert
+#define TREE_REMOVE		rb_remove
+#define TREE_FOR_EACH		rb_for_each
+#define TREE_NUMNODES		rb_numnodes
+#define TREE_DESTROY_NODES	rb_destroy_nodes
+#else
+#error "Unspecified test type"
+#endif
 
 struct node {
-	struct bst_node node;
+	struct TREE_NODE node;
 	uint32_t v;
 };
 
@@ -68,37 +105,37 @@ static void seq_reset(void)
 	seq_v = 0;
 }
 
-static void insert(struct bst_tree *tree, struct node *nodes,
+static void insert(struct TREE_TREE *tree, struct node *nodes,
 		   uint32_t (*f)(void))
 {
 	uint64_t start, end;
 	size_t i, ok;
 
-	ASSERT3U(bst_numnodes(tree), ==, 0);
+	ASSERT3U(TREE_NUMNODES(tree), ==, 0);
 
 	start = gettick();
 	for (i = 0, ok = 0; i < NITERS; i++) {
 		nodes[i].v = f();
 
-		if (!bst_insert(tree, &nodes[i]))
+		if (!TREE_INSERT(tree, &nodes[i]))
 			ok++;
 	}
 	end = gettick();
 
-	ASSERT3U(bst_numnodes(tree), ==, ok);
+	ASSERT3U(TREE_NUMNODES(tree), ==, ok);
 
 	cmn_err(CE_INFO, "%zu/%zu insertions in %"PRIu64" ns", ok, NITERS,
 		end - start);
 }
 
-static void find_or_delete(struct bst_tree *tree, struct node *nodes,
+static void find_or_delete(struct TREE_TREE *tree, struct node *nodes,
 			   uint32_t (*f)(void), bool find_only)
 {
 	uint64_t start, end;
 	size_t orig_numnodes;
 	size_t i, ok;
 
-	orig_numnodes = bst_numnodes(tree);
+	orig_numnodes = TREE_NUMNODES(tree);
 
 	start = gettick();
 	for (i = 0, ok = 0; i < NITERS * 10; i++) {
@@ -107,19 +144,19 @@ static void find_or_delete(struct bst_tree *tree, struct node *nodes,
 		};
 		struct node *node;
 
-		node = bst_find(tree, &key, NULL);
+		node = TREE_FIND(tree, &key, NULL);
 		if (node) {
 			if (!find_only)
-				bst_remove(tree, node);
+				TREE_REMOVE(tree, node);
 			ok++;
 		}
 	}
 	end = gettick();
 
 	if (find_only)
-		ASSERT3U(bst_numnodes(tree), ==, orig_numnodes);
+		ASSERT3U(TREE_NUMNODES(tree), ==, orig_numnodes);
 	else
-		ASSERT3U(bst_numnodes(tree), ==, orig_numnodes - ok);
+		ASSERT3U(TREE_NUMNODES(tree), ==, orig_numnodes - ok);
 
 	cmn_err(CE_INFO, "%zu/%zu %s in %"PRIu64" ns", ok, NITERS,
 		find_only ? "finds" : "deletions", end - start);
@@ -127,11 +164,11 @@ static void find_or_delete(struct bst_tree *tree, struct node *nodes,
 
 static void test(uint32_t (*f)(void), void (*reset)(void))
 {
-	struct bst_tree tree;
+	struct TREE_TREE tree;
 	struct node *nodes;
 
-	bst_create(&tree, cmp, sizeof(struct node),
-		   offsetof(struct node, node));
+	TREE_CREATE(&tree, cmp, sizeof(struct node),
+		    offsetof(struct node, node));
 
 	nodes = calloc(NITERS, sizeof(struct node));
 	if (!nodes)
@@ -146,7 +183,7 @@ static void test(uint32_t (*f)(void), void (*reset)(void))
 
 	free(nodes);
 
-	bst_destroy(&tree);
+	TREE_DESTROY(&tree);
 }
 
 static void usage(const char *prog)
@@ -172,6 +209,9 @@ int main(int argc, char **argv)
 	int i;
 
 	jeffpc_init(&init_ops);
+
+	if (argc < 2)
+		usage(argv[0]);
 
 	for (i = 1; i < argc; i++) {
 		test_name = argv[i];

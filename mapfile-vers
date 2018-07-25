@@ -153,6 +153,13 @@ JEFFPC_0.10 {
 		rand64;
 		rand_buf;
 
+		# rbtree
+		rb_add;
+		rb_create;
+		rb_destroy;
+		rb_insert_here;
+		rb_remove;
+
 		# scgisvc
 		scgisvc;
 

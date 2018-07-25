@@ -88,6 +88,174 @@ void *tree_insert_here(struct tree_tree *tree, void *newitem,
 	return NULL;
 }
 
+static inline void __swap_nodes(struct tree_tree *tree,
+				struct tree_node *x,
+				struct tree_node *y,
+				const enum tree_dir left)
+{
+	const enum tree_dir right = 1 - left;
+	const bool root = tree->root == x;
+	enum tree_dir dir_to_orig_x;
+	bool tmp;
+
+	ASSERT3P(x, !=, y);
+	ASSERT3P(y->children[left], ==, NULL);
+
+	if (!root)
+		dir_to_orig_x = which_dir(x->parent, x);
+
+	if (x->children[right] == y) {
+		/*
+		 *  A                 A
+		 *   \                 \
+		 *    \                 \
+		 *     x                 y
+		 *    / \               / \
+		 *   /   \       =>    /   \
+		 *  B     y           B     x
+		 *         \                 \
+		 *          \                 \
+		 *           E                 E
+		 */
+		struct tree_node *A, *B, *E;
+
+		A = x->parent;
+		B = x->children[left];
+		E = y->children[right];
+
+		x->parent = y;
+		y->parent = A;
+		B->parent = y;
+		if (E)
+			E->parent = x;
+
+		x->children[left] = NULL;
+		x->children[right] = E;
+		y->children[left] = B;
+		y->children[right] = x;
+		if (!root)
+			A->children[dir_to_orig_x] = y;
+		else
+			tree->root = y;
+	} else {
+		/*
+		 *    A                 A
+		 *     \                 \
+		 *      \                 \
+		 *       x                 y
+		 *      / \               / \
+		 *     /   \       =>    /   \
+		 *    B     C           B     C
+		 *         /                 /
+		 *        .                 .
+		 *       .                 .
+		 *      /                 /
+		 *     D                 D
+		 *    /                 /
+		 *   /                 /
+		 *  y                 x
+		 *   \                 \
+		 *    \                 \
+		 *     E                 E
+		 */
+		struct tree_node *A, *B, *C, *D, *E;
+
+		A = x->parent;
+		B = x->children[left];
+		C = x->children[right];
+		D = y->parent;
+		E = y->children[right];
+
+		x->parent = D;
+		y->parent = A;
+		B->parent = y;
+		C->parent = y;
+		if (E)
+			E->parent = x;
+
+		x->children[left] = NULL;
+		x->children[right] = E;
+		y->children[left] = B;
+		y->children[right] = C;
+		if (!root)
+			A->children[dir_to_orig_x] = y;
+		else
+			tree->root = y;
+		D->children[left] = x;
+	}
+
+	/* swap the colors */
+	tmp = x->red;
+	x->red = y->red;
+	y->red = tmp;
+}
+
+static inline void __promote_node_child(struct tree_tree *tree,
+					struct tree_node *parent,
+					struct tree_node *node,
+					struct tree_node *child)
+{
+	if (parent)
+		parent->children[which_dir(parent, node)] = child;
+	else
+		tree->root = child;
+
+	if (child)
+		child->parent = parent;
+}
+
+/*
+ * Remove @item from @tree.
+ *
+ * @parent_r: the parent node of @child_r (may be NULL)
+ * @child_r: the node that ultimately took @item's new place in the tree
+ *	(may be NULL)
+ */
+void tree_remove(struct tree_tree *tree, void *item,
+		 struct tree_node **parent_r,
+		 struct tree_node **child_r)
+{
+	struct tree_node *parent;
+	struct tree_node *child;
+	struct tree_node *node;
+
+	ASSERT3P(tree, !=, NULL);
+	ASSERT3P(item, !=, NULL);
+
+	node = obj2node(tree, item);
+
+	/*
+	 * Two children: exchange it with a leaf-ish node greater than this
+	 * node.
+	 */
+	if (node->children[TREE_LEFT] && node->children[TREE_RIGHT])
+		__swap_nodes(tree, node,
+			     firstlast(node->children[TREE_RIGHT], TREE_LEFT),
+			     TREE_LEFT);
+
+	/* now, we have zero or one child */
+	ASSERT(!node->children[TREE_LEFT] || !node->children[TREE_RIGHT]);
+
+	parent = node->parent;
+	if (node->children[TREE_LEFT])
+		child = node->children[TREE_LEFT];
+	else
+		child = node->children[TREE_RIGHT];
+
+	__promote_node_child(tree, parent, node, child);
+
+	/* clear out the removed node */
+	node->parent = NULL;
+	node->children[TREE_LEFT] = NULL;
+	node->children[TREE_RIGHT] = NULL;
+
+	tree->num_nodes--;
+
+	/* return various info */
+	*parent_r = parent;
+	*child_r = child;
+}
+
 void *tree_first(struct tree_tree *tree)
 {
 	return firstlast_obj(tree, TREE_LEFT);
