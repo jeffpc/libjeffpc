@@ -48,22 +48,23 @@ static void check_lock_magic(struct lock *lock, const char *op)
 	print_lock(lock);
 }
 
-static void verify_lock_init(struct lock *l, const struct lock_class *lc)
+static void verify_lock_init(const struct lock_context *where, struct lock *l,
+			     const struct lock_class *lc)
 {
 	l->magic = (uintptr_t) l;
 }
 
-static void verify_lock_destroy(struct lock *l)
+static void verify_lock_destroy(const struct lock_context *where, struct lock *l)
 {
 	check_lock_magic(l, "destroy");
 }
 
-static void verify_lock_lock(struct lock *l)
+static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 {
 	check_lock_magic(l, "acquire");
 }
 
-static void verify_lock_unlock(struct lock *l)
+static void verify_lock_unlock(const struct lock_context *where, struct lock *l)
 {
 	check_lock_magic(l, "release");
 }
@@ -71,30 +72,31 @@ static void verify_lock_unlock(struct lock *l)
 /*
  * synch API
  */
-void mxinit(struct lock *l, const struct lock_class *lc)
+void mxinit(const struct lock_context *where, struct lock *l,
+	    const struct lock_class *lc)
 {
-	verify_lock_init(l, lc);
+	verify_lock_init(where, l, lc);
 
 	VERIFY0(pthread_mutex_init(&l->lock, NULL));
 }
 
-void mxdestroy(struct lock *l)
+void mxdestroy(const struct lock_context *where, struct lock *l)
 {
-	verify_lock_destroy(l);
+	verify_lock_destroy(where, l);
 
 	VERIFY0(pthread_mutex_destroy(&l->lock));
 }
 
-void mxlock(struct lock *l)
+void mxlock(const struct lock_context *where, struct lock *l)
 {
-	verify_lock_lock(l);
+	verify_lock_lock(where, l);
 
 	VERIFY0(pthread_mutex_lock(&l->lock));
 }
 
-void mxunlock(struct lock *l)
+void mxunlock(const struct lock_context *where, struct lock *l)
 {
-	verify_lock_unlock(l);
+	verify_lock_unlock(where, l);
 
 	VERIFY0(pthread_mutex_unlock(&l->lock));
 }
