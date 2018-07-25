@@ -184,10 +184,10 @@ static inline void __swap_nodes(struct tree_tree *tree,
 	}
 }
 
-static inline void __remove_node(struct tree_tree *tree,
-				 struct tree_node *parent,
-				 struct tree_node *node,
-				 struct tree_node *child)
+static inline void __promote_node_child(struct tree_tree *tree,
+					struct tree_node *parent,
+					struct tree_node *node,
+					struct tree_node *child)
 {
 	if (parent)
 		parent->children[which_dir(parent, node)] = child;
@@ -198,8 +198,19 @@ static inline void __remove_node(struct tree_tree *tree,
 		child->parent = parent;
 }
 
-void tree_remove(struct tree_tree *tree, void *item)
+/*
+ * Remove @item from @tree.
+ *
+ * @parent_r: the parent node of @child_r (may be NULL)
+ * @child_r: the node that ultimately took @item's new place in the tree
+ *	(may be NULL)
+ */
+void tree_remove(struct tree_tree *tree, void *item,
+		 struct tree_node **parent_r,
+		 struct tree_node **child_r)
 {
+	struct tree_node *parent;
+	struct tree_node *child;
 	struct tree_node *node;
 
 	ASSERT3P(tree, !=, NULL);
@@ -207,11 +218,11 @@ void tree_remove(struct tree_tree *tree, void *item)
 
 	node = obj2node(tree, item);
 
+	/*
+	 * Two children: exchange it with a leaf-ish node greater than this
+	 * node.
+	 */
 	if (node->children[TREE_LEFT] && node->children[TREE_RIGHT])
-		/*
-		 * Two children: exchange it with a leaf-ish node greater
-		 * than this node.
-		 */
 		__swap_nodes(tree, node,
 			     firstlast(node->children[TREE_RIGHT], TREE_LEFT),
 			     TREE_LEFT);
@@ -219,20 +230,24 @@ void tree_remove(struct tree_tree *tree, void *item)
 	/* now, we have zero or one child */
 	ASSERT(!node->children[TREE_LEFT] || !node->children[TREE_RIGHT]);
 
+	parent = node->parent;
 	if (node->children[TREE_LEFT])
-		__remove_node(tree, node->parent, node,
-				  node->children[TREE_LEFT]);
-	else if (node->children[TREE_RIGHT])
-		__remove_node(tree, node->parent, node,
-				  node->children[TREE_RIGHT]);
+		child = node->children[TREE_LEFT];
 	else
-		__remove_node(tree, node->parent, node, NULL);
+		child = node->children[TREE_RIGHT];
 
+	__promote_node_child(tree, parent, node, child);
+
+	/* clear out the removed node */
 	node->parent = NULL;
 	node->children[TREE_LEFT] = NULL;
 	node->children[TREE_RIGHT] = NULL;
 
 	tree->num_nodes--;
+
+	/* return various info */
+	*parent_r = parent;
+	*child_r = child;
 }
 
 void *tree_first(struct tree_tree *tree)

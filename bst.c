@@ -64,5 +64,7 @@ void *bst_insert_here(struct bst_tree *tree, void *newitem,
 
 void bst_remove(struct bst_tree *tree, void *item)
 {
-	tree_remove(&tree->tree, item);
+	struct tree_node *p, *c;
+
+	tree_remove(&tree->tree, item, &p, &c);
 }
