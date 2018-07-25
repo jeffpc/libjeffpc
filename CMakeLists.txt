@@ -102,12 +102,14 @@ add_library(jeffpc SHARED
 	padding.c
 	qstring.c
 	rand.c
+	scgisvc.c
 	sexpr.c
 	sexpr_dump.c
 	sexpr_eval.c
 	${FLEX_sexpr_OUTPUTS} ${BISON_sexpr_OUTPUTS}
 	slab.c
 	sock.c
+	socksvc.c
 	str.c
 	synch.c
 	taskq.c
@@ -134,20 +136,9 @@ target_link_libraries(jeffpc
 	nsl
 )
 
-add_library(jeffpc-comm SHARED
-	scgisvc.c
-	socksvc.c
-)
-
-target_link_libraries(jeffpc-comm
-	jeffpc
-)
-
-target_apply_mapfile(jeffpc jeffpc.mapfile-vers)
-target_apply_mapfile(jeffpc-comm jeffpc-comm.mapfile-vers)
+target_apply_mapfile(jeffpc mapfile-vers)
 
 install(TARGETS	jeffpc
-		jeffpc-comm
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 install(FILES	include/jeffpc/atomic.h

@@ -153,6 +153,9 @@ JEFFPC_0.10 {
 		rand64;
 		rand_buf;
 
+		# scgisvc
+		scgisvc;
+
 		# sexpr
 		sexpr_alist_lookup_bool;
 		sexpr_alist_lookup_int;
@@ -176,6 +179,9 @@ JEFFPC_0.10 {
 
 		# sock
 		connect_ip;
+
+		# socksvc
+		socksvc;
 
 		# str / sym
 		_strsym_alloc;
