@@ -23,14 +23,21 @@
 #include <jeffpc/jeffpc.h>
 #include <jeffpc/error.h>
 #include <jeffpc/bst.h>
+#include <jeffpc/rbtree.h>
 #include <jeffpc/rand.h>
 #include <jeffpc/time.h>
 
-#define NITERS		100000
+#define NITERS		1000000
 
 #define PERF_TREE_BST
 
 #if defined(PERF_TREE_BST)
+/*
+ * Use fewer iterations to avoid pathological behavior with sequential
+ * insertions taking O(n^2) with a large n.
+ */
+#undef NITERS
+#define NITERS			100000
 #define TREE_TREE		bst_tree
 #define TREE_NODE		bst_node
 #define TREE_COOKIE		bst_cookie
@@ -42,6 +49,18 @@
 #define TREE_FOR_EACH		bst_for_each
 #define TREE_NUMNODES		bst_numnodes
 #define TREE_DESTROY_NODES	bst_destroy_nodes
+#elif defined(PERF_TREE_RB)
+#define TREE_TREE		rb_tree
+#define TREE_NODE		rb_node
+#define TREE_COOKIE		rb_cookie
+#define TREE_CREATE		rb_create
+#define TREE_DESTROY		rb_destroy
+#define TREE_FIND		rb_find
+#define TREE_INSERT		rb_insert
+#define TREE_REMOVE		rb_remove
+#define TREE_FOR_EACH		rb_for_each
+#define TREE_NUMNODES		rb_numnodes
+#define TREE_DESTROY_NODES	rb_destroy_nodes
 #else
 #error "Unspecified test type"
 #endif
