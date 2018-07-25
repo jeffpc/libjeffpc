@@ -173,6 +173,9 @@ int main(int argc, char **argv)
 
 	jeffpc_init(&init_ops);
 
+	if (argc < 2)
+		usage(argv[0]);
+
 	for (i = 1; i < argc; i++) {
 		test_name = argv[i];
 
