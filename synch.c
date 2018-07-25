@@ -37,22 +37,27 @@ static void print_invalid_call(const char *fxn, const struct lock_context *where
 	panic("lockdep: Aborting.");
 }
 
-static void print_lock(struct lock *lock)
+static void print_lock(struct lock *lock, const struct lock_context *where)
 {
-	cmn_err(CE_CRIT, " %p <%c>", lock,
-		(lock->magic != (uintptr_t) lock) ? 'M' : '.');
+	cmn_err(CE_CRIT, "lockdep:     %s (%p) <%c> at %s:%d",
+		"<unknown>",
+		lock,
+		(lock->magic != (uintptr_t) lock) ? 'M' : '.',
+		where->file, where->line);
 }
 
 /*
  * state checking
  */
-static void check_lock_magic(struct lock *lock, const char *op)
+static void check_lock_magic(struct lock *lock, const char *op,
+			     const struct lock_context *where)
 {
 	if (lock->magic == (uintptr_t) lock)
 		return;
 
-	cmn_err(CE_CRIT, "thread trying to %s lock with bad magic", op);
-	print_lock(lock);
+	cmn_err(CE_CRIT, "lockdep: thread trying to %s lock with bad magic", op);
+	print_lock(lock, where);
+	panic("lockdep: Aborting.");
 }
 
 static void verify_lock_init(const struct lock_context *where, struct lock *l,
@@ -69,7 +74,7 @@ static void verify_lock_destroy(const struct lock_context *where, struct lock *l
 	if (!l)
 		print_invalid_call("MXDESTROY", where);
 
-	check_lock_magic(l, "destroy");
+	check_lock_magic(l, "destroy", where);
 }
 
 static void verify_lock_lock(const struct lock_context *where, struct lock *l)
@@ -77,7 +82,7 @@ static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 	if (!l)
 		print_invalid_call("MXLOCK", where);
 
-	check_lock_magic(l, "acquire");
+	check_lock_magic(l, "acquire", where);
 }
 
 static void verify_lock_unlock(const struct lock_context *where, struct lock *l)
@@ -85,7 +90,7 @@ static void verify_lock_unlock(const struct lock_context *where, struct lock *l)
 	if (!l)
 		print_invalid_call("MXUNLOCK", where);
 
-	check_lock_magic(l, "release");
+	check_lock_magic(l, "release", where);
 }
 
 /*
