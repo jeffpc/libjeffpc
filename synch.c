@@ -30,6 +30,13 @@
 /*
  * error printing
  */
+static void print_invalid_call(const char *fxn, const struct lock_context *where)
+{
+	cmn_err(CE_CRIT, "lockdep: invalid call to %s at %s:%d", fxn,
+		where->file, where->line);
+	panic("lockdep: Aborting.");
+}
+
 static void print_lock(struct lock *lock)
 {
 	cmn_err(CE_CRIT, " %p <%c>", lock,
@@ -51,21 +58,33 @@ static void check_lock_magic(struct lock *lock, const char *op)
 static void verify_lock_init(const struct lock_context *where, struct lock *l,
 			     const struct lock_class *lc)
 {
+	if (!l || !lc)
+		print_invalid_call("MXINIT", where);
+
 	l->magic = (uintptr_t) l;
 }
 
 static void verify_lock_destroy(const struct lock_context *where, struct lock *l)
 {
+	if (!l)
+		print_invalid_call("MXDESTROY", where);
+
 	check_lock_magic(l, "destroy");
 }
 
 static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 {
+	if (!l)
+		print_invalid_call("MXLOCK", where);
+
 	check_lock_magic(l, "acquire");
 }
 
 static void verify_lock_unlock(const struct lock_context *where, struct lock *l)
 {
+	if (!l)
+		print_invalid_call("MXUNLOCK", where);
+
 	check_lock_magic(l, "release");
 }
 
