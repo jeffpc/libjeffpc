@@ -1,3 +1,4 @@
 syntax:glob
 
+config-synch.h
 config.h

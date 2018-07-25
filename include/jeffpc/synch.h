@@ -26,15 +26,27 @@
 #include <stdbool.h>
 #include <pthread.h>
 
+#include <jeffpc/config-synch.h>
+
 struct lock_class {
 	const char *name;
 };
 
 #define LOCK_CLASS(n)	const struct lock_class n = { .name = #n };
 
+struct lock_context {
+	const char *lockname;
+	const char *file;
+	int line;
+};
+
 struct lock {
 	pthread_mutex_t lock;
 	uintptr_t magic;
+#ifdef JEFFPC_LOCK_TRACKING
+	const struct lock_class *lc;
+	const char *name;
+#endif
 };
 
 struct rwlock {
@@ -50,10 +62,38 @@ struct barrier {
 };
 
 /* the API */
-#define MXINIT(l, lc)	mxinit((l), (lc))
-#define MXDESTROY(l)	mxdestroy(l)
-#define MXLOCK(l)	mxlock(l)
-#define MXUNLOCK(l)	mxunlock(l)
+#define MXINIT(l, lc)	do { \
+				struct lock_context mx_ctx = { \
+					.lockname = #l, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				mxinit(&mx_ctx, (l), (lc)); \
+			 } while (0)
+#define MXDESTROY(l)	do { \
+				struct lock_context mx_ctx = { \
+					.lockname = #l, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				mxdestroy(&mx_ctx, (l)); \
+			} while (0)
+#define MXLOCK(l)	do { \
+				struct lock_context mx_ctx = { \
+					.lockname = #l, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				mxlock(&mx_ctx, (l)); \
+			} while (0)
+#define MXUNLOCK(l)	do { \
+				struct lock_context mx_ctx = { \
+					.lockname = #l, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				mxunlock(&mx_ctx, (l)); \
+			} while (0)
 #define CONDINIT(c)	condinit(c)
 #define CONDDESTROY(c)	conddestroy(c)
 #define CONDWAIT(c,m)	condwait((c),(m))
@@ -61,10 +101,11 @@ struct barrier {
 #define CONDBCAST(c)	condbcast(c)
 
 /* Do *NOT* use directly */
-extern void mxinit(struct lock *m, const struct lock_class *lc);
-extern void mxdestroy(struct lock *m);
-extern void mxlock(struct lock *m);
-extern void mxunlock(struct lock *m);
+extern void mxinit(const struct lock_context *where, struct lock *m,
+		   const struct lock_class *lc);
+extern void mxdestroy(const struct lock_context *where, struct lock *m);
+extern void mxlock(const struct lock_context *where, struct lock *m);
+extern void mxunlock(const struct lock_context *where, struct lock *m);
 
 extern void rwinit(struct rwlock *l);
 extern void rwdestroy(struct rwlock *l);
