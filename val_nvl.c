@@ -81,7 +81,7 @@ struct val *val_alloc_nvl(void)
 	if (IS_ERR(val))
 		return val;
 
-	bst_create(&val->_set_nvl.values, val_nvl_cmp, sizeof(struct nvpair),
+	rb_create(&val->_set_nvl.values, val_nvl_cmp, sizeof(struct nvpair),
 		   offsetof(struct nvpair, node));
 
 	return val;
@@ -89,16 +89,16 @@ struct val *val_alloc_nvl(void)
 
 void __val_free_nvl(struct val *val)
 {
-	struct bst_cookie cookie;
+	struct rb_cookie cookie;
 	struct nvpair *cur;
 
 	ASSERT(val);
 	ASSERT3U(refcnt_read(&val->refcnt), ==, 0);
 	ASSERT3U(val->type, ==, VT_NVL);
 
-	memset(&cookie, 0, sizeof(struct bst_cookie));
-	while ((cur = bst_destroy_nodes(&val->_set_nvl.values, &cookie)))
+	memset(&cookie, 0, sizeof(struct rb_cookie));
+	while ((cur = rb_destroy_nodes(&val->_set_nvl.values, &cookie)))
 		__nvpair_free(cur);
 
-	bst_destroy(&val->_set_nvl.values);
+	rb_destroy(&val->_set_nvl.values);
 }

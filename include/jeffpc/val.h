@@ -31,7 +31,7 @@
 #include <jeffpc/error.h>
 #include <jeffpc/types.h>
 #include <jeffpc/list.h>
-#include <jeffpc/bst.h>
+#include <jeffpc/rbtree.h>
 
 /*
  * A typed value structure.
@@ -101,7 +101,7 @@ struct val {
 			 * a balanced binary search tree implementation, we
 			 * should switch to it.
 			 */
-			struct bst_tree values;
+			struct rb_tree values;
 		} nvl;
 
 		/*
@@ -132,7 +132,7 @@ struct val {
 			size_t nelem;
 		} _set_array;
 		struct {
-			struct bst_tree values;
+			struct rb_tree values;
 		} _set_nvl;
 	};
 };
