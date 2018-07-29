@@ -391,7 +391,9 @@ static void scgi_conn(int fd, struct socksvc_stats *sockstats, void *private)
 
 	req->scgi_stats.write_header_time = gettime();
 
-	ret = scgi_write_body(req);
+	/* Write out the body for everything but HEAD requests */
+	if (req->request.method != SCGI_REQUEST_METHOD_HEAD)
+		ret = scgi_write_body(req);
 
 	req->scgi_stats.write_body_time = gettime();
 
