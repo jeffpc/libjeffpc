@@ -228,11 +228,13 @@ int cbor_pack_map_start(struct buffer *buffer, size_t npairs)
 
 int cbor_pack_map_end(struct buffer *buffer, size_t npairs)
 {
-	if (npairs != CBOR_UNKNOWN_NELEM)
+	if (npairs == CBOR_UNKNOWN_NELEM) {
+		/* indefinite-length map */
+		return cbor_pack_break(buffer);
+	} else {
+		/* definite-length map */
 		return 0;
-
-	/* indefinite-length map */
-	return cbor_pack_break(buffer);
+	}
 }
 
 int cbor_pack_map_val(struct buffer *buffer, struct val *val)
