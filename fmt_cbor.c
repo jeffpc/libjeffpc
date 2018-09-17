@@ -214,13 +214,16 @@ int cbor_pack_array_vals(struct buffer *buffer, struct val **vals, size_t nelem)
 
 int cbor_pack_map_start(struct buffer *buffer, size_t npairs)
 {
-	static const uint8_t byte = MKTYPE_STATIC(CMT_MAP, ADDL_MAP_INDEF);
+	if (npairs == CBOR_UNKNOWN_NELEM) {
+		/* indefinite-length map */
+		static const uint8_t byte = MKTYPE_STATIC(CMT_MAP,
+							  ADDL_MAP_INDEF);
 
-	if (npairs != CBOR_UNKNOWN_NELEM)
-		return -ENOTSUP; /* FIXME */
-
-	/* indefinite-length map */
-	return buffer_append(buffer, &byte, 1);
+		return buffer_append(buffer, &byte, 1);
+	} else {
+		/* definite-length map */
+		return pack_cbor_type(buffer, CMT_MAP, npairs);
+	}
 }
 
 int cbor_pack_map_end(struct buffer *buffer, size_t npairs)
