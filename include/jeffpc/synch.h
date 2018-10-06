@@ -32,7 +32,7 @@ struct lock_class {
 	const char *name;
 };
 
-#define LOCK_CLASS(n)	const struct lock_class n = { .name = #n };
+#define LOCK_CLASS(n)	struct lock_class n = { .name = #n };
 
 struct lock_context {
 	const char *lockname;
@@ -44,7 +44,7 @@ struct lock {
 	pthread_mutex_t lock;
 	uintptr_t magic;
 #ifdef JEFFPC_LOCK_TRACKING
-	const struct lock_class *lc;
+	struct lock_class *lc;
 	const char *name;
 #endif
 };
@@ -102,7 +102,7 @@ struct barrier {
 
 /* Do *NOT* use directly */
 extern void mxinit(const struct lock_context *where, struct lock *m,
-		   const struct lock_class *lc);
+		   struct lock_class *lc);
 extern void mxdestroy(const struct lock_context *where, struct lock *m);
 extern void mxlock(const struct lock_context *where, struct lock *m);
 extern void mxunlock(const struct lock_context *where, struct lock *m);

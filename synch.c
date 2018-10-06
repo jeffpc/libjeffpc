@@ -204,7 +204,7 @@ static void check_lock_magic(struct lock *lock, const char *op,
 }
 
 static void verify_lock_init(const struct lock_context *where, struct lock *l,
-			     const struct lock_class *lc)
+			     struct lock_class *lc)
 {
 	if (!l || !lc)
 		print_invalid_call("MXINIT", where);
@@ -306,7 +306,7 @@ out:
  * synch API
  */
 void mxinit(const struct lock_context *where, struct lock *l,
-	    const struct lock_class *lc)
+	    struct lock_class *lc)
 {
 	verify_lock_init(where, l, lc);
 
