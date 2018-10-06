@@ -53,7 +53,8 @@ static __thread size_t held_stack_count;
 
 static inline struct held_lock *last_acquired_lock(void)
 {
-	VERIFY3U(held_stack_count, >, 0);
+	if (!held_stack_count)
+		return NULL;
 
 	return &held_stack[held_stack_count - 1];
 }
@@ -69,6 +70,8 @@ static inline struct held_lock *held_stack_alloc(void)
 static inline void held_stack_remove(struct held_lock *held)
 {
 	struct held_lock *last = last_acquired_lock();
+
+	VERIFY3P(last, !=, NULL);
 
 	if (held != last)
 		memmove(held, held + 1,
