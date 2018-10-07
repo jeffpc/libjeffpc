@@ -32,6 +32,8 @@
 
 static void test(void);
 
+static const char *expected_panic_string;
+
 /*
  * Do not make this static or the compiler may complain about an unused
  * static function.
@@ -51,11 +53,16 @@ void NORETURN fail(const char *fmt, ...)
 	exit(1);
 }
 
+void test_set_panic_string(const char *str)
+{
+	expected_panic_string = str;
+}
+
 /*
- * We intercept the cmn_err printing to force all output to stderr and to
- * ensure everything was flushed.  Usually stderr is unbuffered, but these
- * are tests so (1) we expect errors, (2) we really don't want to lose them,
- * and (3) performance isn't that important.
+ * We intercept the cmn_err printing to force all output to stderr, to
+ * ensure everything was flushed, and to handle expected panics.  Usually
+ * stderr is unbuffered, but these are tests so (1) we expect errors, (2) we
+ * really don't want to lose them, and (3) performance isn't that important.
  */
 static void test_print(enum errlevel level, const char *fmt, va_list ap)
 {
@@ -66,6 +73,25 @@ static void test_print(enum errlevel level, const char *fmt, va_list ap)
 
 	fwrite(buf, len, 1, stderr);
 	fflush(stderr);
+
+	if ((level == CE_PANIC) && expected_panic_string &&
+	    strnstr(buf, expected_panic_string, len)) {
+		/*
+		 * We got a panic, expected a panic, and the panic string
+		 * matches the substring we were given - all is good.  Let's
+		 * terminate the test gracefully.
+		 *
+		 * We print a message to make it harder to misinterpret the
+		 * above printed panic message.
+		 */
+		fprintf(stderr, "Expected panic string matched - Test passed.\n");
+		exit(0);
+	}
+
+	/*
+	 * If we had an unexpected panic, cmd_err will end up aborting the
+	 * process causing the test to fail.
+	 */
 }
 
 int main(int argc, char **argv)
@@ -81,7 +107,13 @@ int main(int argc, char **argv)
 
 	test();
 
-	fprintf(stderr, "Tests passed.\n");
+	/* no panics encountered */
 
-	return 0;
+	if (expected_panic_string) {
+		fprintf(stderr, "Tests failed - expected a panic.\n");
+		return 1;
+	} else {
+		fprintf(stderr, "Tests passed.\n");
+		return 0;
+	}
 }
