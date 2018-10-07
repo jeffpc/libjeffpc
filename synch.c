@@ -204,8 +204,7 @@ static void error_unlock(struct lock *lock, const struct lock_context *where)
 	print_lock(lock, where);
 	cmn_err(CE_CRIT, "lockdep: while holding:");
 	print_held_locks(NULL);
-
-	atomic_set(&lockdep_on, 0);
+	panic("lockdep: Aborting - releasing unheld lock");
 }
 
 static void error_alloc(struct lock *lock, const struct lock_context *where,
