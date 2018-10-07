@@ -239,10 +239,12 @@ static int add_dependency(struct lock_class *from,
 	if (!atomic_read(&lockdep_on))
 		return 0; /* pretend everything went well */
 
+	/* check if we already have this dep */
 	for (i = 0; i < from->ndeps; i++)
 		if (from->deps[i] == to)
 			return 0; /* already present */
 
+	/* all slots full */
 	if (from->ndeps >= (JEFFPC_LOCK_DEP_COUNT - 1))
 		return -1;
 
