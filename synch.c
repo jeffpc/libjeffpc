@@ -92,6 +92,9 @@ static void print_invalid_call(const char *fxn, const struct lock_context *where
 	panic("lockdep: Aborting.");
 }
 
+#define GENERATE_LOCK_MASK_ARGS(l)						\
+	((l)->magic != (uintptr_t) (l)) ? 'M' : '.'
+
 static void print_lock(struct lock *lock, const struct lock_context *where)
 {
 	cmn_err(CE_CRIT, "lockdep:     %s (%p) <%c> at %s:%d",
@@ -101,7 +104,7 @@ static void print_lock(struct lock *lock, const struct lock_context *where)
 		"<unknown>",
 #endif
 		lock,
-		(lock->magic != (uintptr_t) lock) ? 'M' : '.',
+		GENERATE_LOCK_MASK_ARGS(lock),
 		where->file, where->line);
 }
 
@@ -117,7 +120,7 @@ static void print_held_locks(struct held_lock *highlight)
 		cmn_err(CE_CRIT, "lockdep:  %s #%zd: %s (%p) <%c> acquired at %s:%d",
 			(cur == highlight) ? "->" : "  ",
 			i, lock->name, lock,
-			(lock->magic != (uintptr_t) lock) ? 'M' : '.',
+			GENERATE_LOCK_MASK_ARGS(lock),
 			cur->where.file, cur->where.line);
 	}
 }
