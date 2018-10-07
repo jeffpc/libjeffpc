@@ -123,6 +123,11 @@ static void print_held_locks(struct held_lock *highlight)
 	struct held_lock *cur;
 	size_t i;
 
+	if (!held_stack_count) {
+		cmn_err(CE_CRIT, "lockdep:     (no locks held)");
+		return;
+	}
+
 	for_each_held_lock(i, cur) {
 		struct lock *lock = cur->lock;
 
