@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@
 #include <alloca.h>
 #include <string.h>
 
+#include <jeffpc/jeffpc.h>
 #include <jeffpc/version.h>
 #include <jeffpc/error.h>
 
@@ -50,10 +51,33 @@ void NORETURN fail(const char *fmt, ...)
 	exit(1);
 }
 
+/*
+ * We intercept the cmn_err printing to force all output to stderr and to
+ * ensure everything was flushed.  Usually stderr is unbuffered, but these
+ * are tests so (1) we expect errors, (2) we really don't want to lose them,
+ * and (3) performance isn't that important.
+ */
+static void test_print(enum errlevel level, const char *fmt, va_list ap)
+{
+	char buf[4096];
+	size_t len;
+
+	len = vsnprintf(buf, sizeof(buf), fmt, ap);
+
+	fwrite(buf, len, 1, stderr);
+	fflush(stderr);
+}
+
 int main(int argc, char **argv)
 {
+	struct jeffpc_ops init_ops = {
+		.print = test_print,
+	};
+
 	fprintf(stderr, "libjeffpc.so version %s\n", jeffpc_version);
 	fprintf(stderr, "Running tests (%s)\n", argv[0]);
+
+	jeffpc_init(&init_ops);
 
 	test();
 
