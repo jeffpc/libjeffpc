@@ -173,9 +173,10 @@ static void error_unlock(struct lock *lock, const struct lock_context *where)
 	atomic_set(&lockdep_on, 0);
 }
 
-static void error_alloc(struct lock *lock, const struct lock_context *where)
+static void error_alloc(struct lock *lock, const struct lock_context *where,
+			const char *msg)
 {
-	cmn_err(CE_CRIT, "lockdep: lock nesting limit reached");
+	cmn_err(CE_CRIT, "lockdep: %s", msg);
 	cmn_err(CE_CRIT, "lockdep: thread trying to acquire lock:");
 	print_lock(lock, where);
 	cmn_err(CE_CRIT, "lockdep: while holding:");
@@ -262,7 +263,7 @@ static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 
 	held = held_stack_alloc();
 	if (!held) {
-		error_alloc(l, where);
+		error_alloc(l, where, "lock nesting limit reached");
 		return;
 	}
 
