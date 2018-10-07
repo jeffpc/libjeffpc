@@ -232,6 +232,10 @@ static int add_dependency(struct lock_class *from,
 
 	VERIFY3P(from, !=, to);
 
+	/* check again with the lock held */
+	if (!atomic_read(&lockdep_on))
+		return 0; /* pretend everything went well */
+
 	for (i = 0; i < from->ndeps; i++)
 		if (from->deps[i] == to)
 			return 0; /* already present */
