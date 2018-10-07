@@ -91,9 +91,8 @@ static inline void held_stack_remove(struct held_lock *held)
  */
 static void print_invalid_call(const char *fxn, const struct lock_context *where)
 {
-	cmn_err(CE_CRIT, "lockdep: invalid call to %s at %s:%d", fxn,
-		where->file, where->line);
-	panic("lockdep: Aborting.");
+	panic("lockdep: invalid call to %s at %s:%d", fxn, where->file,
+	      where->line);
 }
 
 #define GENERATE_LOCK_MASK_ARGS(l)						\
