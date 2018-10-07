@@ -30,6 +30,7 @@
 
 #ifdef JEFFPC_LOCK_TRACKING
 static atomic_t lockdep_on = ATOMIC_INITIALIZER(1);
+static pthread_mutex_t lockdep_lock = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 /*
@@ -79,6 +80,9 @@ static inline void held_stack_remove(struct held_lock *held)
 
 	held_stack_count--;
 }
+
+#define LOCK_DEP_GRAPH()	VERIFY0(pthread_mutex_lock(&lockdep_lock))
+#define UNLOCK_DEP_GRAPH()	VERIFY0(pthread_mutex_unlock(&lockdep_lock))
 
 #endif
 
