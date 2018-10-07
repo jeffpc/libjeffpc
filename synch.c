@@ -169,7 +169,7 @@ static void error_lock(struct held_lock *held, struct lock *new,
 	print_held_locks(held);
 
 	if (deadlock)
-		panic("lockdep: found a fatal situation...aborting.");
+		panic("lockdep: Aborting - deadlock");
 
 	atomic_set(&lockdep_on, 0);
 }
