@@ -110,13 +110,13 @@ static void print_lock(struct lock *lock, const struct lock_context *where)
 		where->file, where->line);
 }
 
+#ifdef JEFFPC_LOCK_TRACKING
 static void print_lock_class(struct lock_class *lc)
 {
 	cmn_err(CE_CRIT, "lockdep:     class %s (%p): %zu deps", lc->name,
 		lc, lc->ndeps);
 }
 
-#ifdef JEFFPC_LOCK_TRACKING
 static void print_held_locks(struct held_lock *highlight)
 {
 	struct held_lock *cur;
