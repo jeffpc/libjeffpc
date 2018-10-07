@@ -52,6 +52,7 @@ if(NOT WITHOUT_LOCK_TRACKING)
 endif()
 
 set(JEFFPC_LOCK_DEP_COUNT 16)
+set(JEFFPC_LOCK_STACK_DEPTH 32)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/jeffpc/config-synch.h.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/include/jeffpc/config-synch.h")

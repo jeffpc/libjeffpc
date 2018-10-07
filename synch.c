@@ -37,14 +37,13 @@ static pthread_mutex_t lockdep_lock = PTHREAD_MUTEX_INITIALIZER;
  * held stack management
  */
 #ifdef JEFFPC_LOCK_TRACKING
-#define LOCKDEP_STACK_DEPTH	32
 
 struct held_lock {
 	struct lock *lock;
 	struct lock_context where;
 };
 
-static __thread struct held_lock held_stack[LOCKDEP_STACK_DEPTH];
+static __thread struct held_lock held_stack[JEFFPC_LOCK_STACK_DEPTH];
 static __thread size_t held_stack_count;
 
 #define for_each_held_lock(idx, cur)	\
@@ -62,7 +61,7 @@ static inline struct held_lock *last_acquired_lock(void)
 
 static inline struct held_lock *held_stack_alloc(void)
 {
-	if (held_stack_count == LOCKDEP_STACK_DEPTH)
+	if (held_stack_count == JEFFPC_LOCK_STACK_DEPTH)
 		return NULL;
 
 	return &held_stack[held_stack_count++];
