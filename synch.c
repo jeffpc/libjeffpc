@@ -322,7 +322,7 @@ static void check_lock_magic(struct lock *lock, const char *op,
 	cmn_err(CE_CRIT, "lockdep: while holding:");
 	print_held_locks(NULL);
 #endif
-	panic("lockdep: Aborting.");
+	panic("lockdep: Aborting - bad lock magic");
 }
 
 static void verify_lock_init(const struct lock_context *where, struct lock *l,
