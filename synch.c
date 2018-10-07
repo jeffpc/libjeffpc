@@ -222,10 +222,11 @@ static void error_alloc(struct lock *lock, const struct lock_context *where,
  */
 #ifdef JEFFPC_LOCK_TRACKING
 /*
- * Returns false on error, true if a new dependency was added.
+ * Returns a negative int on error, 0 if there was no change to the graph,
+ * and a positive int if a new dependency was added.
  */
-static bool add_dependency(struct lock_class *from,
-			   struct lock_class *to)
+static int add_dependency(struct lock_class *from,
+			  struct lock_class *to)
 {
 	size_t i;
 
@@ -233,15 +234,15 @@ static bool add_dependency(struct lock_class *from,
 
 	for (i = 0; i < from->ndeps; i++)
 		if (from->deps[i] == to)
-			return true; /* already present */
+			return 0; /* already present */
 
 	if (from->ndeps >= (JEFFPC_LOCK_DEP_COUNT - 1))
-		return false;
+		return -1;
 
 	from->deps[from->ndeps] = to;
 	from->ndeps++;
 
-	return true;
+	return 1;
 }
 
 static bool __find_path(struct lock *lock,
@@ -283,15 +284,17 @@ static bool check_circular_deps(struct lock *lock,
 				const struct lock_context *where)
 {
 	struct held_lock *last = last_acquired_lock();
+	int ret;
 
 	if (!last)
 		return false; /* no currently held locks == no deps to check */
 
 	LOCK_DEP_GRAPH();
 
-	if (!add_dependency(lock->lc, last->lock->lc))
+	ret = add_dependency(lock->lc, last->lock->lc);
+	if (ret < 0)
 		error_alloc(lock, where, "lock dependency count limit reached");
-	else
+	else if (ret > 0)
 		find_path(lock, where, last->lock->lc, lock->lc, last);
 
 	UNLOCK_DEP_GRAPH();
