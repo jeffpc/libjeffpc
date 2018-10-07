@@ -38,6 +38,7 @@ extern void xuuid_clear(struct xuuid *uuid);
 extern int xuuid_compare(const struct xuuid *u1, const struct xuuid *u2);
 extern void xuuid_generate(struct xuuid *uuid);
 
+/* returns true if uuid was successfully parsed */
 extern bool xuuid_parse(struct xuuid *u, const char *in);
 extern void xuuid_unparse(const struct xuuid *u, char *out);
 
