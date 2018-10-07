@@ -49,7 +49,7 @@ static struct nvpair *find(struct nvlist *nvl, const char *name)
 		.name = &name_str,
 	};
 
-	return bst_find(&nvl->val._set_nvl.values, &key, NULL);
+	return rb_find(&nvl->val._set_nvl.values, &key, NULL);
 }
 
 /*
@@ -58,13 +58,13 @@ static struct nvpair *find(struct nvlist *nvl, const char *name)
 
 const struct nvpair *nvl_iter_start(struct nvlist *nvl)
 {
-	return bst_first(&nvl->val._set_nvl.values);
+	return rb_first(&nvl->val._set_nvl.values);
 }
 
 const struct nvpair *nvl_iter_next(struct nvlist *nvl,
 				   const struct nvpair *prev)
 {
-	return bst_next(&nvl->val._set_nvl.values, (void *) prev);
+	return rb_next(&nvl->val._set_nvl.values, (void *) prev);
 }
 
 /*
@@ -133,7 +133,7 @@ static inline int do_nvl_set(struct nvlist *nvl, const char *cname,
 			return -ENOMEM;
 		}
 
-		bst_add(&nvl->val._set_nvl.values, pair);
+		rb_add(&nvl->val._set_nvl.values, pair);
 	} else {
 		str_putref(name);
 	}
@@ -211,7 +211,7 @@ static int unset(struct nvlist *nvl, const char *name, enum val_type type,
 	if (matchtype && (pair->value->type != type))
 		return -ERANGE;
 
-	bst_remove(&nvl->val._set_nvl.values, pair);
+	rb_remove(&nvl->val._set_nvl.values, pair);
 
 	__nvpair_free(pair);
 

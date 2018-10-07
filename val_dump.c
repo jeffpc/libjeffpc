@@ -126,12 +126,12 @@ static void do_val_dump_file(FILE *out, struct val *val, int indent)
 			break;
 		}
 		case VT_NVL: {
-			struct bst_tree *tree = &val->_set_nvl.values;
+			struct rb_tree *tree = &val->_set_nvl.values;
 			struct nvpair *cur;
 
-			fprintf(out, " items=%zu\n", bst_numnodes(tree));
+			fprintf(out, " items=%zu\n", rb_numnodes(tree));
 
-			bst_for_each(tree, cur) {
+			rb_for_each(tree, cur) {
 				doindent(out, indent);
 				fprintf(out, "name='%s' ", str_cstr(cur->name));
 				do_val_dump_file(out, cur->value, indent + 1);

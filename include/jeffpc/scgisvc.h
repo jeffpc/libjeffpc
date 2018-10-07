@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,6 +49,12 @@ struct scgi {
 		struct nvlist *query;
 		size_t content_length;
 		const void *body;
+		enum scgi_request_method {
+			SCGI_REQUEST_METHOD_UNKNOWN,
+			SCGI_REQUEST_METHOD_GET,
+			SCGI_REQUEST_METHOD_POST,
+			SCGI_REQUEST_METHOD_HEAD,
+		} method;
 	} request;
 
 	/* response */

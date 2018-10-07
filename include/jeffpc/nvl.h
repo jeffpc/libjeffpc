@@ -34,7 +34,7 @@ struct nvlist {
 
 /* do not access these directly */
 struct nvpair {
-	struct bst_node node;
+	struct rb_node node;
 
 	struct str *name;
 	struct val *value;

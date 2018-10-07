@@ -25,4 +25,6 @@
 
 #cmakedefine JEFFPC_LOCK_TRACKING
 
+#cmakedefine JEFFPC_LOCK_DEP_COUNT ${JEFFPC_LOCK_DEP_COUNT}
+
 #endif

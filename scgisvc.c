@@ -159,6 +159,7 @@ static const struct nvl_convert_info scgi_convert_headers[] = {
 
 static int parse_headers(struct scgi *req)
 {
+	struct str *s;
 	uint64_t i;
 	int ret;
 
@@ -179,6 +180,21 @@ static int parse_headers(struct scgi *req)
 		return -EINVAL;
 
 	req->request.content_length = i;
+
+	s = nvl_lookup_str(req->request.headers, SCGI_REQUEST_METHOD);
+	if (IS_ERR(s))
+		return PTR_ERR(s);
+
+	if (!strcmp("GET", str_cstr(s)))
+		req->request.method = SCGI_REQUEST_METHOD_GET;
+	else if (!strcmp("POST", str_cstr(s)))
+		req->request.method = SCGI_REQUEST_METHOD_POST;
+	else if (!strcmp("HEAD", str_cstr(s)))
+		req->request.method = SCGI_REQUEST_METHOD_HEAD;
+	else
+		req->request.method = SCGI_REQUEST_METHOD_UNKNOWN;
+
+	str_putref(s);
 
 	return 0;
 }
@@ -375,7 +391,9 @@ static void scgi_conn(int fd, struct socksvc_stats *sockstats, void *private)
 
 	req->scgi_stats.write_header_time = gettime();
 
-	ret = scgi_write_body(req);
+	/* Write out the body for everything but HEAD requests */
+	if (req->request.method != SCGI_REQUEST_METHOD_HEAD)
+		ret = scgi_write_body(req);
 
 	req->scgi_stats.write_body_time = gettime();
 

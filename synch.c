@@ -30,6 +30,7 @@
 
 #ifdef JEFFPC_LOCK_TRACKING
 static atomic_t lockdep_on = ATOMIC_INITIALIZER(1);
+static pthread_mutex_t lockdep_lock = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 /*
@@ -53,7 +54,8 @@ static __thread size_t held_stack_count;
 
 static inline struct held_lock *last_acquired_lock(void)
 {
-	VERIFY3U(held_stack_count, >, 0);
+	if (!held_stack_count)
+		return NULL;
 
 	return &held_stack[held_stack_count - 1];
 }
@@ -70,12 +72,17 @@ static inline void held_stack_remove(struct held_lock *held)
 {
 	struct held_lock *last = last_acquired_lock();
 
+	VERIFY3P(last, !=, NULL);
+
 	if (held != last)
 		memmove(held, held + 1,
 			(last - held) * sizeof(struct held_lock));
 
 	held_stack_count--;
 }
+
+#define LOCK_DEP_GRAPH()	VERIFY0(pthread_mutex_lock(&lockdep_lock))
+#define UNLOCK_DEP_GRAPH()	VERIFY0(pthread_mutex_unlock(&lockdep_lock))
 
 #endif
 
@@ -89,6 +96,9 @@ static void print_invalid_call(const char *fxn, const struct lock_context *where
 	panic("lockdep: Aborting.");
 }
 
+#define GENERATE_LOCK_MASK_ARGS(l)						\
+	((l)->magic != (uintptr_t) (l)) ? 'M' : '.'
+
 static void print_lock(struct lock *lock, const struct lock_context *where)
 {
 	cmn_err(CE_CRIT, "lockdep:     %s (%p) <%c> at %s:%d",
@@ -98,8 +108,14 @@ static void print_lock(struct lock *lock, const struct lock_context *where)
 		"<unknown>",
 #endif
 		lock,
-		(lock->magic != (uintptr_t) lock) ? 'M' : '.',
+		GENERATE_LOCK_MASK_ARGS(lock),
 		where->file, where->line);
+}
+
+static void print_lock_class(struct lock_class *lc)
+{
+	cmn_err(CE_CRIT, "lockdep:     class %s (%p): %zu deps", lc->name,
+		lc, lc->ndeps);
 }
 
 #ifdef JEFFPC_LOCK_TRACKING
@@ -114,7 +130,7 @@ static void print_held_locks(struct held_lock *highlight)
 		cmn_err(CE_CRIT, "lockdep:  %s #%zd: %s (%p) <%c> acquired at %s:%d",
 			(cur == highlight) ? "->" : "  ",
 			i, lock->name, lock,
-			(lock->magic != (uintptr_t) lock) ? 'M' : '.',
+			GENERATE_LOCK_MASK_ARGS(lock),
 			cur->where.file, cur->where.line);
 	}
 }
@@ -159,6 +175,25 @@ static void error_lock(struct held_lock *held, struct lock *new,
 	atomic_set(&lockdep_on, 0);
 }
 
+static void error_lock_circular(struct lock *new,
+				const struct lock_context *where)
+{
+	struct held_lock *last = last_acquired_lock();
+
+	cmn_err(CE_CRIT, "lockdep: circular dependency detected");
+	cmn_err(CE_CRIT, "lockdep: thread is trying to acquire lock of "
+		"class %s (%p):", new->lc->name, new->lc);
+	print_lock(new, where);
+	cmn_err(CE_CRIT, "lockdep: but the thread is already holding of "
+		"class %s (%p):", last->lock->lc->name, last->lock->lc);
+	print_lock(last->lock, &last->where);
+	cmn_err(CE_CRIT, "lockdep: which already depends on the new lock's "
+		"class.");
+	cmn_err(CE_CRIT, "lockdep: the reverse dependency chain:");
+
+	atomic_set(&lockdep_on, 0);
+}
+
 static void error_unlock(struct lock *lock, const struct lock_context *where)
 {
 	cmn_err(CE_CRIT, "lockdep: thread is trying to release lock it "
@@ -170,15 +205,106 @@ static void error_unlock(struct lock *lock, const struct lock_context *where)
 	atomic_set(&lockdep_on, 0);
 }
 
-static void error_alloc(struct lock *lock, const struct lock_context *where)
+static void error_alloc(struct lock *lock, const struct lock_context *where,
+			const char *msg)
 {
-	cmn_err(CE_CRIT, "lockdep: lock nesting limit reached");
+	cmn_err(CE_CRIT, "lockdep: %s", msg);
 	cmn_err(CE_CRIT, "lockdep: thread trying to acquire lock:");
 	print_lock(lock, where);
 	cmn_err(CE_CRIT, "lockdep: while holding:");
 	print_held_locks(NULL);
 
 	atomic_set(&lockdep_on, 0);
+}
+#endif
+
+/*
+ * dependency tracking
+ */
+#ifdef JEFFPC_LOCK_TRACKING
+/*
+ * Returns a negative int on error, 0 if there was no change to the graph,
+ * and a positive int if a new dependency was added.
+ */
+static int add_dependency(struct lock_class *from,
+			  struct lock_class *to)
+{
+	size_t i;
+
+	VERIFY3P(from, !=, to);
+
+	/* check again with the lock held */
+	if (!atomic_read(&lockdep_on))
+		return 0; /* pretend everything went well */
+
+	for (i = 0; i < from->ndeps; i++)
+		if (from->deps[i] == to)
+			return 0; /* already present */
+
+	if (from->ndeps >= (JEFFPC_LOCK_DEP_COUNT - 1))
+		return -1;
+
+	from->deps[from->ndeps] = to;
+	from->ndeps++;
+
+	return 1;
+}
+
+static bool __find_path(struct lock *lock,
+			const struct lock_context *where,
+			struct lock_class *from,
+			struct lock_class *to)
+{
+	size_t i;
+
+	if (from == to) {
+		error_lock_circular(lock, where);
+		print_lock_class(from);
+		return true;
+	}
+
+	for (i = 0; i < from->ndeps; i++) {
+		if (__find_path(lock, where, from->deps[i], to)) {
+			print_lock_class(from);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static void find_path(struct lock *lock,
+		      const struct lock_context *where,
+		      struct lock_class *from,
+		      struct lock_class *to,
+		      struct held_lock *held)
+{
+	if (__find_path(lock, where, from, to)) {
+		cmn_err(CE_CRIT, "lockdep: currently held locks:");
+		print_held_locks(held);
+	}
+}
+
+static bool check_circular_deps(struct lock *lock,
+				const struct lock_context *where)
+{
+	struct held_lock *last = last_acquired_lock();
+	int ret;
+
+	if (!last)
+		return false; /* no currently held locks == no deps to check */
+
+	LOCK_DEP_GRAPH();
+
+	ret = add_dependency(lock->lc, last->lock->lc);
+	if (ret < 0)
+		error_alloc(lock, where, "lock dependency count limit reached");
+	else if (ret > 0)
+		find_path(lock, where, last->lock->lc, lock->lc, last);
+
+	UNLOCK_DEP_GRAPH();
+
+	return !atomic_read(&lockdep_on);
 }
 #endif
 
@@ -201,7 +327,7 @@ static void check_lock_magic(struct lock *lock, const char *op,
 }
 
 static void verify_lock_init(const struct lock_context *where, struct lock *l,
-			     const struct lock_class *lc)
+			     struct lock_class *lc)
 {
 	if (!l || !lc)
 		print_invalid_call("MXINIT", where);
@@ -257,9 +383,13 @@ static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 		}
 	}
 
+	/* check for circular dependencies */
+	if (check_circular_deps(l, where))
+		return;
+
 	held = held_stack_alloc();
 	if (!held) {
-		error_alloc(l, where);
+		error_alloc(l, where, "lock nesting limit reached");
 		return;
 	}
 
@@ -303,7 +433,7 @@ out:
  * synch API
  */
 void mxinit(const struct lock_context *where, struct lock *l,
-	    const struct lock_class *lc)
+	    struct lock_class *lc)
 {
 	verify_lock_init(where, l, lc);
 
