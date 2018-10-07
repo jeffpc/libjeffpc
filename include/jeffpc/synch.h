@@ -30,6 +30,10 @@
 
 struct lock_class {
 	const char *name;
+#ifdef JEFFPC_LOCK_TRACKING
+	size_t ndeps;
+	struct lock_class *deps[JEFFPC_LOCK_DEP_COUNT];
+#endif
 };
 
 #define LOCK_CLASS(n)	struct lock_class n = { .name = #n };
