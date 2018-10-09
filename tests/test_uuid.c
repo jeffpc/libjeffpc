@@ -115,6 +115,20 @@ static const struct test tests[] = {
 	},
 };
 
+static void test_null_const(void)
+{
+	struct xuuid empty = { { 0 } };
+
+	fprintf(stderr, "%s: ", __func__);
+	if (memcmp(&xuuid_null_uuid, &empty, sizeof(struct xuuid))) {
+		char dump_got[sizeof(struct xuuid) * 2 + 1];
+
+		hexdumpz(dump_got, &xuuid_null_uuid, sizeof(struct xuuid), false);
+		fail("xuuid_null_uuid isn't null (got: %s)", dump_got);
+	}
+	fprintf(stderr, "ok.\n");
+}
+
 static void test_parse_unparse(void)
 {
 	int i;
@@ -161,5 +175,6 @@ static void test_parse_unparse(void)
 
 void test(void)
 {
+	test_null_const();
 	test_parse_unparse();
 }

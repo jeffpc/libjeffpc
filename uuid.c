@@ -24,6 +24,9 @@
 #include <jeffpc/hexdump.h>
 #include <jeffpc/rand.h>
 
+/* a zeroed-out uuid for easy assignment */
+const struct xuuid xuuid_null_uuid;
+
 void xuuid_clear(struct xuuid *uuid)
 {
 	memset(uuid->raw, 0, sizeof(uuid->raw));
