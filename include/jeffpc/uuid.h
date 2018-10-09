@@ -46,4 +46,9 @@ extern void xuuid_unparse(const struct xuuid *u, char *out);
 
 extern bool_t xdr_xuuid(XDR *xdr, struct xuuid *obj);
 
+static inline bool xuuid_is_null(const struct xuuid *uuid)
+{
+	return xuuid_compare(uuid, &xuuid_null_uuid) == 0;
+}
+
 #endif

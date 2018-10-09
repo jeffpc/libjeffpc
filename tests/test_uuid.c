@@ -31,6 +31,7 @@ struct test {
 	const char *str;
 	struct xuuid bin;
 	bool parse_ret;
+	bool is_null_ret;
 };
 
 static const struct test tests[] = {
@@ -94,24 +95,28 @@ static const struct test tests[] = {
 		.bin = { { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, } },
 		.parse_ret = true,
+		.is_null_ret = true,
 	},
 	{
 		.str = "9e9a19f3-fb85-6c3d-9a91-b5a9efee2d97",
 		.bin = { { 0x9e, 0x9a, 0x19, 0xf3, 0xfb, 0x85, 0x6c, 0x3d,
 			   0x9a, 0x91, 0xb5, 0xa9, 0xef, 0xee, 0x2d, 0x97, } },
 		.parse_ret = true,
+		.is_null_ret = false,
 	},
 	{
 		.str = "9E9A19F3-FB85-6C3D-9A91-B5A9EFEE2D97",
 		.bin = { { 0x9e, 0x9a, 0x19, 0xf3, 0xfb, 0x85, 0x6c, 0x3d,
 			   0x9a, 0x91, 0xb5, 0xa9, 0xef, 0xee, 0x2d, 0x97, } },
 		.parse_ret = true,
+		.is_null_ret = false,
 	},
 	{
 		.str = "9e9a19F3-fB85-6C3D-9A91-b5a9eFeE2D97",
 		.bin = { { 0x9e, 0x9a, 0x19, 0xf3, 0xfb, 0x85, 0x6c, 0x3d,
 			   0x9a, 0x91, 0xb5, 0xa9, 0xef, 0xee, 0x2d, 0x97, } },
 		.parse_ret = true,
+		.is_null_ret = false,
 	},
 };
 
@@ -168,6 +173,12 @@ static void test_parse_unparse(void)
 		if (strcasecmp(tmp_str, test->str))
 			fail("unparsed uuid doesn't match original (exp: %s, got: %s)",
 			     test->str, tmp_str);
+
+		if (test->is_null_ret != xuuid_is_null(&test->bin))
+			fail("null check mismatch for %s (exp: %s, got: %s)",
+			     test->str,
+			     test->is_null_ret ? "true" : "false",
+			     test->is_null_ret ? "false" : "true");
 
 		fprintf(stderr, "ok.\n");
 	}
