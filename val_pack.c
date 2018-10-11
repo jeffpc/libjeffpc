@@ -210,6 +210,23 @@ static int do_val_pack(struct buffer *buffer, struct val *val,
 	return CALL(&ops->pack, buffer_finish, (buffer));
 }
 
+ssize_t val_pack_into(struct val *val, void *buf, size_t bufsize,
+		      enum val_format format)
+{
+	struct buffer buffer;
+	int ret;
+
+	buffer_init_static(&buffer, buf, bufsize, true);
+
+	ret = buffer_truncate(&buffer, 0);
+	if (ret)
+		return ret;
+
+	ret = do_val_pack(&buffer, val, format);
+
+	return ret ? ret : buffer_used(&buffer);
+}
+
 struct buffer *val_pack(struct val *val, enum val_format format)
 {
 	struct buffer *buffer;

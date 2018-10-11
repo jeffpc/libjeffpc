@@ -230,6 +230,8 @@ extern void val_free(struct val *v);
 
 extern ssize_t val_size(struct val *val, enum val_format format);
 extern struct buffer *val_pack(struct val *val, enum val_format format);
+extern ssize_t val_pack_into(struct val *val, void *buf, size_t len,
+			     enum val_format format);
 extern struct val *val_unpack(const void *ptr, size_t len,
 			      enum val_format format);
 
