@@ -41,6 +41,7 @@ JEFFPC_0.10 {
 		buffer_free;
 		buffer_init_const;
 		buffer_init_sink;
+		buffer_init_static;
 		buffer_seek;
 		buffer_truncate;
 

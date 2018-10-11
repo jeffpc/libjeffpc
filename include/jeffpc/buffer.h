@@ -63,6 +63,8 @@ extern void buffer_init_sink(struct buffer *buffer);
 /* a buffer that wraps a const data pointer */
 extern void buffer_init_const(struct buffer *buffer, const void *data,
 			      size_t size);
+/* a buffer that wraps a data pointer */
+extern void buffer_init_static(struct buffer *buffer, void *data, size_t size);
 /* a buffer that writes to a FILE * */
 extern void buffer_init_stdio(struct buffer *buffer, FILE *f);
 

@@ -20,31 +20,35 @@
  * SOFTWARE.
  */
 
-#ifndef __JEFFPC_BUFFER_IMPL_H
-#define __JEFFPC_BUFFER_IMPL_H
+#include "buffer_impl.h"
 
-#include <jeffpc/buffer.h>
+static int static_buffer_check_append(struct buffer *buffer, const void *data,
+				      size_t size)
+{
+	if ((buffer->used + size) <= buffer->allocsize)
+		return 0;
 
-extern const struct buffer_ops heap_buffer;
-extern const struct buffer_ops sink_buffer;
-extern const struct buffer_ops const_buffer;
-extern const struct buffer_ops static_buffer;
-extern const struct buffer_ops stdio_buffer;
+	return -ENOSPC;
+}
 
-/* clear implementations */
-extern void generic_buffer_clear_memset(struct buffer *buffer, size_t off,
-					size_t len);
-extern void generic_buffer_clear_nop(struct buffer *buffer, size_t off,
-				     size_t len);
-extern void generic_buffer_clear_panic(struct buffer *buffer, size_t off,
-				       size_t len);
+static int static_buffer_check_truncate(struct buffer *buffer, size_t size)
+{
+	if (size <= buffer->allocsize)
+		return 0;
 
-/* copyin implementations */
-extern void generic_buffer_copyin_memcpy(struct buffer *buffer, size_t off,
-					 const void *newdata, size_t newdatalen);
-extern void generic_buffer_copyin_nop(struct buffer *buffer, size_t off,
-				      const void *newdata, size_t newdatalen);
-extern void generic_buffer_copyin_panic(struct buffer *buffer, size_t off,
-					const void *newdata, size_t newdatalen);
+	return -ENOSPC;
+}
 
-#endif
+const struct buffer_ops static_buffer = {
+	.check_append = static_buffer_check_append,
+	.check_truncate = static_buffer_check_truncate,
+
+	/*
+	 * no need for:
+	 *  - realloc since we have a borrowed static buffer
+	 *  - free since we have a borrowed static buffer
+	 */
+
+	.clear = generic_buffer_clear_memset,
+	.copyin = generic_buffer_copyin_memcpy,
+};

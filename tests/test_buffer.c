@@ -337,6 +337,53 @@ void test_const(void)
 	}
 }
 
+void test_static_rw(void)
+{
+	char rawdata[] = "759f7e2d-67ec-4e72-8f61-86a3fd93b1be"
+			 "60e9149e-d039-e32b-b25d-c995b28bf890"
+			 "40f0fddc-ddca-4ff5-cd81-b0ae4c7d6123";
+	const size_t rawlen = strlen(rawdata);
+	struct buffer buffer;
+
+	buffer_init_static(&buffer, rawdata, rawlen);
+
+	fprintf(stderr, "%s: initial sanity check...", __func__);
+	check_used(&buffer, rawlen);
+	check_data_ptr(&buffer, rawdata);
+	fprintf(stderr, "ok.\n");
+
+	fprintf(stderr, "%s: append to a full buffer...", __func__);
+	check_append_err(&buffer, "abc", 3, -ENOSPC);
+	check_used(&buffer, rawlen);
+	check_data_ptr(&buffer, rawdata);
+	fprintf(stderr, "ok.\n");
+
+	fprintf(stderr, "%s: truncate to a larger than original size...",
+		__func__);
+	check_truncate_err(&buffer, rawlen + 1, -ENOSPC);
+	check_used(&buffer, rawlen);
+	check_data_ptr(&buffer, rawdata);
+	fprintf(stderr, "ok.\n");
+
+	fprintf(stderr, "%s: truncate to a smaller size...", __func__);
+	check_truncate_err(&buffer, rawlen - 10, 0);
+	check_used(&buffer, rawlen - 10);
+	check_data_ptr(&buffer, rawdata);
+	fprintf(stderr, "ok.\n");
+
+	fprintf(stderr, "%s: append too much...", __func__);
+	check_append_err(&buffer, "12345678901", 11, -ENOSPC);
+	check_used(&buffer, rawlen - 10);
+	check_data_ptr(&buffer, rawdata);
+	fprintf(stderr, "ok.\n");
+
+	fprintf(stderr, "%s: append a little...", __func__);
+	check_append_err(&buffer, "12345", 5, 0);
+	check_used(&buffer, rawlen - 5);
+	check_data_ptr(&buffer, rawdata);
+	fprintf(stderr, "ok.\n");
+}
+
 void test(void)
 {
 	test_alloc_free();
@@ -345,4 +392,5 @@ void test(void)
 	test_truncate_shrink();
 	test_sink();
 	test_const();
+	test_static_rw();
 }

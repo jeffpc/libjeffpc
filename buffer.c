@@ -77,6 +77,15 @@ void buffer_init_const(struct buffer *buffer, const void *data, size_t size)
 	buffer->ops = &const_buffer;
 }
 
+void buffer_init_static(struct buffer *buffer, void *data, size_t size)
+{
+	buffer->data = data;
+	buffer->off = 0;
+	buffer->used = size;
+	buffer->allocsize = size;
+	buffer->ops = &static_buffer;
+}
+
 void buffer_init_stdio(struct buffer *buffer, FILE *f)
 {
 	buffer->data = NULL;
