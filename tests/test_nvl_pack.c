@@ -187,21 +187,24 @@ static void cmp_buffers(const char *name, bool hex,
 		fail("%s packing failed: content mismatch", name);
 }
 
+static inline void check_packing_fmt(const char *name, bool hex,
+				     struct nvlist *nvl,
+				     struct buffer *expected,
+				     enum val_format fmt)
+{
+	struct buffer *buf;
+
+	buf = nvl_pack(nvl, fmt);
+	cmp_buffers(name, hex, expected, buf);
+	buffer_free(buf);
+}
+
 static inline void check_packing(struct nvlist *nvl,
 				 struct buffer *expected_json,
 				 struct buffer *expected_cbor)
 {
-	struct buffer *buf;
-
-	/* JSON */
-	buf = nvl_pack(nvl, VF_JSON);
-	cmp_buffers("JSON", false, expected_json, buf);
-	buffer_free(buf);
-
-	/* CBOR */
-	buf = nvl_pack(nvl, VF_CBOR);
-	cmp_buffers("CBOR", true, expected_cbor, buf);
-	buffer_free(buf);
+	check_packing_fmt("JSON", false, nvl, expected_json, VF_JSON);
+	check_packing_fmt("CBOR", true, nvl, expected_cbor, VF_CBOR);
 }
 
 static void onefile(struct val *prog,
