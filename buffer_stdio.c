@@ -41,7 +41,8 @@ static void stdio_buffer_copyin(struct buffer *buffer, size_t off,
 				const void *newdata, size_t newdatalen)
 {
 	if (fwrite(newdata, newdatalen, 1, buffer->private) != 1)
-		panic("%s: failed to write data to buffer", __func__);
+		panic("%s: failed to write data to buffer: %s", __func__,
+		      strerror(errno));
 }
 
 const struct buffer_ops stdio_buffer = {
