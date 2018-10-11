@@ -309,7 +309,16 @@ static void test_sink(void)
 	}
 }
 
-void test_const(void)
+void test_static_const_arg(void)
+{
+	const char const_data[] = "abc";
+	struct buffer buffer;
+
+	/* (statically) check for passing in const pointer being ok */
+	buffer_init_static(&buffer, const_data, strlen(const_data), false);
+}
+
+void test_static_ro(void)
 {
 	const char rawdata[] = "759f7e2d-67ec-4e72-8f61-86a3fd93b1be"
 			       "60e9149e-d039-e32b-b25d-c995b28bf890"
@@ -317,7 +326,7 @@ void test_const(void)
 	struct buffer buffer;
 	int i;
 
-	buffer_init_const(&buffer, rawdata, strlen(rawdata));
+	buffer_init_static(&buffer, rawdata, strlen(rawdata), false);
 
 	check_used(&buffer, strlen(rawdata));
 	check_data_ptr(&buffer, rawdata);
@@ -345,7 +354,7 @@ void test_static_rw(void)
 	const size_t rawlen = strlen(rawdata);
 	struct buffer buffer;
 
-	buffer_init_static(&buffer, rawdata, rawlen);
+	buffer_init_static(&buffer, rawdata, rawlen, true);
 
 	fprintf(stderr, "%s: initial sanity check...", __func__);
 	check_used(&buffer, rawlen);
@@ -391,6 +400,7 @@ void test(void)
 	test_truncate_grow();
 	test_truncate_shrink();
 	test_sink();
-	test_const();
+	test_static_const_arg();
+	test_static_ro();
 	test_static_rw();
 }

@@ -85,7 +85,6 @@ add_library(jeffpc SHARED
 	array.c
 	bst.c
 	buffer.c
-	buffer_const.c
 	buffer_heap.c
 	buffer_sink.c
 	buffer_static.c

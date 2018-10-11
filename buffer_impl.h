@@ -27,8 +27,8 @@
 
 extern const struct buffer_ops heap_buffer;
 extern const struct buffer_ops sink_buffer;
-extern const struct buffer_ops const_buffer;
-extern const struct buffer_ops static_buffer;
+extern const struct buffer_ops static_buffer_ro;
+extern const struct buffer_ops static_buffer_rw;
 extern const struct buffer_ops stdio_buffer;
 
 /* clear implementations */

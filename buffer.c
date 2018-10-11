@@ -68,22 +68,14 @@ void buffer_init_sink(struct buffer *buffer)
 	buffer->ops = &sink_buffer;
 }
 
-void buffer_init_const(struct buffer *buffer, const void *data, size_t size)
+void buffer_init_static(struct buffer *buffer, const void *data, size_t size,
+			bool writable)
 {
 	buffer->data = (void *) data;
 	buffer->off = 0;
 	buffer->used = size;
 	buffer->allocsize = size;
-	buffer->ops = &const_buffer;
-}
-
-void buffer_init_static(struct buffer *buffer, void *data, size_t size)
-{
-	buffer->data = data;
-	buffer->off = 0;
-	buffer->used = size;
-	buffer->allocsize = size;
-	buffer->ops = &static_buffer;
+	buffer->ops = writable ? &static_buffer_rw : &static_buffer_ro;
 }
 
 void buffer_init_stdio(struct buffer *buffer, FILE *f)

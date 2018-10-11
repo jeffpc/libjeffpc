@@ -22,8 +22,33 @@
 
 #include "buffer_impl.h"
 
-static int static_buffer_check_append(struct buffer *buffer, const void *data,
-				      size_t size)
+/*
+ * Static buffers
+ *
+ * Since we have a borrowed buffer we must never allow:
+ *
+ *  - resizing of the buffer
+ *  - freeing of the buffer
+ *
+ * Conveniently, if we leave the realloc op NULL, the generic code returns
+ * -ENOTSUP for us.  Leaving the free op NULL turns it into a no-op.
+ *
+ * There is a slight difference between the read-only and read-write
+ * variants.  Namely, the read-only variant does not support *any* writes or
+ * changes to the (apparent) buffer size.  In both cases, -EROFS is
+ * returned.  The read-write variant allows changes to the amount of used
+ * space, truncation, etc. as long as the result fits within the borrowed
+ * buffer.
+ */
+
+static int static_buffer_check_append_ro(struct buffer *buffer, const void *data,
+					 size_t size)
+{
+	return -EROFS;
+}
+
+static int static_buffer_check_append_rw(struct buffer *buffer, const void *data,
+					 size_t size)
 {
 	if ((buffer->used + size) <= buffer->allocsize)
 		return 0;
@@ -31,7 +56,12 @@ static int static_buffer_check_append(struct buffer *buffer, const void *data,
 	return -ENOSPC;
 }
 
-static int static_buffer_check_truncate(struct buffer *buffer, size_t size)
+static int static_buffer_check_truncate_ro(struct buffer *buffer, size_t size)
+{
+	return -EROFS;
+}
+
+static int static_buffer_check_truncate_rw(struct buffer *buffer, size_t size)
 {
 	if (size <= buffer->allocsize)
 		return 0;
@@ -39,15 +69,19 @@ static int static_buffer_check_truncate(struct buffer *buffer, size_t size)
 	return -ENOSPC;
 }
 
-const struct buffer_ops static_buffer = {
-	.check_append = static_buffer_check_append,
-	.check_truncate = static_buffer_check_truncate,
+/* a read-only static buffer */
+const struct buffer_ops static_buffer_ro = {
+	.check_append = static_buffer_check_append_ro,
+	.check_truncate = static_buffer_check_truncate_ro,
 
-	/*
-	 * no need for:
-	 *  - realloc since we have a borrowed static buffer
-	 *  - free since we have a borrowed static buffer
-	 */
+	.clear = generic_buffer_clear_panic,
+	.copyin = generic_buffer_copyin_panic,
+};
+
+/* a read-write static buffer */
+const struct buffer_ops static_buffer_rw = {
+	.check_append = static_buffer_check_append_rw,
+	.check_truncate = static_buffer_check_truncate_rw,
 
 	.clear = generic_buffer_clear_memset,
 	.copyin = generic_buffer_copyin_memcpy,

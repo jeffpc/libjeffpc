@@ -192,7 +192,7 @@ static void get_expected_output(const char *fname, struct buffer *buf)
 	tmp = read_file_len(expfname, &len);
 	ASSERT(!IS_ERR(tmp));
 
-	buffer_init_const(buf, tmp, len);
+	buffer_init_static(buf, tmp, len, false);
 }
 
 static void test(const char *fname)
