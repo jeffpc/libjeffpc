@@ -192,11 +192,23 @@ static inline void check_packing_fmt(const char *name, bool hex,
 				     struct buffer *expected,
 				     enum val_format fmt)
 {
+	const size_t rawsize = buffer_used(expected);
+	uint8_t *raw = alloca(rawsize);
 	struct buffer *buf;
+	struct buffer tmp;
+	ssize_t ret;
+
+	fprintf(stderr, "nvl_pack:\n");
 
 	buf = nvl_pack(nvl, fmt);
 	cmp_buffers(name, hex, expected, buf);
 	buffer_free(buf);
+
+	fprintf(stderr, "nvl_pack_into:\n");
+
+	ret = nvl_pack_into(nvl, raw, rawsize, fmt);
+	buffer_init_static(&tmp, raw, (ret > 0) ? ret : 0, false);
+	cmp_buffers(name, hex, expected, &tmp);
 }
 
 static inline void check_packing(struct nvlist *nvl,

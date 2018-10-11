@@ -108,6 +108,13 @@ static inline ssize_t nvl_size(struct nvlist *nvl, enum val_format format)
 	return val_size(nvl_cast_to_val(nvl), format);
 }
 
+static inline ssize_t nvl_pack_into(struct nvlist *nvl,
+				    void *buf, size_t bufsize,
+				    enum val_format format)
+{
+	return val_pack_into(nvl_cast_to_val(nvl), buf, bufsize, format);
+}
+
 static inline struct buffer *nvl_pack(struct nvlist *nvl,
 				      enum val_format format)
 {
