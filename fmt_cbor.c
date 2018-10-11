@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,6 +58,10 @@ enum major_type {
 			STATIC_ASSERT0(additional & ~0x1f);		\
 			(type << 5) | additional;			\
 		})
+
+/*
+ * pack
+ */
 
 static int pack_cbor_type_byte(struct buffer *buffer, enum major_type type,
 			       uint8_t additional)
@@ -298,4 +302,60 @@ int cbor_pack_val(struct buffer *buffer, struct val *val)
 	}
 
 	return -ENOTSUP;
+}
+
+/*
+ * peek
+ */
+
+int cbor_peek_type(struct buffer *buffer, enum val_type *type)
+{
+	const uint8_t *ptr;
+	enum major_type major_type;
+	uint8_t extra;
+
+	if (buffer_remain(buffer) < 1)
+		return -EFAULT;
+
+	ptr = buffer_data_current(buffer);
+
+	major_type = *ptr >> 5;
+	extra = *ptr & 0x1f;
+
+	switch (major_type) {
+		case CMT_UINT:
+			*type = VT_INT;
+			break;
+		case CMT_BYTE:
+			*type = VT_BLOB;
+			break;
+		case CMT_TEXT:
+			*type = VT_STR;
+			break;
+		case CMT_FLOAT:
+			switch (extra) {
+				case ADDL_FLOAT_FALSE:
+				case ADDL_FLOAT_TRUE:
+					*type = VT_BOOL;
+					break;
+				case ADDL_FLOAT_NULL:
+					*type = VT_NULL;
+					break;
+				case ADDL_FLOAT_BREAK:
+				default:
+					return -ENOTSUP;
+			}
+			break;
+		case CMT_ARRAY:
+			*type = VT_ARRAY;
+			break;
+		case CMT_MAP:
+			*type = VT_NVL;
+			break;
+		case CMT_NINT:
+		case CMT_TAG:
+			return -ENOTSUP;
+	}
+
+	return 0;
 }

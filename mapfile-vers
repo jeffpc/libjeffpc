@@ -64,6 +64,7 @@ JEFFPC_0.10 {
 		cbor_pack_str;
 		cbor_pack_uint;
 		cbor_pack_val;
+		cbor_peek_type;
 
 		# cstr
 		strcpy_safe;

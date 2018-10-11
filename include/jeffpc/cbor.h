@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -55,5 +55,7 @@ static inline int cbor_pack_cstr(struct buffer *buffer, const char *str)
 {
 	return cbor_pack_cstr_len(buffer, str, strlen(str));
 }
+
+extern int cbor_peek_type(struct buffer *buffer, enum val_type *type);
 
 #endif
