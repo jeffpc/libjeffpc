@@ -304,7 +304,7 @@ static struct tree_node *destroy_nodes_step(struct tree_tree *tree,
 
 		if (!tmp->children[TREE_RIGHT]) {
 			destroy_nodes_save_parent(tree, tmp, cookie);
-			return tmp;
+			return node2obj(tree, tmp);
 		}
 
 		node = tmp->children[TREE_RIGHT];
@@ -360,7 +360,7 @@ void *tree_destroy_nodes(struct tree_tree *tree, struct tree_cookie *cookie)
 
 	destroy_nodes_save_parent(tree, cookie->node, cookie);
 
-	return node;
+	return node2obj(tree, node);
 }
 
 void tree_swap(struct tree_tree *tree1, struct tree_tree *tree2)
