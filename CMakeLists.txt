@@ -154,6 +154,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/jeffpc.h
 		include/jeffpc/list.h
 		include/jeffpc/mem.h
+		include/jeffpc/mmap.h
 		include/jeffpc/nvl.h
 		include/jeffpc/padding.h
 		include/jeffpc/qstring.h
