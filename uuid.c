@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 
+#include <string.h>
+
 #include <jeffpc/uuid.h>
 #include <jeffpc/hexdump.h>
 #include <jeffpc/rand.h>
