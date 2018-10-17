@@ -40,7 +40,7 @@ extern int assfail(const char *a, const char *f, int l);
 #endif
 
 static inline void assertion_failed(const char *assertion, const char *file,
-				    int line)
+				    int line, const char *function)
 {
 #if defined(HAVE_ASSFAIL)
 	assfail(assertion, file, line);
@@ -117,7 +117,7 @@ void default_assfail(const char *a, const char *f, int l, const char *fxn)
 
 	print_stacktrace(CE_CRIT, NULL);
 
-	assertion_failed(a, f, l);
+	assertion_failed(a, f, l, fxn);
 }
 
 void jeffpc_assfail(const char *a, const char *f, int l, const char *fxn)
@@ -141,7 +141,7 @@ void default_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
 
 	print_stacktrace(CE_CRIT, NULL);
 
-	assertion_failed(msg, f, l);
+	assertion_failed(msg, f, l, fxn);
 }
 
 void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
