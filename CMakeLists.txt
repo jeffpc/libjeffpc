@@ -132,9 +132,9 @@ add_library(jeffpc SHARED
 
 target_link_libraries(jeffpc
 	${UMEM_LIBRARY}
+	${XDR_LIBRARY}
 	pthread
 	socket
-	nsl
 )
 
 target_apply_mapfile(jeffpc mapfile-vers)
