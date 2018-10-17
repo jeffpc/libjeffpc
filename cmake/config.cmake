@@ -59,6 +59,7 @@ check_function_exists(reallocarray HAVE_REALLOCARRAY)
 check_function_exists(recallocarray HAVE_RECALLOCARRAY)
 check_include_files(sys/debug.h HAVE_SYS_DEBUG_H)
 
+find_symbol(accept "socket" SOCKET_LIBRARY)
 find_symbol(xdr_opaque "nsl" XDR_LIBRARY)
 
 include("${CMAKE_DIR}/config-gnu-ld.cmake")
