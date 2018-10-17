@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,11 +40,6 @@ static inline size_t total_size(size_t elem_size, size_t count)
 static inline void *get_ptr(struct array *array, size_t idx)
 {
 	return &array->raw[array->elem_size * idx];
-}
-
-static inline void copyin(struct array *array, size_t idx, void *newitem)
-{
-	memcpy(get_ptr(array, idx), newitem, array->elem_size);
 }
 
 void *array_alloc(size_t elem_size, size_t prealloc_count)
