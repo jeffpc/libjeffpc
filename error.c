@@ -110,7 +110,7 @@ void jeffpc_log(int loglevel, const char *fmt, ...)
 	va_end(ap);
 }
 
-void default_assfail(const char *a, const char *f, int l)
+void default_assfail(const char *a, const char *f, int l, const char *fxn)
 {
 	jeffpc_log(LOG_ALERT, "assertion failed: %s, file: %s, line: %d",
 		   a, f, l);
@@ -122,14 +122,14 @@ void default_assfail(const char *a, const char *f, int l)
 
 void jeffpc_assfail(const char *a, const char *f, int l, const char *fxn)
 {
-	libops.assfail(a, f, l);
+	libops.assfail(a, f, l, fxn);
 
 	/* this is a hack to shut up gcc */
 	abort();
 }
 
 void default_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
-		      const char *f, int l)
+		      const char *f, int l, const char *fxn)
 {
 	char msg[512];
 
@@ -147,7 +147,7 @@ void default_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
 void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
 		     const char *f, int l, const char *fxn)
 {
-	libops.assfail3(a, lv, op, rv, f, l);
+	libops.assfail3(a, lv, op, rv, f, l, fxn);
 
 	/* this is a hack to shut up gcc */
 	abort();

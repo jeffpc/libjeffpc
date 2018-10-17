@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,8 +27,10 @@
 
 extern void default_print(enum errlevel level, const char *fmt, va_list ap);
 extern void default_log(int loglevel, const char *fmt, va_list ap);
-extern void default_assfail(const char *a, const char *f, int l);
+extern void default_assfail(const char *a, const char *f, int l,
+                            const char *fxn);
 extern void default_assfail3(const char *a, uintmax_t lv, const char *op,
-                             uintmax_t rv, const char *f, int l);
+                             uintmax_t rv, const char *f, int l,
+                             const char *fxn);
 
 #endif
