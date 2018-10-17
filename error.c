@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2013-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,16 +34,20 @@
 
 #include "init.h"
 
-#ifndef HAVE_ASSFAIL
-static int assfail(const char *assertion, const char *file, int line)
-{
-	__assert(assertion, file, line);
-
-	return 0; /* not reached */
-}
-#else
+#ifdef HAVE_ASSFAIL
+/* See comment at the end of this file about assfail type checking */
 extern int assfail(const char *a, const char *f, int l);
 #endif
+
+static inline void assertion_failed(const char *assertion, const char *file,
+				    int line)
+{
+#if defined(HAVE_ASSFAIL)
+	assfail(assertion, file, line);
+#else
+	__assert(assertion, file, line);
+#endif
+}
 
 void default_print(enum errlevel level, const char *fmt, va_list ap)
 {
@@ -113,7 +117,7 @@ void default_assfail(const char *a, const char *f, int l)
 
 	print_stacktrace(CE_CRIT, NULL);
 
-	assfail(a, f, l);
+	assertion_failed(a, f, l);
 }
 
 void jeffpc_assfail(const char *a, const char *f, int l)
@@ -137,7 +141,7 @@ void default_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
 
 	print_stacktrace(CE_CRIT, NULL);
 
-	assfail(msg, f, l);
+	assertion_failed(msg, f, l);
 }
 
 void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
