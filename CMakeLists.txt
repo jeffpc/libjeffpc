@@ -132,6 +132,7 @@ add_library(jeffpc SHARED
 
 target_link_libraries(jeffpc
 	${UMEM_LIBRARY}
+	${EXECINFO_LIBRARY}
 	${SOCKET_LIBRARY}
 	${XDR_LIBRARY}
 	pthread
