@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
 #include <unistd.h>
 
 #include <jeffpc/sock.h>
+#include <jeffpc/config.h>
 
 int connect_ip(const char *host, uint16_t port, bool v4, bool v6, enum ip_type type)
 {
@@ -46,7 +47,9 @@ int connect_ip(const char *host, uint16_t port, bool v4, bool v6, enum ip_type t
 		case 0:
 			/* success */
 			break;
+#ifdef HAVE_EAI_ADDRFAMILY
 		case EAI_ADDRFAMILY:
+#endif
 		case EAI_FAMILY:
 		case EAI_SERVICE:
 		case EAI_SOCKTYPE:
@@ -57,7 +60,9 @@ int connect_ip(const char *host, uint16_t port, bool v4, bool v6, enum ip_type t
 			return -EINVAL;
 		case EAI_MEMORY:
 			return -ENOMEM;
+#ifdef HAVE_EAI_NODATA
 		case EAI_NODATA:
+#endif
 		case EAI_NONAME:
 			return -ENOENT;
 		case EAI_OVERFLOW:
