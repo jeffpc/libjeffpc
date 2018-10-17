@@ -33,6 +33,8 @@
 #cmakedefine HAVE_REALLOCARRAY
 #cmakedefine HAVE_RECALLOCARRAY
 #cmakedefine HAVE_SYS_DEBUG_H
+#cmakedefine HAVE_EAI_ADDRFAMILY
+#cmakedefine HAVE_EAI_NODATA
 #cmakedefine HAVE_UMEM
 
 #endif

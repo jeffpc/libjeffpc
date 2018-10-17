@@ -23,6 +23,7 @@
 include(CheckFunctionExists)
 include(CheckIncludeFiles)
 include(CheckLibraryExists)
+include(CheckSymbolExists)
 include(TestBigEndian)
 
 test_big_endian(CPU_BIG_ENDIAN)
@@ -58,6 +59,8 @@ check_function_exists(pthread_cond_reltimedwait_np
 check_function_exists(reallocarray HAVE_REALLOCARRAY)
 check_function_exists(recallocarray HAVE_RECALLOCARRAY)
 check_include_files(sys/debug.h HAVE_SYS_DEBUG_H)
+check_symbol_exists(EAI_ADDRFAMILY "netdb.h" HAVE_EAI_ADDRFAMILY)
+check_symbol_exists(EAI_NODATA "netdb.h" HAVE_EAI_NODATA)
 
 find_symbol(accept "socket" SOCKET_LIBRARY)
 find_symbol(backtrace "execinfo" EXECINFO_LIBRARY)
