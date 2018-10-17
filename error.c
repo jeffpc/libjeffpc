@@ -120,7 +120,7 @@ void default_assfail(const char *a, const char *f, int l)
 	assertion_failed(a, f, l);
 }
 
-void jeffpc_assfail(const char *a, const char *f, int l)
+void jeffpc_assfail(const char *a, const char *f, int l, const char *fxn)
 {
 	libops.assfail(a, f, l);
 
@@ -145,7 +145,7 @@ void default_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
 }
 
 void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op, uintmax_t rv,
-		     const char *f, int l)
+		     const char *f, int l, const char *fxn)
 {
 	libops.assfail3(a, lv, op, rv, f, l);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2013-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,9 +58,11 @@ extern void cmn_verr(enum errlevel level, const char *fmt, va_list ap);
 extern void panic(const char *fmt, ...)
 	__attribute__ ((format (printf, 1, 2))) NORETURN;
 
-extern void jeffpc_assfail(const char *a, const char *f, int l) NORETURN;
+extern void jeffpc_assfail(const char *a, const char *f, int l,
+                           const char *fxn) NORETURN;
 extern void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op,
-                            uintmax_t rv, const char *f, int l) NORETURN;
+                            uintmax_t rv, const char *f, int l,
+                            const char *fxn) NORETURN;
 
 extern void save_stacktrace(struct stack *stack);
 extern void print_stacktrace(enum errlevel level, struct stack *stack);
@@ -71,7 +73,7 @@ extern void print_stacktrace(enum errlevel level, struct stack *stack);
 		uintptr_t rhs = (uintptr_t)(r);				\
 		if (!(lhs op rhs))					\
 			jeffpc_assfail3(#l " " #op " " #r, lhs, #op, rhs,	\
-					__FILE__, __LINE__);		\
+					__FILE__, __LINE__, __func__);	\
 	} while(0)
 
 #define VERIFY3U(l, op, r)						\
@@ -80,7 +82,7 @@ extern void print_stacktrace(enum errlevel level, struct stack *stack);
 		uint64_t rhs = (r);					\
 		if (!(lhs op rhs))					\
 			jeffpc_assfail3(#l " " #op " " #r, lhs, #op, rhs,	\
-					__FILE__, __LINE__);		\
+					__FILE__, __LINE__, __func__);	\
 	} while(0)
 
 #define VERIFY3S(l, op, r)						\
@@ -89,13 +91,13 @@ extern void print_stacktrace(enum errlevel level, struct stack *stack);
 		int64_t rhs = (r);					\
 		if (!(lhs op rhs))					\
 			jeffpc_assfail3(#l " " #op " " #r, lhs, #op, rhs,	\
-					__FILE__, __LINE__);		\
+					__FILE__, __LINE__, __func__);	\
 	} while(0)
 
 #define VERIFY(c)							\
 	do {								\
 		if (!(c))						\
-			jeffpc_assfail(#c, __FILE__, __LINE__);		\
+			jeffpc_assfail(#c, __FILE__, __LINE__, __func__);	\
 	} while(0)
 
 #define VERIFY0(c)	VERIFY3U((c), ==, 0)
