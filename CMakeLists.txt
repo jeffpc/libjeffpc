@@ -30,7 +30,7 @@ enable_testing()
 add_definitions(
 	-D__EXTENSIONS__
 	-D_REENTRANT
-	-D_POSIX_C_SOURCE=200112L
+	-D_POSIX_C_SOURCE=200809L
 	-D_GNU_SOURCE
 )
 
