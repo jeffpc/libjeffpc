@@ -24,6 +24,7 @@
 #define __JEFFPC_SYNCH_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <pthread.h>
 
 #include <jeffpc/config-synch.h>
