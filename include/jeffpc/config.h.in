@@ -25,6 +25,7 @@
 
 #cmakedefine CPU_BIG_ENDIAN
 
+#cmakedefine HAVE___ASSERT_FREEBSD_STYLE
 #cmakedefine HAVE___ASSERT_LINUX_STYLE
 #cmakedefine HAVE_ARC4RANDOM
 #cmakedefine HAVE_ARC4RANDOM_BUF

@@ -52,6 +52,11 @@ macro(find_symbol fxn libs output_lib_name)
 endmacro()
 
 check_prototype_definition(__assert
+	"void __assert(const char *func, const char *file, int line, const char *expr)"
+	""
+	"assert.h"
+	HAVE___ASSERT_FREEBSD_STYLE)
+check_prototype_definition(__assert
 	"void __assert(const char *expr, const char *file, int line)"
 	""
 	"assert.h"
