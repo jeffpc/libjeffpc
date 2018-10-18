@@ -22,9 +22,32 @@
 
 include(CheckFunctionExists)
 include(CheckIncludeFiles)
+include(CheckLibraryExists)
 include(TestBigEndian)
 
 test_big_endian(CPU_BIG_ENDIAN)
+
+# Find which library a particular function exists in
+macro(find_symbol fxn libs output_lib_name)
+	string(TOUPPER ${fxn} name)
+	check_function_exists(${fxn} HAVE_${name})
+	if(HAVE_${name})
+		set(${output_lib_name})
+	else()
+		foreach(lib ${libs})
+			string(TOUPPER ${lib} libname)
+			check_library_exists(${lib} ${fxn} "" HAVE_${libname}_${name})
+			if(HAVE_${libname}_${name})
+				set(HAVE_${name} 1)
+				set(${output_lib_name} ${lib})
+				break()
+			endif()
+		endforeach()
+	endif()
+	if(NOT HAVE_${name})
+		message("-- Could not find ${fxn}")
+	endif()
+endmacro()
 
 check_function_exists(arc4random HAVE_ARC4RANDOM)
 check_function_exists(arc4random_buf HAVE_ARC4RANDOM_BUF)
