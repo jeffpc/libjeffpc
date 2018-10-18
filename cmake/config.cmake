@@ -23,6 +23,7 @@
 include(CheckFunctionExists)
 include(CheckIncludeFiles)
 include(CheckLibraryExists)
+include(CheckPrototypeDefinition)
 include(CheckSymbolExists)
 include(TestBigEndian)
 
@@ -50,6 +51,11 @@ macro(find_symbol fxn libs output_lib_name)
 	endif()
 endmacro()
 
+check_prototype_definition(__assert
+	"void __assert(const char *expr, const char *file, int line)"
+	""
+	"assert.h"
+	HAVE___ASSERT_LINUX_STYLE)
 check_function_exists(arc4random HAVE_ARC4RANDOM)
 check_function_exists(arc4random_buf HAVE_ARC4RANDOM_BUF)
 check_function_exists(assfail HAVE_ASSFAIL)

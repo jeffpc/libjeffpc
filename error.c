@@ -44,8 +44,10 @@ static inline void assertion_failed(const char *assertion, const char *file,
 {
 #if defined(HAVE_ASSFAIL)
 	assfail(assertion, file, line);
-#else
+#elif defined(HAVE___ASSERT_LINUX_STYLE)
 	__assert(assertion, file, line);
+#else
+#error "Don't know how to kill for assertion failures"
 #endif
 }
 
