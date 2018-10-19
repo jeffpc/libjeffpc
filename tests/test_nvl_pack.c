@@ -163,7 +163,8 @@ static inline void dumpbuf(struct buffer *buf, bool hex)
 		hexdumpz(tmp, buffer_data(buf), len, false);
 		fprintf(stderr, "%s", tmp);
 	} else {
-		fprintf(stderr, "%*.*s", len, len,
+		VERIFY3U(len, <=, INT_MAX);
+		fprintf(stderr, "%*.*s", (int) len, (int) len,
 			(const char *) buffer_data(buf));
 	}
 }
