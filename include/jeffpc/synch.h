@@ -46,6 +46,8 @@ struct lock_context {
 			const char *condname; /* cond */
 			const char *lockname; /* mutex or rwlock */
 		};
+		/* barrier */
+		const char *barname; /* barrier */
 	};
 	const char *file;
 	int line;
@@ -189,10 +191,31 @@ struct barrier {
 				condbcast(&cond_ctx, (c)); \
 			} while (0)
 #define BARRIERINIT(b, c) \
-			barrierinit((b), (c))
+			do { \
+				struct lock_context bar_ctx = { \
+					.barname = #b, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				barrierinit(&bar_ctx, (b), (c)); \
+			} while (0)
 #define BARRIERDESTROY(b) \
-			barrierdestroy(b)
-#define BARRIERWAIT(b)	barrierwait(b)
+			do { \
+				struct lock_context bar_ctx = { \
+					.barname = #b, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				barrierdestroy(&bar_ctx, (b)); \
+			} while (0)
+#define BARRIERWAIT(b)	do { \
+				struct lock_context bar_ctx = { \
+					.barname = #b, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				barrierwait(&bar_ctx, (b)); \
+			} while (0)
 
 /* Do *NOT* use directly */
 extern void mxinit(const struct lock_context *where, struct lock *m,
@@ -215,8 +238,9 @@ extern int condreltimedwait(const struct lock_context *where, struct cond *c,
 extern void condsig(const struct lock_context *where, struct cond *c);
 extern void condbcast(const struct lock_context *where, struct cond *c);
 
-extern void barrierinit(struct barrier *b, unsigned count);
-extern void barrierdestroy(struct barrier *b);
-extern bool barrierwait(struct barrier *b);
+extern void barrierinit(const struct lock_context *where, struct barrier *b,
+			unsigned count);
+extern void barrierdestroy(const struct lock_context *where, struct barrier *b);
+extern bool barrierwait(const struct lock_context *where, struct barrier *b);
 
 #endif

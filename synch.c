@@ -542,17 +542,18 @@ void condbcast(const struct lock_context *where, struct cond *c)
 	VERIFY0(pthread_cond_broadcast(&c->cond));
 }
 
-void barrierinit(struct barrier *b, unsigned count)
+void barrierinit(const struct lock_context *where, struct barrier *b,
+		 unsigned count)
 {
 	VERIFY0(pthread_barrier_init(&b->bar, NULL, count));
 }
 
-void barrierdestroy(struct barrier *b)
+void barrierdestroy(const struct lock_context *where, struct barrier *b)
 {
 	VERIFY0(pthread_barrier_destroy(&b->bar));
 }
 
-bool barrierwait(struct barrier *b)
+bool barrierwait(const struct lock_context *where, struct barrier *b)
 {
 	int ret;
 
