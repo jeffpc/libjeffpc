@@ -531,17 +531,32 @@ void rwunlock(const struct lock_context *where, struct rwlock *l)
 
 void condinit(const struct lock_context *where, struct cond *c)
 {
-	VERIFY0(pthread_cond_init(&c->cond, NULL));
+	int ret;
+
+	ret = pthread_cond_init(&c->cond, NULL);
+	if (ret)
+		panic("cond init failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 void conddestroy(const struct lock_context *where, struct cond *c)
 {
-	VERIFY0(pthread_cond_destroy(&c->cond));
+	int ret;
+
+	ret = pthread_cond_destroy(&c->cond);
+	if (ret)
+		panic("cond destroy failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 void condwait(const struct lock_context *where, struct cond *c, struct lock *l)
 {
-	VERIFY0(pthread_cond_wait(&c->cond, &l->lock));
+	int ret;
+
+	ret = pthread_cond_wait(&c->cond, &l->lock);
+	if (ret)
+		panic("cond wait failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 int condreltimedwait(const struct lock_context *where, struct cond *c,
@@ -550,7 +565,7 @@ int condreltimedwait(const struct lock_context *where, struct cond *c,
 	int ret;
 
 #ifdef HAVE_PTHREAD_COND_RELTIMEDWAIT_NP
-	ret = -pthread_cond_reltimedwait_np(&c->cond, &l->lock, reltime);
+	ret = pthread_cond_reltimedwait_np(&c->cond, &l->lock, reltime);
 #else
 	struct timespec abstime;
 	struct timespec now;
@@ -565,23 +580,34 @@ int condreltimedwait(const struct lock_context *where, struct cond *c,
 	abstime.tv_sec  = now.tv_sec  + reltime->tv_sec;
 	abstime.tv_nsec = now.tv_nsec + reltime->tv_nsec;
 
-	ret = -pthread_cond_timedwait(&c->cond, &l->lock, &abstime);
+	ret = pthread_cond_timedwait(&c->cond, &l->lock, &abstime);
 #endif
 
-	if ((ret != 0) && (ret != -ETIMEDOUT))
-		panic("%s failed: %s", __func__, xstrerror(ret));
+	if ((ret != 0) && (ret != ETIMEDOUT))
+		panic("cond rel-timed-wait failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 
-	return ret;
+	return -ret;
 }
 
 void condsig(const struct lock_context *where, struct cond *c)
 {
-	VERIFY0(pthread_cond_signal(&c->cond));
+	int ret;
+
+	ret = pthread_cond_signal(&c->cond);
+	if (ret)
+		panic("cond signal failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 void condbcast(const struct lock_context *where, struct cond *c)
 {
-	VERIFY0(pthread_cond_broadcast(&c->cond));
+	int ret;
+
+	ret = pthread_cond_broadcast(&c->cond);
+	if (ret)
+		panic("cond broadcast failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 void barrierinit(const struct lock_context *where, struct barrier *b,
