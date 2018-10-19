@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <alloca.h>
 #include <string.h>
 
 #include <jeffpc/jeffpc.h>

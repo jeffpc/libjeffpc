@@ -23,6 +23,7 @@
 #include <jeffpc/hexdump.h>
 #include <jeffpc/padding.h>
 #include <jeffpc/types.h>
+#include <jeffpc/mem.h>
 
 #include "test.c"
 

@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+#include <jeffpc/mem.h>
 #include <jeffpc/nvl.h>
 #include <jeffpc/hexdump.h>
 #include <jeffpc/sexpr.h>
