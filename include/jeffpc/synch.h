@@ -104,6 +104,10 @@ struct barrier {
 				}; \
 				mxunlock(&mx_ctx, (l)); \
 			} while (0)
+#define RWINIT(l)	rwinit(l)
+#define RWDESTROY(l)	rwdestroy(l)
+#define RWLOCK(l, wr)	rwlock((l), (wr))
+#define RWUNLOCK(l)	rwunlock(l)
 #define CONDINIT(c)	condinit(c)
 #define CONDDESTROY(c)	conddestroy(c)
 #define CONDWAIT(c,m)	condwait((c),(m))
