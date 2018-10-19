@@ -111,6 +111,8 @@ struct barrier {
 #define CONDINIT(c)	condinit(c)
 #define CONDDESTROY(c)	conddestroy(c)
 #define CONDWAIT(c,m)	condwait((c),(m))
+#define CONDRELTIMEDWAIT(c, m, t) \
+			condreltimedwait((c),(m),(t))
 #define CONDSIG(c)	condsig(c)
 #define CONDBCAST(c)	condbcast(c)
 
