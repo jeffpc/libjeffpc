@@ -40,7 +40,12 @@ struct lock_class {
 #define LOCK_CLASS(n)	struct lock_class n = { .name = #n };
 
 struct lock_context {
-	const char *lockname;
+	union {
+		/* mutex */
+		struct {
+			const char *lockname; /* mutex */
+		};
+	};
 	const char *file;
 	int line;
 };
