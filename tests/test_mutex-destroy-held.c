@@ -31,7 +31,8 @@ void test(void)
 
 	MXINIT(&a, &lc);
 	MXLOCK(&a);
-	MXDESTROY(&a);
 
-	/* TODO: check lockdep state */
+	test_set_panic_string("lockdep: Aborting - destroying held lock");
+
+	MXDESTROY(&a);
 }

@@ -146,8 +146,7 @@ static void error_destroy(struct held_lock *held,
 	print_lock(held->lock, where);
 	cmn_err(CE_CRIT, "lockdep: while holding:");
 	print_held_locks(held);
-
-	atomic_set(&lockdep_on, 0);
+	panic("lockdep: Aborting - destroying held lock");
 }
 
 static void error_lock(struct held_lock *held, struct lock *new,
