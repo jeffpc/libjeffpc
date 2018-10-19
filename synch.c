@@ -438,30 +438,50 @@ out:
 void mxinit(const struct lock_context *where, struct lock *l,
 	    struct lock_class *lc)
 {
+	int ret;
+
 	verify_lock_init(where, l, lc);
 
-	VERIFY0(pthread_mutex_init(&l->lock, NULL));
+	ret = pthread_mutex_init(&l->lock, NULL);
+	if (ret)
+		panic("mutex init failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 void mxdestroy(const struct lock_context *where, struct lock *l)
 {
+	int ret;
+
 	verify_lock_destroy(where, l);
 
-	VERIFY0(pthread_mutex_destroy(&l->lock));
+	ret = pthread_mutex_destroy(&l->lock);
+	if (ret)
+		panic("mutex destroy failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 void mxlock(const struct lock_context *where, struct lock *l)
 {
+	int ret;
+
 	verify_lock_lock(where, l);
 
-	VERIFY0(pthread_mutex_lock(&l->lock));
+	ret = pthread_mutex_lock(&l->lock);
+	if (ret)
+		panic("mutex lock failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 void mxunlock(const struct lock_context *where, struct lock *l)
 {
+	int ret;
+
 	verify_lock_unlock(where, l);
 
-	VERIFY0(pthread_mutex_unlock(&l->lock));
+	ret = pthread_mutex_unlock(&l->lock);
+	if (ret)
+		panic("mutex unlock failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 void rwinit(const struct lock_context *where, struct rwlock *l)
