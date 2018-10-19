@@ -41,9 +41,9 @@ struct lock_class {
 
 struct lock_context {
 	union {
-		/* mutex */
+		/* mutex/rwlock */
 		struct {
-			const char *lockname; /* mutex */
+			const char *lockname; /* mutex or rwlock */
 		};
 	};
 	const char *file;
@@ -104,10 +104,38 @@ struct barrier {
 				}; \
 				mxunlock(&mx_ctx, (l)); \
 			} while (0)
-#define RWINIT(l)	rwinit(l)
-#define RWDESTROY(l)	rwdestroy(l)
-#define RWLOCK(l, wr)	rwlock((l), (wr))
-#define RWUNLOCK(l)	rwunlock(l)
+#define RWINIT(l)	do { \
+				struct lock_context rw_ctx = { \
+					.lockname = #l, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				rwinit(&rw_ctx, (l)); \
+			} while (0)
+#define RWDESTROY(l)	do { \
+				struct lock_context rw_ctx = { \
+					.lockname = #l, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				rwdestroy(&rw_ctx, (l)); \
+			} while (0)
+#define RWLOCK(l, wr)	do { \
+				struct lock_context rw_ctx = { \
+					.lockname = #l, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				rwlock(&rw_ctx, (l), (wr)); \
+			} while (0)
+#define RWUNLOCK(l)	do { \
+				struct lock_context rw_ctx = { \
+					.lockname = #l, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				rwunlock(&rw_ctx, (l)); \
+			} while (0)
 #define CONDINIT(c)	condinit(c)
 #define CONDDESTROY(c)	conddestroy(c)
 #define CONDWAIT(c,m)	condwait((c),(m))
@@ -128,10 +156,10 @@ extern void mxdestroy(const struct lock_context *where, struct lock *m);
 extern void mxlock(const struct lock_context *where, struct lock *m);
 extern void mxunlock(const struct lock_context *where, struct lock *m);
 
-extern void rwinit(struct rwlock *l);
-extern void rwdestroy(struct rwlock *l);
-extern void rwlock(struct rwlock *l, bool wr);
-extern void rwunlock(struct rwlock *l);
+extern void rwinit(const struct lock_context *where, struct rwlock *l);
+extern void rwdestroy(const struct lock_context *where, struct rwlock *l);
+extern void rwlock(const struct lock_context *where, struct rwlock *l, bool wr);
+extern void rwunlock(const struct lock_context *where, struct rwlock *l);
 
 extern void condinit(struct cond *c);
 extern void conddestroy(struct cond *c);

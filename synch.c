@@ -464,17 +464,17 @@ void mxunlock(const struct lock_context *where, struct lock *l)
 	VERIFY0(pthread_mutex_unlock(&l->lock));
 }
 
-void rwinit(struct rwlock *l)
+void rwinit(const struct lock_context *where, struct rwlock *l)
 {
 	VERIFY0(pthread_rwlock_init(&l->lock, NULL));
 }
 
-void rwdestroy(struct rwlock *l)
+void rwdestroy(const struct lock_context *where, struct rwlock *l)
 {
 	VERIFY0(pthread_rwlock_destroy(&l->lock));
 }
 
-void rwlock(struct rwlock *l, bool wr)
+void rwlock(const struct lock_context *where, struct rwlock *l, bool wr)
 {
 	if (wr)
 		VERIFY0(pthread_rwlock_wrlock(&l->lock));
@@ -482,7 +482,7 @@ void rwlock(struct rwlock *l, bool wr)
 		VERIFY0(pthread_rwlock_rdlock(&l->lock));
 }
 
-void rwunlock(struct rwlock *l)
+void rwunlock(const struct lock_context *where, struct rwlock *l)
 {
 	VERIFY0(pthread_rwlock_unlock(&l->lock));
 }
