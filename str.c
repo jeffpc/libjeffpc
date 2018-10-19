@@ -22,7 +22,6 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
-#include <alloca.h>
 
 #include <jeffpc/mem.h>
 #include <jeffpc/jeffpc.h>
