@@ -56,7 +56,7 @@ macro(build_test_bin_and_run_files name files)
 	foreach(TEST ${TESTS})
 		add_test(NAME "${name}:${TEST}"
 			 COMMAND "${CMAKE_BINARY_DIR}/tests/test_${name}"
-			 	 "${TEST}"
+			 	 "${CMAKE_CURRENT_SOURCE_DIR}/${TEST}"
 		)
 		set_tests_properties("${name}:${TEST}" PROPERTIES
 			ENVIRONMENT "UMEM_DEBUG=default,verbose"
