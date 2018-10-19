@@ -124,7 +124,7 @@ static void insert(struct TREE_TREE *tree, struct node *nodes,
 
 	ASSERT3U(TREE_NUMNODES(tree), ==, ok);
 
-	cmn_err(CE_INFO, "%zu/%zu insertions in %"PRIu64" ns", ok, NITERS,
+	cmn_err(CE_INFO, "%zu/%u insertions in %"PRIu64" ns", ok, NITERS,
 		end - start);
 }
 
@@ -158,7 +158,7 @@ static void find_or_delete(struct TREE_TREE *tree, struct node *nodes,
 	else
 		ASSERT3U(TREE_NUMNODES(tree), ==, orig_numnodes - ok);
 
-	cmn_err(CE_INFO, "%zu/%zu %s in %"PRIu64" ns", ok, NITERS,
+	cmn_err(CE_INFO, "%zu/%u %s in %"PRIu64" ns", ok, NITERS,
 		find_only ? "finds" : "deletions", end - start);
 }
 
@@ -172,7 +172,7 @@ static void test(uint32_t (*f)(void), void (*reset)(void))
 
 	nodes = calloc(NITERS, sizeof(struct node));
 	if (!nodes)
-		panic("Failed to allocate new nodes (niters = %zu)", NITERS);
+		panic("Failed to allocate new nodes (niters = %u)", NITERS);
 
 	reset();
 	insert(&tree, nodes, f);
