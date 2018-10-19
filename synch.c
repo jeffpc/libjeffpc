@@ -486,25 +486,47 @@ void mxunlock(const struct lock_context *where, struct lock *l)
 
 void rwinit(const struct lock_context *where, struct rwlock *l)
 {
-	VERIFY0(pthread_rwlock_init(&l->lock, NULL));
+	int ret;
+
+	ret = pthread_rwlock_init(&l->lock, NULL);
+	if (ret)
+		panic("rwlock init failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 void rwdestroy(const struct lock_context *where, struct rwlock *l)
 {
-	VERIFY0(pthread_rwlock_destroy(&l->lock));
+	int ret;
+
+	ret = pthread_rwlock_destroy(&l->lock);
+	if (ret)
+		panic("rwlock destroy failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 void rwlock(const struct lock_context *where, struct rwlock *l, bool wr)
 {
+	int ret;
+
 	if (wr)
-		VERIFY0(pthread_rwlock_wrlock(&l->lock));
+		ret = pthread_rwlock_wrlock(&l->lock);
 	else
-		VERIFY0(pthread_rwlock_rdlock(&l->lock));
+		ret = pthread_rwlock_rdlock(&l->lock);
+
+	if (ret)
+		panic("rwlock %s-lock failed @ %s:%d: %s",
+		      wr ? "write" : "read", where->file, where->line,
+		      strerror(ret));
 }
 
 void rwunlock(const struct lock_context *where, struct rwlock *l)
 {
-	VERIFY0(pthread_rwlock_unlock(&l->lock));
+	int ret;
+
+	ret = pthread_rwlock_unlock(&l->lock);
+	if (ret)
+		panic("rwlock unlock failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 void condinit(const struct lock_context *where, struct cond *c)
