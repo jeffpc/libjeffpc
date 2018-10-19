@@ -613,12 +613,22 @@ void condbcast(const struct lock_context *where, struct cond *c)
 void barrierinit(const struct lock_context *where, struct barrier *b,
 		 unsigned count)
 {
-	VERIFY0(pthread_barrier_init(&b->bar, NULL, count));
+	int ret;
+
+	ret = pthread_barrier_init(&b->bar, NULL, count);
+	if (ret)
+		panic("barrier init failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 void barrierdestroy(const struct lock_context *where, struct barrier *b)
 {
-	VERIFY0(pthread_barrier_destroy(&b->bar));
+	int ret;
+
+	ret = pthread_barrier_destroy(&b->bar);
+	if (ret)
+		panic("barrier destroy failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 bool barrierwait(const struct lock_context *where, struct barrier *b)
@@ -626,8 +636,9 @@ bool barrierwait(const struct lock_context *where, struct barrier *b)
 	int ret;
 
 	ret = pthread_barrier_wait(&b->bar);
-
-	VERIFY((ret == 0) || (ret == PTHREAD_BARRIER_SERIAL_THREAD));
+	if ((ret != 0) && (ret != PTHREAD_BARRIER_SERIAL_THREAD))
+		panic("barrier wait failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 
 	return (ret == PTHREAD_BARRIER_SERIAL_THREAD);
 }
