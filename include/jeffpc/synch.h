@@ -115,6 +115,11 @@ struct barrier {
 			condreltimedwait((c),(m),(t))
 #define CONDSIG(c)	condsig(c)
 #define CONDBCAST(c)	condbcast(c)
+#define BARRIERINIT(b, c) \
+			barrierinit((b), (c))
+#define BARRIERDESTROY(b) \
+			barrierdestroy(b)
+#define BARRIERWAIT(b)	barrierwait(b)
 
 /* Do *NOT* use directly */
 extern void mxinit(const struct lock_context *where, struct lock *m,
