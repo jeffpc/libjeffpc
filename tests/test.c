@@ -70,12 +70,13 @@ static void test_print(enum errlevel level, const char *fmt, va_list ap)
 	size_t len;
 
 	len = vsnprintf(buf, sizeof(buf), fmt, ap);
+	buf[sizeof(buf) - 1] = '\0'; /* ensure nul-termination */
 
 	fwrite(buf, len, 1, stderr);
 	fflush(stderr);
 
 	if ((level == CE_PANIC) && expected_panic_string &&
-	    strnstr(buf, expected_panic_string, len)) {
+	    strstr(buf, expected_panic_string)) {
 		/*
 		 * We got a panic, expected a panic, and the panic string
 		 * matches the substring we were given - all is good.  Let's
