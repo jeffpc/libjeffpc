@@ -41,8 +41,9 @@ struct lock_class {
 
 struct lock_context {
 	union {
-		/* mutex/rwlock */
+		/* mutex/cond/rwlock */
 		struct {
+			const char *condname; /* cond */
 			const char *lockname; /* mutex or rwlock */
 		};
 	};
@@ -136,13 +137,57 @@ struct barrier {
 				}; \
 				rwunlock(&rw_ctx, (l)); \
 			} while (0)
-#define CONDINIT(c)	condinit(c)
-#define CONDDESTROY(c)	conddestroy(c)
-#define CONDWAIT(c,m)	condwait((c),(m))
+#define CONDINIT(c)	do { \
+				struct lock_context cond_ctx = { \
+					.condname = #c, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				condinit(&cond_ctx, (c)); \
+			} while (0)
+#define CONDDESTROY(c)	do { \
+				struct lock_context cond_ctx = { \
+					.condname = #c, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				conddestroy(&cond_ctx, (c)); \
+			} while (0)
+#define CONDWAIT(c, m)	do { \
+				struct lock_context cond_ctx = { \
+					.condname = #c, \
+					.lockname = #m, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				condwait(&cond_ctx, (c), (m)); \
+			} while (0)
 #define CONDRELTIMEDWAIT(c, m, t) \
-			condreltimedwait((c),(m),(t))
-#define CONDSIG(c)	condsig(c)
-#define CONDBCAST(c)	condbcast(c)
+			do { \
+				struct lock_context cond_ctx = { \
+					.condname = #c, \
+					.lockname = #m, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				condreltimedwait(&cond_ctx, (c), (m), (t)); \
+			} while (0)
+#define CONDSIG(c)	do { \
+				struct lock_context cond_ctx = { \
+					.condname = #c, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				condsig(&cond_ctx, (c)); \
+			} while (0)
+#define CONDBCAST(c)	do { \
+				struct lock_context cond_ctx = { \
+					.condname = #c, \
+					.file = __FILE__, \
+					.line = __LINE__, \
+				}; \
+				condbcast(&cond_ctx, (c)); \
+			} while (0)
 #define BARRIERINIT(b, c) \
 			barrierinit((b), (c))
 #define BARRIERDESTROY(b) \
@@ -161,13 +206,14 @@ extern void rwdestroy(const struct lock_context *where, struct rwlock *l);
 extern void rwlock(const struct lock_context *where, struct rwlock *l, bool wr);
 extern void rwunlock(const struct lock_context *where, struct rwlock *l);
 
-extern void condinit(struct cond *c);
-extern void conddestroy(struct cond *c);
-extern void condwait(struct cond *c, struct lock *m);
-extern int condreltimedwait(struct cond *c, struct lock *m,
-			    const struct timespec *reltime);
-extern void condsig(struct cond *c);
-extern void condbcast(struct cond *c);
+extern void condinit(const struct lock_context *where, struct cond *c);
+extern void conddestroy(const struct lock_context *where, struct cond *c);
+extern void condwait(const struct lock_context *where, struct cond *c,
+		     struct lock *m);
+extern int condreltimedwait(const struct lock_context *where, struct cond *c,
+			    struct lock *m, const struct timespec *reltime);
+extern void condsig(const struct lock_context *where, struct cond *c);
+extern void condbcast(const struct lock_context *where, struct cond *c);
 
 extern void barrierinit(struct barrier *b, unsigned count);
 extern void barrierdestroy(struct barrier *b);

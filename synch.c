@@ -487,23 +487,23 @@ void rwunlock(const struct lock_context *where, struct rwlock *l)
 	VERIFY0(pthread_rwlock_unlock(&l->lock));
 }
 
-void condinit(struct cond *c)
+void condinit(const struct lock_context *where, struct cond *c)
 {
 	VERIFY0(pthread_cond_init(&c->cond, NULL));
 }
 
-void conddestroy(struct cond *c)
+void conddestroy(const struct lock_context *where, struct cond *c)
 {
 	VERIFY0(pthread_cond_destroy(&c->cond));
 }
 
-void condwait(struct cond *c, struct lock *l)
+void condwait(const struct lock_context *where, struct cond *c, struct lock *l)
 {
 	VERIFY0(pthread_cond_wait(&c->cond, &l->lock));
 }
 
-int condreltimedwait(struct cond *c, struct lock *l,
-		     const struct timespec *reltime)
+int condreltimedwait(const struct lock_context *where, struct cond *c,
+		     struct lock *l, const struct timespec *reltime)
 {
 	int ret;
 
@@ -532,12 +532,12 @@ int condreltimedwait(struct cond *c, struct lock *l,
 	return ret;
 }
 
-void condsig(struct cond *c)
+void condsig(const struct lock_context *where, struct cond *c)
 {
 	VERIFY0(pthread_cond_signal(&c->cond));
 }
 
-void condbcast(struct cond *c)
+void condbcast(const struct lock_context *where, struct cond *c)
 {
 	VERIFY0(pthread_cond_broadcast(&c->cond));
 }
