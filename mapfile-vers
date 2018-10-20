@@ -204,24 +204,24 @@ JEFFPC_0.10 {
 		str_vprintf;
 
 		# synch
-		lockdep_no_locks;
-		mxinit;
-		mxdestroy;
-		mxlock;
-		mxunlock;
-		rwinit;
-		rwdestroy;
-		rwlock;
-		rwunlock;
-		condinit;
+		barrierdestroy;
+		barrierinit;
+		barrierwait;
+		condbcast;
 		conddestroy;
-		condwait;
+		condinit;
 		condreltimedwait;
 		condsig;
-		condbcast;
-		barrierinit;
-		barrierdestroy;
-		barrierwait;
+		condwait;
+		lockdep_no_locks;
+		mxdestroy;
+		mxinit;
+		mxlock;
+		mxunlock;
+		rwdestroy;
+		rwinit;
+		rwlock;
+		rwunlock;
 
 		# taskq
 		taskq_create_fixed;
