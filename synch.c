@@ -447,77 +447,134 @@ out:
 void mxinit(const struct lock_context *where, struct lock *l,
 	    struct lock_class *lc)
 {
+	int ret;
+
 	verify_lock_init(where, l, lc);
 
-	VERIFY0(pthread_mutex_init(&l->lock, NULL));
+	ret = pthread_mutex_init(&l->lock, NULL);
+	if (ret)
+		panic("mutex init failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 void mxdestroy(const struct lock_context *where, struct lock *l)
 {
+	int ret;
+
 	verify_lock_destroy(where, l);
 
-	VERIFY0(pthread_mutex_destroy(&l->lock));
+	ret = pthread_mutex_destroy(&l->lock);
+	if (ret)
+		panic("mutex destroy failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 void mxlock(const struct lock_context *where, struct lock *l)
 {
+	int ret;
+
 	verify_lock_lock(where, l);
 
-	VERIFY0(pthread_mutex_lock(&l->lock));
+	ret = pthread_mutex_lock(&l->lock);
+	if (ret)
+		panic("mutex lock failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
 void mxunlock(const struct lock_context *where, struct lock *l)
 {
+	int ret;
+
 	verify_lock_unlock(where, l);
 
-	VERIFY0(pthread_mutex_unlock(&l->lock));
+	ret = pthread_mutex_unlock(&l->lock);
+	if (ret)
+		panic("mutex unlock failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
-void rwinit(struct rwlock *l)
+void rwinit(const struct lock_context *where, struct rwlock *l)
 {
-	VERIFY0(pthread_rwlock_init(&l->lock, NULL));
+	int ret;
+
+	ret = pthread_rwlock_init(&l->lock, NULL);
+	if (ret)
+		panic("rwlock init failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
-void rwdestroy(struct rwlock *l)
+void rwdestroy(const struct lock_context *where, struct rwlock *l)
 {
-	VERIFY0(pthread_rwlock_destroy(&l->lock));
+	int ret;
+
+	ret = pthread_rwlock_destroy(&l->lock);
+	if (ret)
+		panic("rwlock destroy failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
-void rwlock(struct rwlock *l, bool wr)
+void rwlock(const struct lock_context *where, struct rwlock *l, bool wr)
 {
+	int ret;
+
 	if (wr)
-		VERIFY0(pthread_rwlock_wrlock(&l->lock));
+		ret = pthread_rwlock_wrlock(&l->lock);
 	else
-		VERIFY0(pthread_rwlock_rdlock(&l->lock));
+		ret = pthread_rwlock_rdlock(&l->lock);
+
+	if (ret)
+		panic("rwlock %s-lock failed @ %s:%d: %s",
+		      wr ? "write" : "read", where->file, where->line,
+		      strerror(ret));
 }
 
-void rwunlock(struct rwlock *l)
+void rwunlock(const struct lock_context *where, struct rwlock *l)
 {
-	VERIFY0(pthread_rwlock_unlock(&l->lock));
+	int ret;
+
+	ret = pthread_rwlock_unlock(&l->lock);
+	if (ret)
+		panic("rwlock unlock failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
-void condinit(struct cond *c)
+void condinit(const struct lock_context *where, struct cond *c)
 {
-	VERIFY0(pthread_cond_init(&c->cond, NULL));
+	int ret;
+
+	ret = pthread_cond_init(&c->cond, NULL);
+	if (ret)
+		panic("cond init failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
-void conddestroy(struct cond *c)
+void conddestroy(const struct lock_context *where, struct cond *c)
 {
-	VERIFY0(pthread_cond_destroy(&c->cond));
+	int ret;
+
+	ret = pthread_cond_destroy(&c->cond);
+	if (ret)
+		panic("cond destroy failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
-void condwait(struct cond *c, struct lock *l)
+void condwait(const struct lock_context *where, struct cond *c, struct lock *l)
 {
-	VERIFY0(pthread_cond_wait(&c->cond, &l->lock));
+	int ret;
+
+	ret = pthread_cond_wait(&c->cond, &l->lock);
+	if (ret)
+		panic("cond wait failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
-int condreltimedwait(struct cond *c, struct lock *l,
-		     const struct timespec *reltime)
+int condreltimedwait(const struct lock_context *where, struct cond *c,
+		     struct lock *l, const struct timespec *reltime)
 {
 	int ret;
 
 #ifdef HAVE_PTHREAD_COND_RELTIMEDWAIT_NP
-	ret = -pthread_cond_reltimedwait_np(&c->cond, &l->lock, reltime);
+	ret = pthread_cond_reltimedwait_np(&c->cond, &l->lock, reltime);
 #else
 	struct timespec abstime;
 	struct timespec now;
@@ -532,42 +589,65 @@ int condreltimedwait(struct cond *c, struct lock *l,
 	abstime.tv_sec  = now.tv_sec  + reltime->tv_sec;
 	abstime.tv_nsec = now.tv_nsec + reltime->tv_nsec;
 
-	ret = -pthread_cond_timedwait(&c->cond, &l->lock, &abstime);
+	ret = pthread_cond_timedwait(&c->cond, &l->lock, &abstime);
 #endif
 
-	if ((ret != 0) && (ret != -ETIMEDOUT))
-		panic("%s failed: %s", __func__, xstrerror(ret));
+	if ((ret != 0) && (ret != ETIMEDOUT))
+		panic("cond rel-timed-wait failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 
-	return ret;
+	return -ret;
 }
 
-void condsig(struct cond *c)
+void condsig(const struct lock_context *where, struct cond *c)
 {
-	VERIFY0(pthread_cond_signal(&c->cond));
+	int ret;
+
+	ret = pthread_cond_signal(&c->cond);
+	if (ret)
+		panic("cond signal failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
-void condbcast(struct cond *c)
+void condbcast(const struct lock_context *where, struct cond *c)
 {
-	VERIFY0(pthread_cond_broadcast(&c->cond));
+	int ret;
+
+	ret = pthread_cond_broadcast(&c->cond);
+	if (ret)
+		panic("cond broadcast failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
-void barrierinit(struct barrier *b, unsigned count)
+void barrierinit(const struct lock_context *where, struct barrier *b,
+		 unsigned count)
 {
-	VERIFY0(pthread_barrier_init(&b->bar, NULL, count));
+	int ret;
+
+	ret = pthread_barrier_init(&b->bar, NULL, count);
+	if (ret)
+		panic("barrier init failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
-void barrierdestroy(struct barrier *b)
+void barrierdestroy(const struct lock_context *where, struct barrier *b)
 {
-	VERIFY0(pthread_barrier_destroy(&b->bar));
+	int ret;
+
+	ret = pthread_barrier_destroy(&b->bar);
+	if (ret)
+		panic("barrier destroy failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 }
 
-bool barrierwait(struct barrier *b)
+bool barrierwait(const struct lock_context *where, struct barrier *b)
 {
 	int ret;
 
 	ret = pthread_barrier_wait(&b->bar);
-
-	VERIFY((ret == 0) || (ret == PTHREAD_BARRIER_SERIAL_THREAD));
+	if ((ret != 0) && (ret != PTHREAD_BARRIER_SERIAL_THREAD))
+		panic("barrier wait failed @ %s:%d: %s",
+		      where->file, where->line, strerror(ret));
 
 	return (ret == PTHREAD_BARRIER_SERIAL_THREAD);
 }
