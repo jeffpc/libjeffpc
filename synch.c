@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2011-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -213,6 +213,15 @@ static void error_alloc(struct lock *lock, const struct lock_context *where,
 	cmn_err(CE_CRIT, "lockdep: thread trying to acquire lock:");
 	print_lock(lock, where);
 	cmn_err(CE_CRIT, "lockdep: while holding:");
+	print_held_locks(NULL);
+
+	atomic_set(&lockdep_on, 0);
+}
+
+static void error_locks_on_exit(void)
+{
+	cmn_err(CE_CRIT, "lockdep: thread is holding locks while terminating");
+	cmn_err(CE_CRIT, "lockdep: held locks:");
 	print_held_locks(NULL);
 
 	atomic_set(&lockdep_on, 0);
@@ -562,3 +571,16 @@ bool barrierwait(struct barrier *b)
 
 	return (ret == PTHREAD_BARRIER_SERIAL_THREAD);
 }
+
+#ifdef JEFFPC_LOCK_TRACKING
+void lockdep_no_locks(void)
+{
+	if (!atomic_read(&lockdep_on))
+		return;
+
+	if (!last_acquired_lock())
+		return;
+
+	error_locks_on_exit();
+}
+#endif

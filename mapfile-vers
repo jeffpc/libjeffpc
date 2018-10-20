@@ -204,6 +204,7 @@ JEFFPC_0.10 {
 		str_vprintf;
 
 		# synch
+		lockdep_no_locks;
 		mxinit;
 		mxdestroy;
 		mxlock;

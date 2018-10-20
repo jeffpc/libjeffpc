@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2011-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -104,6 +104,13 @@ struct barrier {
 #define CONDWAIT(c,m)	condwait((c),(m))
 #define CONDSIG(c)	condsig(c)
 #define CONDBCAST(c)	condbcast(c)
+
+/* assert that this thread is not holding any locks */
+#ifdef JEFFPC_LOCK_TRACKING
+extern void lockdep_no_locks(void);
+#else
+#define lockdep_no_locks()	do { } while (0)
+#endif
 
 /* Do *NOT* use directly */
 extern void mxinit(const struct lock_context *where, struct lock *m,
