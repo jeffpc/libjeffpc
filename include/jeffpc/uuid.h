@@ -42,6 +42,8 @@ extern void xuuid_generate(struct xuuid *uuid);
 
 /* returns true if uuid was successfully parsed */
 extern bool xuuid_parse(struct xuuid *u, const char *in);
+/* just like xuuid_parse, but doesn't require the \0 terminator */
+extern bool xuuid_parse_no_nul(struct xuuid *u, const char *in);
 extern void xuuid_unparse(const struct xuuid *u, char *out);
 
 extern bool_t xdr_xuuid(XDR *xdr, struct xuuid *obj);

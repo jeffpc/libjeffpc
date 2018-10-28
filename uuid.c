@@ -81,16 +81,27 @@ static inline bool parse_part(uint8_t *out, const char *in, size_t len)
 	return true;
 }
 
-bool xuuid_parse(struct xuuid *uuid, const char *in)
+static inline bool __xuuid_parse(struct xuuid *uuid, const char *in,
+				 bool req_nul)
 {
 	return (in[8] == '-') && (in[13] == '-') &&
 	       (in[18] == '-') && (in[23] == '-') &&
-	       (in[36] == '\0') &&
+	       (!req_nul || (in[36] == '\0')) &&
 	       parse_part(&uuid->raw[0], &in[0], 4) &&
 	       parse_part(&uuid->raw[4], &in[9], 2) &&
 	       parse_part(&uuid->raw[6], &in[14], 2) &&
 	       parse_part(&uuid->raw[8], &in[19], 2) &&
 	       parse_part(&uuid->raw[10], &in[24], 6);
+}
+
+bool xuuid_parse(struct xuuid *uuid, const char *in)
+{
+	return __xuuid_parse(uuid, in, true);
+}
+
+bool xuuid_parse_no_nul(struct xuuid *uuid, const char *in)
+{
+	return __xuuid_parse(uuid, in, false);
 }
 
 void xuuid_unparse(const struct xuuid *uuid, char *out)

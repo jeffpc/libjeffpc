@@ -249,6 +249,7 @@ JEFFPC_0.10 {
 		xuuid_generate;
 		xuuid_null_uuid;
 		xuuid_parse;
+		xuuid_parse_no_nul;
 		xuuid_unparse;
 
 		# val
