@@ -95,12 +95,6 @@ struct val {
 			size_t nelem;
 		} array;
 		const struct {
-			/*
-			 * TODO: Using an unbalanced binary search tree is
-			 * not great, but it will do for now.  Once we have
-			 * a balanced binary search tree implementation, we
-			 * should switch to it.
-			 */
 			struct rb_tree values;
 		} nvl;
 
