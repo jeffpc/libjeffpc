@@ -40,4 +40,5 @@ macro(find_errno errno)
 	endif()
 endmacro()
 
+find_errno(ECKSUM)
 find_errno(ENOTUNIQ)

@@ -35,6 +35,9 @@
 /*
  * Additions to system errnos
  */
+#ifdef JEFFPC_ERRNO_ECKSUM
+#define ECKSUM		JEFFPC_ERRNO_ECKSUM
+#endif
 #ifdef JEFFPC_ERRNO_ENOTUNIQ
 #define ENOTUNIQ	JEFFPC_ERRNO_ENOTUNIQ
 #endif
