@@ -78,6 +78,7 @@ JEFFPC_0.10 {
 		panic;
 		print_stacktrace;
 		save_stacktrace;
+		xstrerror;
 
 		# hexdump
 		hexdump;

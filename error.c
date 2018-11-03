@@ -301,6 +301,11 @@ void print_stacktrace(enum errlevel level, struct stack *stack)
 	}
 }
 
+const char *xstrerror(int e)
+{
+	return strerror(-e);
+}
+
 /*
  * If we have sys/debug.h, let's include it so that the assfail function
  * signature gets checked to be what we expect.

@@ -67,6 +67,8 @@ extern void jeffpc_assfail3(const char *a, uintmax_t lv, const char *op,
 extern void save_stacktrace(struct stack *stack);
 extern void print_stacktrace(enum errlevel level, struct stack *stack);
 
+extern const char *xstrerror(int e);
+
 #define VERIFY3P(l, op, r)						\
 	do {								\
 		uintptr_t lhs = (uintptr_t)(l);				\
@@ -141,11 +143,6 @@ static inline int IS_ERR(const void *ptr)
 static inline void *ERR_CAST(const void *ptr)
 {
 	return (void *) ptr;
-}
-
-static inline const char *xstrerror(int e)
-{
-	return strerror(-e);
 }
 
 #endif
