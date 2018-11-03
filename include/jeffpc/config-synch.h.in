@@ -23,9 +23,6 @@
 #ifndef __JEFFPC_CONFIG_SYNCH_H
 #define __JEFFPC_CONFIG_SYNCH_H
 
-#cmakedefine JEFFPC_LOCK_TRACKING
-
-#cmakedefine JEFFPC_LOCK_DEP_COUNT ${JEFFPC_LOCK_DEP_COUNT}
-#cmakedefine JEFFPC_LOCK_STACK_DEPTH ${JEFFPC_LOCK_STACK_DEPTH}
+#include <jeffpc/config.h>
 
 #endif

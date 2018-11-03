@@ -85,15 +85,15 @@ find_package(umem)
 # set a value that's "exported" into the generated config file
 set(JEFFPC_HAVE_UMEM ${UMEM_FOUND})
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/jeffpc/config.h.in"
-	"${CMAKE_CURRENT_BINARY_DIR}/include/jeffpc/config.h")
-
 if(NOT WITHOUT_LOCK_TRACKING)
 	set(JEFFPC_LOCK_TRACKING 1)
 endif()
 
 set(JEFFPC_LOCK_DEP_COUNT 16)
 set(JEFFPC_LOCK_STACK_DEPTH 32)
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/jeffpc/config.h.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/include/jeffpc/config.h")
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/jeffpc/config-synch.h.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/include/jeffpc/config-synch.h")
