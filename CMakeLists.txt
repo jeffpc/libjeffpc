@@ -32,6 +32,8 @@ add_definitions(
 	-D_REENTRANT
 	-D_POSIX_C_SOURCE=200809L
 	-D_GNU_SOURCE
+	-D__BSD_VISIBLE
+	-D__XSI_VISIBLE
 )
 
 add_compile_options(
