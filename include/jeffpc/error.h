@@ -30,6 +30,15 @@
 #include <errno.h>
 #include <string.h>
 
+#include <jeffpc/config.h>
+
+/*
+ * Additions to system errnos
+ */
+#ifdef JEFFPC_ERRNO_ENOTUNIQ
+#define ENOTUNIQ	JEFFPC_ERRNO_ENOTUNIQ
+#endif
+
 #define NORETURN __attribute__((__noreturn__))
 
 enum errlevel {

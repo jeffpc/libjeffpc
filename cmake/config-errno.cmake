@@ -39,3 +39,5 @@ macro(find_errno errno)
 		math(EXPR NEXT_ERRNO "(${NEXT_ERRNO} + 1)")
 	endif()
 endmacro()
+
+find_errno(ENOTUNIQ)

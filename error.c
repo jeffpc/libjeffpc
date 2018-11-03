@@ -303,6 +303,11 @@ void print_stacktrace(enum errlevel level, struct stack *stack)
 
 const char *xstrerror(int e)
 {
+	switch (e) {
+		case -ENOTUNIQ:
+			return "Name, identifier, or object not unique";
+	}
+
 	return strerror(-e);
 }
 
