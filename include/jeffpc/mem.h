@@ -25,8 +25,13 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <alloca.h>
 #include <string.h>
+
+#include <jeffpc/config.h>
+
+#ifdef JEFFPC_HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
 
 /*
  * zeroed allocation
