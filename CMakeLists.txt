@@ -38,11 +38,11 @@ add_definitions(
 
 add_compile_options(
 	-Wall
-	-Woverride-init
 	-O2
 	-g
 	-std=gnu99
 	-fno-omit-frame-pointer
+	$<$<C_COMPILER_ID:gcc>:-Woverride-init>
 	$<$<C_COMPILER_ID:gcc>:-fno-inline-small-functions>
 	$<$<C_COMPILER_ID:gcc>:-fno-inline-functions-called-once>
 )
