@@ -148,7 +148,6 @@ install(TARGETS	jeffpc
 install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/bst.h
 		include/jeffpc/buffer.h
-		include/jeffpc/config.h
 		include/jeffpc/cstr.h
 		include/jeffpc/error.h
 		include/jeffpc/hexdump.h
