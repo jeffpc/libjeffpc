@@ -30,7 +30,7 @@
 
 uint32_t rand32(void)
 {
-#ifdef HAVE_ARC4RANDOM
+#ifdef JEFFPC_HAVE_ARC4RANDOM
 	return arc4random();
 #else
 	uint32_t val;
@@ -64,7 +64,7 @@ uint64_t rand64(void)
 
 void rand_buf(void *buf, size_t len)
 {
-#ifdef HAVE_ARC4RANDOM_BUF
+#ifdef JEFFPC_HAVE_ARC4RANDOM_BUF
 	arc4random_buf(buf, len);
 #else
 	int ret;

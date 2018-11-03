@@ -573,7 +573,7 @@ int condreltimedwait(const struct lock_context *where, struct cond *c,
 {
 	int ret;
 
-#ifdef HAVE_PTHREAD_COND_RELTIMEDWAIT_NP
+#ifdef JEFFPC_HAVE_PTHREAD_COND_RELTIMEDWAIT_NP
 	ret = pthread_cond_reltimedwait_np(&c->cond, &l->lock, reltime);
 #else
 	struct timespec abstime;

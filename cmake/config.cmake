@@ -27,7 +27,7 @@ include(CheckPrototypeDefinition)
 include(CheckSymbolExists)
 include(TestBigEndian)
 
-test_big_endian(CPU_BIG_ENDIAN)
+test_big_endian(JEFFPC_CPU_BIG_ENDIAN)
 
 # Find which library a particular function exists in
 macro(find_symbol fxn libs output_lib_name)
@@ -55,23 +55,23 @@ check_prototype_definition(__assert
 	"void __assert(const char *func, const char *file, int line, const char *expr)"
 	""
 	"assert.h"
-	HAVE___ASSERT_FREEBSD_STYLE)
+	JEFFPC_HAVE___ASSERT_FREEBSD_STYLE)
 check_prototype_definition(__assert
 	"void __assert(const char *expr, const char *file, int line)"
 	""
 	"assert.h"
-	HAVE___ASSERT_LINUX_STYLE)
-check_function_exists(arc4random HAVE_ARC4RANDOM)
-check_function_exists(arc4random_buf HAVE_ARC4RANDOM_BUF)
-check_function_exists(assfail HAVE_ASSFAIL)
-check_function_exists(addrtosymstr HAVE_ADDRTOSYMSTR)
+	JEFFPC_HAVE___ASSERT_LINUX_STYLE)
+check_function_exists(arc4random JEFFPC_HAVE_ARC4RANDOM)
+check_function_exists(arc4random_buf JEFFPC_HAVE_ARC4RANDOM_BUF)
+check_function_exists(assfail JEFFPC_HAVE_ASSFAIL)
+check_function_exists(addrtosymstr JEFFPC_HAVE_ADDRTOSYMSTR)
 check_function_exists(pthread_cond_reltimedwait_np
-	HAVE_PTHREAD_COND_RELTIMEDWAIT_NP)
-check_function_exists(reallocarray HAVE_REALLOCARRAY)
-check_function_exists(recallocarray HAVE_RECALLOCARRAY)
-check_include_files(sys/debug.h HAVE_SYS_DEBUG_H)
-check_symbol_exists(EAI_ADDRFAMILY "netdb.h" HAVE_EAI_ADDRFAMILY)
-check_symbol_exists(EAI_NODATA "netdb.h" HAVE_EAI_NODATA)
+	JEFFPC_HAVE_PTHREAD_COND_RELTIMEDWAIT_NP)
+check_function_exists(reallocarray JEFFPC_HAVE_REALLOCARRAY)
+check_function_exists(recallocarray JEFFPC_HAVE_RECALLOCARRAY)
+check_include_files(sys/debug.h JEFFPC_HAVE_SYS_DEBUG_H)
+check_symbol_exists(EAI_ADDRFAMILY "netdb.h" JEFFPC_HAVE_EAI_ADDRFAMILY)
+check_symbol_exists(EAI_NODATA "netdb.h" JEFFPC_HAVE_EAI_NODATA)
 
 find_symbol(accept "socket" SOCKET_LIBRARY)
 find_symbol(backtrace "execinfo" EXECINFO_LIBRARY)
@@ -83,7 +83,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_DIR}/Modules")
 find_package(umem)
 
 # set a value that's "exported" into the generated config file
-set(HAVE_UMEM ${UMEM_FOUND})
+set(JEFFPC_HAVE_UMEM ${UMEM_FOUND})
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/jeffpc/config.h.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/include/jeffpc/config.h")

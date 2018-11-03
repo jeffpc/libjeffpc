@@ -34,7 +34,7 @@
 
 #include "init.h"
 
-#ifdef HAVE_ASSFAIL
+#ifdef JEFFPC_HAVE_ASSFAIL
 /* See comment at the end of this file about assfail type checking */
 extern int assfail(const char *a, const char *f, int l);
 #endif
@@ -42,11 +42,11 @@ extern int assfail(const char *a, const char *f, int l);
 static inline void assertion_failed(const char *assertion, const char *file,
 				    int line, const char *function)
 {
-#if defined(HAVE_ASSFAIL)
+#if defined(JEFFPC_HAVE_ASSFAIL)
 	assfail(assertion, file, line);
-#elif defined(HAVE___ASSERT_FREEBSD_STYLE)
+#elif defined(JEFFPC_HAVE___ASSERT_FREEBSD_STYLE)
 	__assert(function, file, line, assertion);
-#elif defined(HAVE___ASSERT_LINUX_STYLE)
+#elif defined(JEFFPC_HAVE___ASSERT_LINUX_STYLE)
 	__assert(assertion, file, line);
 #else
 #error "Don't know how to kill for assertion failures"
@@ -271,7 +271,7 @@ void save_stacktrace(struct stack *stack)
 		stack->frames[nframes++] = NULL;
 }
 
-#ifndef HAVE_ADDRTOSYMSTR
+#ifndef JEFFPC_HAVE_ADDRTOSYMSTR
 static void addrtosymstr(void *pc, char *buf, size_t buflen)
 {
 	snprintf(buf, buflen, "[%p]", pc);
@@ -313,6 +313,6 @@ const char *xstrerror(int e)
  * This include is at the end of this file because it polutes the namespace
  * big time.
  */
-#ifdef HAVE_SYS_DEBUG_H
+#ifdef JEFFPC_HAVE_SYS_DEBUG_H
 #include <sys/debug.h>
 #endif

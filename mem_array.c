@@ -25,7 +25,7 @@
 
 void *mem_reallocarray(void *ptr, size_t nelem, size_t size)
 {
-#ifdef HAVE_REALLOCARRAY
+#ifdef JEFFPC_HAVE_REALLOCARRAY
 	return reallocarray(ptr, nelem, size);
 #else
 	/* TODO: check for overflow, return NULL & set errno to ENOMEM */
@@ -36,7 +36,7 @@ void *mem_reallocarray(void *ptr, size_t nelem, size_t size)
 void *mem_recallocarray(void *ptr, size_t old_nelem, size_t new_nelem,
 			size_t size)
 {
-#ifdef HAVE_RECALLOCARRAY
+#ifdef JEFFPC_HAVE_RECALLOCARRAY
 	return recallocarray(ptr, old_nelem, new_nelem, size);
 #else
 	/*

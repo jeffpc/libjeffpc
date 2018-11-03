@@ -47,7 +47,7 @@ int connect_ip(const char *host, uint16_t port, bool v4, bool v6, enum ip_type t
 		case 0:
 			/* success */
 			break;
-#ifdef HAVE_EAI_ADDRFAMILY
+#ifdef JEFFPC_HAVE_EAI_ADDRFAMILY
 		case EAI_ADDRFAMILY:
 #endif
 		case EAI_FAMILY:
@@ -60,7 +60,7 @@ int connect_ip(const char *host, uint16_t port, bool v4, bool v6, enum ip_type t
 			return -EINVAL;
 		case EAI_MEMORY:
 			return -ENOMEM;
-#ifdef HAVE_EAI_NODATA
+#ifdef JEFFPC_HAVE_EAI_NODATA
 		case EAI_NODATA:
 #endif
 		case EAI_NONAME:
