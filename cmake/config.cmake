@@ -93,6 +93,8 @@ endif()
 set(JEFFPC_LOCK_DEP_COUNT 16)
 set(JEFFPC_LOCK_STACK_DEPTH 32)
 
+include("${CMAKE_DIR}/config-errno.cmake")
+
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/jeffpc/config.h.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/include/jeffpc/config.h")
 
