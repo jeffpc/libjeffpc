@@ -32,6 +32,7 @@ struct jeffpc_ops {
 	void (*assfail3)(const char *a, uintmax_t lv, const char *op,
 			 uintmax_t rv, const char *f, int l, const char *fxn);
 	const char *(*get_session)(void);
+	const char *(*strerror)(int);
 };
 
 extern void jeffpc_init(struct jeffpc_ops *ops);

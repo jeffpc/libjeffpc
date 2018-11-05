@@ -303,6 +303,14 @@ void print_stacktrace(enum errlevel level, struct stack *stack)
 
 const char *xstrerror(int e)
 {
+	if (libops.strerror) {
+		const char *ret;
+
+		ret = libops.strerror(e);
+		if (ret)
+			return ret;
+	}
+
 	switch (e) {
 		case 0:
 			return "Success";
