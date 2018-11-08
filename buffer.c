@@ -260,6 +260,10 @@ ssize_t buffer_pwrite(struct buffer *buffer, const void *buf, size_t len,
 	if (ret)
 		return ret;
 
+	/* clear any holes */
+	if (buffer->used < off)
+		buffer->ops->clear(buffer, buffer->used, off - buffer->used);
+
 	buffer->ops->copyin(buffer, off, buf, len);
 
 	buffer->used = MAX(buffer->used, off + len);
