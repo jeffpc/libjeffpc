@@ -146,6 +146,7 @@ install(TARGETS	jeffpc
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 install(FILES	include/jeffpc/atomic.h
+		include/jeffpc/array.h
 		include/jeffpc/bst.h
 		include/jeffpc/buffer.h
 		include/jeffpc/cstr.h
