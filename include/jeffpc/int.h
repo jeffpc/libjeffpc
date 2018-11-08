@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <errno.h>
+
+#include <jeffpc/config.h>
 
 /*
  * string to integer conversion
@@ -267,7 +269,7 @@ static inline uint##size##_t cpu##size##_to_cpu_unaligned(const void *in)\
 	return bswap;							\
 }
 
-#ifdef CPU_BIG_ENDIAN
+#ifdef JEFFPC_CPU_BIG_ENDIAN
 #define GEN(size)	__GEN(size, x)
 #else
 #define GEN(size)	__GEN(size, bswap_##size(x))
@@ -290,7 +292,7 @@ static inline uint##size##_t from##size##_to_##to(uint##size##_t x)	\
 	return bswap;							\
 }
 
-#ifdef CPU_BIG_ENDIAN
+#ifdef JEFFPC_CPU_BIG_ENDIAN
 #define __GEN(from, size, to, be, le) ___GEN(from, size, to, be)
 #else
 #define __GEN(from, size, to, be, le) ___GEN(from, size, to, le)
