@@ -208,6 +208,7 @@ int buffer_truncate(struct buffer *buffer, size_t size)
 	if (ret)
 		return ret;
 
+	/* clear any expansion */
 	if (buffer->used < size)
 		buffer->ops->clear(buffer, buffer->used, size - buffer->used);
 
