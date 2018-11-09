@@ -304,6 +304,8 @@ void print_stacktrace(enum errlevel level, struct stack *stack)
 const char *xstrerror(int e)
 {
 	switch (e) {
+		case 0:
+			return "Success";
 		case -ECKSUM:
 			return "Checksum mismatch";
 		case -ENOTUNIQ:
