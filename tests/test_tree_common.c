@@ -480,5 +480,8 @@ static void test_insert(void)
 
 void test(void)
 {
+	fprintf(stderr, "a = %p (%d), b = %p (%d), c = %p (%d), d = %p (%d)\n",
+		&a, a.v, &b, b.v, &c, c.v, &d, d.v);
+
 	test_insert();
 }
