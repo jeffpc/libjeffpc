@@ -55,6 +55,51 @@ void *tree_find(struct tree_tree *tree, const void *key,
 	return NULL;
 }
 
+/*
+ * This function is written from the perspective of finding the nearest
+ * greater-than node.  The less-than operation simply swaps the definition
+ * of left and right.
+ *
+ * Essentially, we are trying to do one step of an in-order traversal where
+ * the cookie indicates the last position.
+ *
+ *   node |  dir  | meaning
+ *  ------+-------+-----------------------------
+ *   NULL |   *   | empty tree / invalid cookie
+ *    *   | LEFT  | return node
+ *    *   | RIGHT | go up a level, "recursing"
+ */
+void *tree_nearest(struct tree_tree *tree,
+		   struct tree_cookie *cookie,
+		   bool gt)
+{
+	const enum tree_dir left = gt ? TREE_LEFT : TREE_RIGHT;
+	const enum tree_dir right = gt ? TREE_RIGHT : TREE_LEFT;
+	struct tree_node *node;
+	enum tree_dir dir;
+
+	node = cookie->node;
+	dir = cookie->dir;
+
+	if (!node)
+		return NULL;
+
+	for (;;) {
+		if (dir == left)
+			return node2obj(tree, node);
+
+		ASSERT3U(dir, ==, right);
+
+		if (!node->parent)
+			return NULL;
+
+		/* We finished the right subtree, time to go up the tree */
+
+		dir = which_dir(node->parent, node);
+		node = node->parent;
+	}
+}
+
 void *tree_insert_here(struct tree_tree *tree, void *newitem,
 		       struct tree_cookie *cookie)
 {

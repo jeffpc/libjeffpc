@@ -35,6 +35,9 @@
 #define TREE_ADD		bst_add
 #define TREE_REMOVE		bst_remove
 #define TREE_FOR_EACH		bst_for_each
+#define TREE_FIND		bst_find
+#define TREE_NEAREST_LT		bst_nearest_lt
+#define TREE_NEAREST_GT		bst_nearest_gt
 #define TREE_NUMNODES		bst_numnodes
 #define TREE_DESTROY_NODES	bst_destroy_nodes
 #elif defined(TEST_TREE_RB)
@@ -46,6 +49,9 @@
 #define TREE_ADD		rb_add
 #define TREE_REMOVE		rb_remove
 #define TREE_FOR_EACH		rb_for_each
+#define TREE_FIND		rb_find
+#define TREE_NEAREST_LT		rb_nearest_lt
+#define TREE_NEAREST_GT		rb_nearest_gt
 #define TREE_NUMNODES		rb_numnodes
 #define TREE_DESTROY_NODES	rb_destroy_nodes
 #else
@@ -114,6 +120,40 @@ struct test4 {
 static struct test2 checks2[2];
 static struct test3 checks3[6];
 static struct test4 checks4[24];
+
+struct testnearest {
+	int v;
+	struct node *lt;
+	struct node *gt;
+};
+
+static const struct testnearest checksnearest[5][5] = {
+	[0] = {
+		{  5, NULL, NULL },
+	},
+	[1] = {
+		{  5, NULL, &a },
+		{ 15, &a, NULL },
+	},
+	[2] = {
+		{  5, NULL, &a },
+		{ 15, &a, &b },
+		{ 25, &b, NULL },
+	},
+	[3] = {
+		{  5, NULL, &a },
+		{ 15, &a, &b },
+		{ 25, &b, &c },
+		{ 35, &c, NULL },
+	},
+	[4] = {
+		{  5, NULL, &a },
+		{ 15, &a, &b },
+		{ 25, &b, &c },
+		{ 35, &c, &d },
+		{ 45, &d, NULL },
+	},
+};
 
 static int cmp(const void *va, const void *vb)
 {
@@ -240,6 +280,57 @@ static void verify_iter(struct TREE_TREE *tree, size_t expected_numnodes)
 	VERIFY3U(TREE_NUMNODES(tree), ==, expected_numnodes);
 }
 
+static void check_nearest(const char *dir, int v,
+			  struct node *got, struct node *exp)
+{
+	if (got == exp)
+		return;
+
+	if (!got)
+		fail("nearest %s %d mismatch (got:%p, expected:%p (%d))",
+		     dir, v, got, exp, exp->v);
+
+	if (!exp)
+		fail("nearest %s %d mismatch (got:%p (%d), expected:%p)",
+		     dir, v, got, got->v, exp);
+
+	fail("nearest %s %d mismatch (got:%p (%d), expected:%p (%d))",
+	     dir, v, got, got->v, exp, exp->v);
+}
+
+static void __verify_nearest(struct TREE_TREE *tree, int v,
+			     struct node *exp_lt, struct node *exp_gt)
+{
+	struct TREE_COOKIE cookie;
+	struct node *node;
+	struct node key = {
+		.v = v,
+	};
+
+	node = TREE_FIND(tree, &key, &cookie);
+	if (node)
+		fail("find of non-existent key returned non-null (%p)", node);
+
+	check_nearest("lt", v, TREE_NEAREST_LT(tree, &cookie), exp_lt);
+	check_nearest("gt", v, TREE_NEAREST_GT(tree, &cookie), exp_gt);
+}
+
+static void verify_nearest(struct TREE_TREE *tree, size_t numnodes)
+{
+	int i;
+
+	fprintf(stderr, "nearest...");
+
+	for (i = 0; i < ARRAY_LEN(checksnearest[numnodes]); i++) {
+		const struct testnearest *t = &checksnearest[numnodes][i];
+
+		if (!t->v)
+			continue;
+
+		__verify_nearest(tree, t->v, t->lt, t->gt);
+	}
+}
+
 static void test_nodes(const char *testname, struct node *remove,
 		       size_t numinsert, struct node **inserts,
 		       size_t npre, struct node **pre,
@@ -255,6 +346,7 @@ static void test_nodes(const char *testname, struct node *remove,
 #endif
 	verify_nodes(&tree, npre, pre);
 	verify_iter(&tree, numinsert);
+	verify_nearest(&tree, numinsert);
 	destroy(&tree, numinsert, !remove);
 
 	if (!remove)

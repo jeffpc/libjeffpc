@@ -72,6 +72,18 @@ static inline void *rb_find(struct rb_tree *tree, const void *key,
 	return tree_find(&tree->tree, key, &cookie->cookie);
 }
 
+static inline void *rb_nearest_lt(struct rb_tree *tree,
+				  struct rb_cookie *cookie)
+{
+	return tree_nearest(&tree->tree, &cookie->cookie, false);
+}
+
+static inline void *rb_nearest_gt(struct rb_tree *tree,
+				  struct rb_cookie *cookie)
+{
+	return tree_nearest(&tree->tree, &cookie->cookie, true);
+}
+
 static inline void *rb_first(struct rb_tree *tree)
 {
 	return tree_first(&tree->tree);

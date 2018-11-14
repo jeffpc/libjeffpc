@@ -237,6 +237,7 @@ JEFFPC_0.10 {
 		tree_find;
 		tree_first;
 		tree_last;
+		tree_nearest;
 		tree_next;
 		tree_prev;
 		tree_swap;
