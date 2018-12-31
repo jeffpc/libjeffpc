@@ -41,6 +41,16 @@ static inline struct tree_node *obj2node(struct tree_tree *tree, void *obj)
 	return (struct tree_node *)(((uintptr_t) obj) + tree->node_off);
 }
 
+static inline struct tree_node *get_parent(struct tree_node *node)
+{
+	return node->_parent;
+}
+
+static inline void set_parent(struct tree_node *node, struct tree_node *parent)
+{
+	node->_parent = parent;
+}
+
 static inline enum tree_dir which_dir(struct tree_node *parent,
 				      struct tree_node *tgt)
 {
@@ -75,11 +85,11 @@ static inline void *tree_next_dir(struct tree_tree *tree, void *item, bool fwd)
 	if (node->children[right])
 		return node2obj(tree, firstlast(node->children[right], left));
 
-	while (node->parent) {
-		if (which_dir(node->parent, node) == left)
-			return node2obj(tree, node->parent);
-		else if (which_dir(node->parent, node) == right)
-			node = node->parent;
+	while (get_parent(node)) {
+		if (which_dir(get_parent(node), node) == left)
+			return node2obj(tree, get_parent(node));
+		else if (which_dir(get_parent(node), node) == right)
+			node = get_parent(node);
 	}
 
 	return NULL;

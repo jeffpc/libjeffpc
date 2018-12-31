@@ -80,17 +80,17 @@ static void rb_rotate(struct tree_tree *tree, struct tree_node *node,
 	node->children[right] = tmp->children[left];
 
 	if (tmp->children[left])
-		tmp->children[left]->parent = node;
+		set_parent(tmp->children[left], node);
 
-	tmp->parent = node->parent;
-	if (!node->parent) {
+	set_parent(tmp, get_parent(node));
+	if (!get_parent(node)) {
 		tree->root = tmp;
 	} else {
-		node->parent->children[which_dir(node->parent, node)] = tmp;
+		get_parent(node)->children[which_dir(get_parent(node), node)] = tmp;
 	}
 
 	tmp->children[left] = node;
-	node->parent = tmp;
+	set_parent(node, tmp);
 }
 
 void *rb_insert_here(struct rb_tree *tree, void *newitem,
@@ -121,8 +121,8 @@ void *rb_insert_here(struct rb_tree *tree, void *newitem,
 		struct tree_node *parent;
 		struct tree_node *uncle;
 
-		parent  = node->parent;
-		gparent = parent ? parent->parent : NULL;
+		parent  = get_parent(node);
+		gparent = parent ? get_parent(parent) : NULL;
 		uncle   = gparent ?
 			gparent->children[1 - which_dir(gparent, parent)] : NULL;
 
@@ -151,8 +151,8 @@ void *rb_insert_here(struct rb_tree *tree, void *newitem,
 					  1 - which_dir(parent, node));
 
 				node = parent;
-				parent  = node->parent;
-				gparent = parent ? parent->parent : NULL;
+				parent  = get_parent(node);
+				gparent = parent ? get_parent(parent) : NULL;
 			}
 
 			if (which_dir(parent, node) == which_dir(gparent, parent)) {
@@ -233,7 +233,7 @@ void rb_remove(struct rb_tree *_tree, void *item)
 			node = tree->root;
 		}
 
-		parent = node->parent;
+		parent = get_parent(node);
 	}
 
 	set_red(node, false);

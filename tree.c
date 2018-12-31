@@ -90,13 +90,13 @@ void *tree_nearest(struct tree_tree *tree,
 
 		ASSERT3U(dir, ==, right);
 
-		if (!node->parent)
+		if (!get_parent(node))
 			return NULL;
 
 		/* We finished the right subtree, time to go up the tree */
 
-		dir = which_dir(node->parent, node);
-		node = node->parent;
+		dir = which_dir(get_parent(node), node);
+		node = get_parent(node);
 	}
 }
 
@@ -123,7 +123,7 @@ void *tree_insert_here(struct tree_tree *tree, void *newitem,
 	node = obj2node(tree, newitem);
 	node->children[TREE_LEFT] = NULL;
 	node->children[TREE_RIGHT] = NULL;
-	node->parent = cookie->node;
+	set_parent(node, cookie->node);
 
 	if (cookie->node)
 		cookie->node->children[cookie->dir] = node;
@@ -147,7 +147,7 @@ static inline void __swap_nodes(struct tree_tree *tree,
 	ASSERT3P(y->children[left], ==, NULL);
 
 	if (!root)
-		dir_to_orig_x = which_dir(x->parent, x);
+		dir_to_orig_x = which_dir(get_parent(x), x);
 
 	if (x->children[right] == y) {
 		/*
@@ -164,15 +164,15 @@ static inline void __swap_nodes(struct tree_tree *tree,
 		 */
 		struct tree_node *A, *B, *E;
 
-		A = x->parent;
+		A = get_parent(x);
 		B = x->children[left];
 		E = y->children[right];
 
-		x->parent = y;
-		y->parent = A;
-		B->parent = y;
+		set_parent(x, y);
+		set_parent(y, A);
+		set_parent(B, y);
 		if (E)
-			E->parent = x;
+			set_parent(E, x);
 
 		x->children[left] = NULL;
 		x->children[right] = E;
@@ -205,18 +205,18 @@ static inline void __swap_nodes(struct tree_tree *tree,
 		 */
 		struct tree_node *A, *B, *C, *D, *E;
 
-		A = x->parent;
+		A = get_parent(x);
 		B = x->children[left];
 		C = x->children[right];
-		D = y->parent;
+		D = get_parent(y);
 		E = y->children[right];
 
-		x->parent = D;
-		y->parent = A;
-		B->parent = y;
-		C->parent = y;
+		set_parent(x, D);
+		set_parent(y, A);
+		set_parent(B, y);
+		set_parent(C, y);
 		if (E)
-			E->parent = x;
+			set_parent(E, x);
 
 		x->children[left] = NULL;
 		x->children[right] = E;
@@ -246,7 +246,7 @@ static inline void __promote_node_child(struct tree_tree *tree,
 		tree->root = child;
 
 	if (child)
-		child->parent = parent;
+		set_parent(child, parent);
 }
 
 /*
@@ -281,7 +281,7 @@ void tree_remove(struct tree_tree *tree, void *item,
 	/* now, we have zero or one child */
 	ASSERT(!node->children[TREE_LEFT] || !node->children[TREE_RIGHT]);
 
-	parent = node->parent;
+	parent = get_parent(node);
 	if (node->children[TREE_LEFT])
 		child = node->children[TREE_LEFT];
 	else
@@ -290,7 +290,7 @@ void tree_remove(struct tree_tree *tree, void *item,
 	__promote_node_child(tree, parent, node, child);
 
 	/* clear out the removed node */
-	node->parent = NULL;
+	set_parent(node, NULL);
 	node->children[TREE_LEFT] = NULL;
 	node->children[TREE_RIGHT] = NULL;
 
@@ -328,8 +328,8 @@ static inline void destroy_nodes_save_parent(struct tree_tree *tree,
 					     struct tree_cookie *cookie)
 {
 	if (node != tree->root) {
-		cookie->node = node->parent;
-		cookie->dir = 1 - which_dir(node->parent, node);
+		cookie->node = get_parent(node);
+		cookie->dir = 1 - which_dir(get_parent(node), node);
 	} else {
 		/* indicate end of iteration */
 		cookie->node = DESTROY_NODES_DONE;
