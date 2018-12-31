@@ -51,12 +51,12 @@ static inline void set_parent(struct tree_node *node, struct tree_node *parent)
 	node->_parent = parent;
 }
 
-static inline bool get_extra(struct tree_node *node)
+static inline unsigned int get_extra(struct tree_node *node)
 {
 	return node->_extra;
 }
 
-static inline void set_extra(struct tree_node *node, bool extra)
+static inline void set_extra(struct tree_node *node, unsigned int extra)
 {
 	node->_extra = extra;
 }

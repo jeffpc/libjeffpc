@@ -141,7 +141,7 @@ static inline void __swap_nodes(struct tree_tree *tree,
 	const enum tree_dir right = 1 - left;
 	const bool root = tree->root == x;
 	enum tree_dir dir_to_orig_x;
-	bool tmp;
+	unsigned int tmp;
 
 	ASSERT3P(x, !=, y);
 	ASSERT3P(y->children[left], ==, NULL);
