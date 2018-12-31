@@ -30,13 +30,13 @@
 static inline void set_red(struct tree_node *node, bool red)
 {
 	if (node)
-		node->extra = red;
+		set_extra(node, red);
 }
 
 static inline bool is_red(struct tree_node *node)
 {
 	/* NB: NULLs are black by definition */
-	return node && node->extra;
+	return node && get_extra(node);
 }
 
 void rb_create(struct rb_tree *tree,

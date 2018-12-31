@@ -30,7 +30,7 @@
 struct tree_node {
 	struct tree_node *children[2];
 	struct tree_node *_parent;
-	bool extra;
+	bool _extra;
 };
 
 struct tree_tree {

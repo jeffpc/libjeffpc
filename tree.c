@@ -230,9 +230,9 @@ static inline void __swap_nodes(struct tree_tree *tree,
 	}
 
 	/* swap the extra data */
-	tmp = x->extra;
-	x->extra = y->extra;
-	y->extra = tmp;
+	tmp = get_extra(x);
+	set_extra(x, get_extra(y));
+	set_extra(y, tmp);
 }
 
 static inline void __promote_node_child(struct tree_tree *tree,

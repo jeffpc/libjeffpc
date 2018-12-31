@@ -51,6 +51,16 @@ static inline void set_parent(struct tree_node *node, struct tree_node *parent)
 	node->_parent = parent;
 }
 
+static inline bool get_extra(struct tree_node *node)
+{
+	return node->_extra;
+}
+
+static inline void set_extra(struct tree_node *node, bool extra)
+{
+	node->_extra = extra;
+}
+
 static inline enum tree_dir which_dir(struct tree_node *parent,
 				      struct tree_node *tgt)
 {
