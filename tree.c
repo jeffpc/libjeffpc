@@ -229,10 +229,10 @@ static inline void __swap_nodes(struct tree_tree *tree,
 		D->children[left] = x;
 	}
 
-	/* swap the colors */
-	tmp = x->red;
-	x->red = y->red;
-	y->red = tmp;
+	/* swap the extra data */
+	tmp = x->extra;
+	x->extra = y->extra;
+	y->extra = tmp;
 }
 
 static inline void __promote_node_child(struct tree_tree *tree,
