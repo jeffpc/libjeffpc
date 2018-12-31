@@ -43,22 +43,40 @@ static inline struct tree_node *obj2node(struct tree_tree *tree, void *obj)
 
 static inline struct tree_node *get_parent(struct tree_node *node)
 {
+#ifdef JEFFPC_TREE_COMPACT
+	return (void *) (node->_parent_and_extra & ~0x3ul);
+#else
 	return node->_parent;
+#endif
 }
 
 static inline void set_parent(struct tree_node *node, struct tree_node *parent)
 {
+#ifdef JEFFPC_TREE_COMPACT
+	node->_parent_and_extra = (node->_parent_and_extra & 0x3ul) |
+				  (((uintptr_t) parent) & ~0x3ul);
+#else
 	node->_parent = parent;
+#endif
 }
 
 static inline unsigned int get_extra(struct tree_node *node)
 {
+#ifdef JEFFPC_TREE_COMPACT
+	return node->_parent_and_extra & 0x3;
+#else
 	return node->_extra;
+#endif
 }
 
 static inline void set_extra(struct tree_node *node, unsigned int extra)
 {
+#ifdef JEFFPC_TREE_COMPACT
+	node->_parent_and_extra = (node->_parent_and_extra & ~0x3ul) |
+				  (extra & 0x3);
+#else
 	node->_extra = extra;
+#endif
 }
 
 static inline enum tree_dir which_dir(struct tree_node *parent,

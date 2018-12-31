@@ -26,11 +26,23 @@
 #include <stdbool.h>
 
 #include <jeffpc/int.h>
+#include <jeffpc/config.h>
 
 struct tree_node {
 	struct tree_node *children[2];
+#ifdef JEFFPC_TREE_COMPACT
+	/*
+	 * The following field encodes both the parent pointer and the 2-bit
+	 * extra field.
+	 *
+	 * The extra field uses the 2 least significant bits.  The remainder
+	 * of the value is the parent pointer.
+	 */
+	uintptr_t _parent_and_extra;
+#else
 	struct tree_node *_parent;
 	unsigned int _extra:2;
+#endif
 };
 
 struct tree_tree {
