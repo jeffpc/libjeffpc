@@ -21,11 +21,44 @@
  */
 
 #include <jeffpc/thread.h>
+#include <jeffpc/error.h>
+#include <jeffpc/mem.h>
+
+struct xthr_info {
+	void *(*f)(void *);
+	void *arg;
+};
+
+static void *xthr_setup(void *_info)
+{
+	struct xthr_info info = *((struct xthr_info *) _info);
+
+	/* free early since the function may run for a very long time */
+	free(_info);
+
+	return info.f(info.arg);
+}
 
 int xthr_create(pthread_t *restrict thread, void *(*start)(void*),
 		void *restrict arg)
 {
+	struct xthr_info *info;
 	pthread_t tmp;
+	int ret;
 
-	return -pthread_create(thread ? thread : &tmp, NULL, start, arg);
+	if (!start)
+		return -EINVAL;
+
+	info = malloc(sizeof(struct xthr_info));
+	if (!info)
+		return -ENOMEM;
+
+	info->f = start;
+	info->arg = arg;
+
+	ret = -pthread_create(thread ? thread : &tmp, NULL, xthr_setup, info);
+	if (ret)
+		free(info);
+
+	return ret;
 }
