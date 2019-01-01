@@ -20,22 +20,12 @@
  * SOFTWARE.
  */
 
-#ifndef __JEFFPC_THREAD_H
-#define __JEFFPC_THREAD_H
+#include <jeffpc/thread.h>
 
-#include <pthread.h>
-
-extern int xthr_create(pthread_t *restrict thread, void *(*start)(void*),
-		       void *restrict arg);
-
-static inline int xthr_join(pthread_t thread, void **status)
+int xthr_create(pthread_t *restrict thread, void *(*start)(void*),
+		void *restrict arg)
 {
-	return -pthread_join(thread, status);
-}
+	pthread_t tmp;
 
-static inline pthread_t xthr_self(void)
-{
-	return pthread_self();
+	return -pthread_create(thread ? thread : &tmp, NULL, start, arg);
 }
-
-#endif
