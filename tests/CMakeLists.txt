@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+# Copyright (c) 2016-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,7 @@ build_test_bin_and_run(mutex-destroy-null)
 build_test_bin_and_run(mutex-init-null-both)
 build_test_bin_and_run(mutex-init-null-class)
 build_test_bin_and_run(mutex-init-null-lock)
+build_test_bin_and_run(mutex-lock-destroyed)
 build_test_bin_and_run(mutex-lock-held)
 build_test_bin_and_run(mutex-lock-held-class)
 build_test_bin_and_run(mutex-lock-held-multi-first)
@@ -50,6 +51,7 @@ build_test_bin_and_run(mutex-lock-held-multi-third)
 build_test_bin_and_run(mutex-lock-held-nesting)
 build_test_bin_and_run(mutex-lock-memcpy)
 build_test_bin_and_run(mutex-lock-null)
+build_test_bin_and_run(mutex-unlock-destroyed)
 build_test_bin_and_run(mutex-unlock-memcpy)
 build_test_bin_and_run(mutex-unlock-null)
 build_test_bin_and_run(mutex-unlock-unheld)

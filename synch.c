@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2011-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,14 @@
 #include <jeffpc/atomic.h>
 #include <jeffpc/synch.h>
 #include <jeffpc/config.h>
+
+/*
+ * Some non-zero value that's unlikely to be a valid object address.
+ *
+ * We use non-zero because non-initialized (.bss) memory is zero-filled and
+ * we want something that screams destroyed.
+ */
+#define DESTROYED_MAGIC	(~0ul)
 
 #ifdef JEFFPC_LOCK_TRACKING
 static atomic_t lockdep_on = ATOMIC_INITIALIZER(1);
@@ -371,6 +379,8 @@ static void verify_lock_destroy(const struct lock_context *where, struct lock *l
 		}
 	}
 #endif
+
+	l->magic = DESTROYED_MAGIC;
 }
 
 static void verify_lock_lock(const struct lock_context *where, struct lock *l)
