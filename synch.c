@@ -104,6 +104,8 @@ static void print_invalid_call(const char *fxn, const struct lock_context *where
 
 #define GENERATE_LOCK_MASK_ARGS(l)						\
 	((l)->magic != (uintptr_t) (l)) ? 'M' : '.'
+#define GENERATE_COND_MASK_ARGS(c)						\
+	((c)->magic != (uintptr_t) (c)) ? 'M' : '.'
 
 static void print_lock(struct lock *lock, const struct lock_context *where)
 {
@@ -115,6 +117,14 @@ static void print_lock(struct lock *lock, const struct lock_context *where)
 #endif
 		lock,
 		GENERATE_LOCK_MASK_ARGS(lock),
+		where->file, where->line);
+}
+
+static void print_cond(struct cond *cond, const struct lock_context *where)
+{
+	cmn_err(CE_CRIT, "lockdep:     %p <%c> at %s:%d",
+		cond,
+		GENERATE_LOCK_MASK_ARGS(cond),
 		where->file, where->line);
 }
 
@@ -346,6 +356,17 @@ static void check_lock_magic(struct lock *lock, const char *op,
 	panic("lockdep: Aborting - bad lock magic");
 }
 
+static void check_cond_magic(struct cond *cond, const char *op,
+			     const struct lock_context *where)
+{
+	if (cond->magic == (uintptr_t) cond)
+		return;
+
+	cmn_err(CE_CRIT, "lockdep: thread trying to %s cond with bad magic", op);
+	print_cond(cond, where);
+	panic("lockdep: Aborting - bad cond magic");
+}
+
 static void verify_lock_init(const struct lock_context *where, struct lock *l,
 			     struct lock_class *lc)
 {
@@ -455,12 +476,18 @@ static void verify_cond_init(const struct lock_context *where, struct cond *c)
 {
 	if (!c)
 		print_invalid_call("CONDINIT", where);
+
+	c->magic = (uintptr_t) c;
 }
 
 static void verify_cond_destroy(const struct lock_context *where, struct cond *c)
 {
 	if (!c)
 		print_invalid_call("CONDDESTROY", where);
+
+	check_cond_magic(c, "destroy", where);
+
+	c->magic = DESTROYED_MAGIC;
 }
 
 static void verify_cond_wait(const struct lock_context *where, struct cond *c,
@@ -469,6 +496,8 @@ static void verify_cond_wait(const struct lock_context *where, struct cond *c,
 	if (!c || !l)
 		print_invalid_call(timed ? "CONDRELTIMEDWAIT" : "CONDWAIT",
 				   where);
+
+	check_cond_magic(c, "wait on", where);
 }
 
 static void verify_cond_sig(const struct lock_context *where, struct cond *c,
@@ -476,6 +505,8 @@ static void verify_cond_sig(const struct lock_context *where, struct cond *c,
 {
 	if (!c)
 		print_invalid_call(all ? "CONDBCAST" : "CONDSIG", where);
+
+	check_cond_magic(c, all ? "broadcast" : "signal", where);
 }
 
 /*
