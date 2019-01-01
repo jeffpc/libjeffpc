@@ -494,7 +494,7 @@ static void verify_cond_wait(const struct lock_context *where, struct cond *c,
 			     struct lock *l, bool timed)
 {
 	if (!c || !l)
-		print_invalid_call(timed ? "CONDRELTIMEDWAIT" : "CONDWAIT",
+		print_invalid_call(timed ? "CONDTIMEDWAIT" : "CONDWAIT",
 				   where);
 
 	check_cond_magic(c, "wait on", where);
@@ -642,8 +642,8 @@ void condwait(const struct lock_context *where, struct cond *c, struct lock *l)
 		      where->file, where->line, strerror(ret));
 }
 
-int condreltimedwait(const struct lock_context *where, struct cond *c,
-		     struct lock *l, const struct timespec *reltime)
+int condtimedwait(const struct lock_context *where, struct cond *c,
+		  struct lock *l, const struct timespec *reltime)
 {
 	int ret;
 

@@ -165,7 +165,7 @@ struct barrier {
 				}; \
 				condwait(&cond_ctx, (c), (m)); \
 			} while (0)
-#define CONDRELTIMEDWAIT(c, m, t) \
+#define CONDTIMEDWAIT(c, m, t) \
 			do { \
 				struct lock_context cond_ctx = { \
 					.condname = #c, \
@@ -173,7 +173,7 @@ struct barrier {
 					.file = __FILE__, \
 					.line = __LINE__, \
 				}; \
-				condreltimedwait(&cond_ctx, (c), (m), (t)); \
+				condtimedwait(&cond_ctx, (c), (m), (t)); \
 			} while (0)
 #define CONDSIG(c)	do { \
 				struct lock_context cond_ctx = { \
@@ -241,8 +241,8 @@ extern void condinit(const struct lock_context *where, struct cond *c);
 extern void conddestroy(const struct lock_context *where, struct cond *c);
 extern void condwait(const struct lock_context *where, struct cond *c,
 		     struct lock *m);
-extern int condreltimedwait(const struct lock_context *where, struct cond *c,
-			    struct lock *m, const struct timespec *reltime);
+extern int condtimedwait(const struct lock_context *where, struct cond *c,
+			 struct lock *m, const struct timespec *reltime);
 extern void condsig(const struct lock_context *where, struct cond *c);
 extern void condbcast(const struct lock_context *where, struct cond *c);
 
