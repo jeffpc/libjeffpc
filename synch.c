@@ -732,9 +732,10 @@ bool barrierwait(const struct lock_context *where, struct barrier *b)
 	return (ret == PTHREAD_BARRIER_SERIAL_THREAD);
 }
 
-#ifdef JEFFPC_LOCK_TRACKING
+#undef lockdep_no_locks
 void lockdep_no_locks(void)
 {
+#ifdef JEFFPC_LOCK_TRACKING
 	if (!atomic_read(&lockdep_on))
 		return;
 
@@ -742,5 +743,5 @@ void lockdep_no_locks(void)
 		return;
 
 	error_locks_on_exit();
-}
 #endif
+}
