@@ -451,6 +451,33 @@ out:
 #endif
 }
 
+static void verify_cond_init(const struct lock_context *where, struct cond *c)
+{
+	if (!c)
+		print_invalid_call("CONDINIT", where);
+}
+
+static void verify_cond_destroy(const struct lock_context *where, struct cond *c)
+{
+	if (!c)
+		print_invalid_call("CONDDESTROY", where);
+}
+
+static void verify_cond_wait(const struct lock_context *where, struct cond *c,
+			     struct lock *l, bool timed)
+{
+	if (!c || !l)
+		print_invalid_call(timed ? "CONDRELTIMEDWAIT" : "CONDWAIT",
+				   where);
+}
+
+static void verify_cond_sig(const struct lock_context *where, struct cond *c,
+			    bool all)
+{
+	if (!c)
+		print_invalid_call(all ? "CONDBCAST" : "CONDSIG", where);
+}
+
 /*
  * synch API
  */
@@ -552,6 +579,8 @@ void condinit(const struct lock_context *where, struct cond *c)
 {
 	int ret;
 
+	verify_cond_init(where, c);
+
 	ret = pthread_cond_init(&c->cond, NULL);
 	if (ret)
 		panic("cond init failed @ %s:%d: %s",
@@ -561,6 +590,8 @@ void condinit(const struct lock_context *where, struct cond *c)
 void conddestroy(const struct lock_context *where, struct cond *c)
 {
 	int ret;
+
+	verify_cond_destroy(where, c);
 
 	ret = pthread_cond_destroy(&c->cond);
 	if (ret)
@@ -572,6 +603,8 @@ void condwait(const struct lock_context *where, struct cond *c, struct lock *l)
 {
 	int ret;
 
+	verify_cond_wait(where, c, l, false);
+
 	ret = pthread_cond_wait(&c->cond, &l->lock);
 	if (ret)
 		panic("cond wait failed @ %s:%d: %s",
@@ -582,6 +615,8 @@ int condreltimedwait(const struct lock_context *where, struct cond *c,
 		     struct lock *l, const struct timespec *reltime)
 {
 	int ret;
+
+	verify_cond_wait(where, c, l, true);
 
 #ifdef JEFFPC_HAVE_PTHREAD_COND_RELTIMEDWAIT_NP
 	ret = pthread_cond_reltimedwait_np(&c->cond, &l->lock, reltime);
@@ -613,6 +648,8 @@ void condsig(const struct lock_context *where, struct cond *c)
 {
 	int ret;
 
+	verify_cond_sig(where, c, false);
+
 	ret = pthread_cond_signal(&c->cond);
 	if (ret)
 		panic("cond signal failed @ %s:%d: %s",
@@ -622,6 +659,8 @@ void condsig(const struct lock_context *where, struct cond *c)
 void condbcast(const struct lock_context *where, struct cond *c)
 {
 	int ret;
+
+	verify_cond_sig(where, c, true);
 
 	ret = pthread_cond_broadcast(&c->cond);
 	if (ret)
