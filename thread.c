@@ -21,6 +21,7 @@
  */
 
 #include <jeffpc/thread.h>
+#include <jeffpc/synch.h>
 #include <jeffpc/error.h>
 #include <jeffpc/mem.h>
 
@@ -32,11 +33,16 @@ struct xthr_info {
 static void *xthr_setup(void *_info)
 {
 	struct xthr_info info = *((struct xthr_info *) _info);
+	void *ret;
 
 	/* free early since the function may run for a very long time */
 	free(_info);
 
-	return info.f(info.arg);
+	ret = info.f(info.arg);
+
+	lockdep_no_locks();
+
+	return ret;
 }
 
 int xthr_create(pthread_t *restrict thread, void *(*start)(void*),
