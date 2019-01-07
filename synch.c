@@ -642,30 +642,28 @@ void condwait(const struct lock_context *where, struct cond *c, struct lock *l)
 		      where->file, where->line, strerror(ret));
 }
 
-int condtimedwait_spec(const struct lock_context *where, struct cond *c,
-		       struct lock *l, const struct timespec *reltime)
+int condtimedwait(const struct lock_context *where, struct cond *c,
+		  struct lock *l, const uint64_t reltime)
 {
+	struct timespec when;
 	int ret;
 
 	verify_cond_wait(where, c, l, true);
 
 #ifdef JEFFPC_HAVE_PTHREAD_COND_RELTIMEDWAIT_NP
-	ret = pthread_cond_reltimedwait_np(&c->cond, &l->lock, reltime);
+	when.tv_sec = reltime / 1000000000ull;
+	when.tv_nsec = reltime % 1000000000ull;
+
+	ret = pthread_cond_reltimedwait_np(&c->cond, &l->lock, &when);
 #else
-	struct timespec abstime;
-	struct timespec now;
+	uint64_t abstime;
 
-	VERIFY0(clock_gettime(CLOCK_REALTIME, &now));
+	abstime = gettime() + reltime;
 
-	while ((now.tv_nsec + reltime->tv_nsec) >= 1000000000) {
-		now.tv_sec++;
-		now.tv_nsec -= 1000000000;
-	}
+	when.tv_sec = abstime / 1000000000ull;
+	when.tv_nsec = abstime % 1000000000ull;
 
-	abstime.tv_sec  = now.tv_sec  + reltime->tv_sec;
-	abstime.tv_nsec = now.tv_nsec + reltime->tv_nsec;
-
-	ret = pthread_cond_timedwait(&c->cond, &l->lock, &abstime);
+	ret = pthread_cond_timedwait(&c->cond, &l->lock, &when);
 #endif
 
 	if ((ret != 0) && (ret != ETIMEDOUT))
