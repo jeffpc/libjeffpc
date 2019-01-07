@@ -175,6 +175,8 @@ struct barrier {
 				}; \
 				condtimedwait(&cond_ctx, (c), (m), (t)); \
 			} while (0)
+#define CONDTIMEDWAIT_SEC(c, m, t) \
+			CONDTIMEDWAIT_NSEC((c), (m), (t) * 1000000000ull)
 #define CONDTIMEDWAIT_SPEC(c, m, t) \
 			do { \
 				struct time_spec tmp = *(t); \
