@@ -642,8 +642,8 @@ void condwait(const struct lock_context *where, struct cond *c, struct lock *l)
 		      where->file, where->line, strerror(ret));
 }
 
-int condtimedwait(const struct lock_context *where, struct cond *c,
-		  struct lock *l, const struct timespec *reltime)
+int condtimedwait_spec(const struct lock_context *where, struct cond *c,
+		       struct lock *l, const struct timespec *reltime)
 {
 	int ret;
 

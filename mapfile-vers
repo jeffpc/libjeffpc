@@ -213,7 +213,7 @@ JEFFPC_0.10 {
 		condbcast;
 		conddestroy;
 		condinit;
-		condtimedwait;
+		condtimedwait_spec;
 		condsig;
 		condwait;
 		lockdep_no_locks;
