@@ -1,0 +1,74 @@
+.Dd January 18, 2019
+.Dt XREAD 3
+.Os
+.\"
+.Sh NAME
+.Nm xread ,
+.Nm xpread
+.Nd read bytes from a file descriptor handling partial reads internally
+.\"
+.Sh SYNOPSIS
+.In jeffpc/io.h
+.Ft int
+.Fn xread "int fd" "void *buf" "size_t nbyte"
+.Ft int
+.Fn xpread "int fd" "void *buf" "size_t nbyte" "off_t off"
+.\"
+.Sh DESCRIPTION
+The
+.Fn xread
+and
+.Fn xpread
+functions attempt to read
+.Fa nbyte
+bytes from the file descriptor specified by the
+.Fa fd
+argument.
+The read data is stored in the first
+.Fa nbyte
+bytes pointed to by
+.Fa buf.
+.sp
+.Fn xpread
+reads from the current position of the file descriptor and updates it in the
+same manner as
+.Xr read 2 .
+.sp
+.Fn xpread
+reads from the file offset specified by
+.Fa off
+leaving the file descriptor's current position unchanged in the same manner
+as
+.Xr pread 2 .
+.\"
+.Sh RETURN VALUES
+On success
+.Fn xread
+and
+.Fn xpread
+return 0, and a negated errno otherwise.
+.\"
+.Sh ERRORS
+Both
+.Fn xread
+and
+.Fn xpread
+forward any errors from
+.Xr read 2
+and
+.Xr pread 2 ,
+respectively with the following differences:
+.Bl -tag -width Er
+.It Er -EPIPE
+The requested number of bytes could not be read.
+If
+.Fn xread
+was used, the file descriptor's new position may be anywhere between the
+original location and
+.Fa nbyte
+bytes following it.
+.El
+.\"
+.Sh SEE ALSO
+.Xr pread 2 ,
+.Xr read 2
