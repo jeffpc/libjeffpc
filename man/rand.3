@@ -1,0 +1,34 @@
+.Dd January 18, 2019
+.Dt RAND 3
+.Os
+.\"
+.Sh NAME
+.Nm rand32 ,
+.Nm rand64
+.Nd generate a random integer
+.\"
+.Sh SYNOPSIS
+.In jeffpc/rand.h
+.Ft uint32_t
+.Fn rand32 void
+.Ft uint64_t
+.Fn rand64 void
+.\"
+.Sh DESCRIPTION
+The
+.Fn rand32
+function generates a 32-bit pseudo-random integer.
+.sp
+The
+.Fn rand64
+function generates a 64-bit pseudo-random integer.
+.\"
+.Sh RETURN VALUES
+A random number in the range 0-UINT32_T_MAX or 0-UINT64_T_MAX.
+.\"
+.Sh ERRORS
+An error generating a pseudo-random integer will result in a panic.
+.\"
+.Sh SEE ALSO
+.Xr rand 3 ,
+.Xr rand_r 3
