@@ -1,0 +1,43 @@
+.Dd January 18, 2019
+.Dt HEXDUMP 3
+.Os
+.\"
+.Sh NAME
+.Nm hexdump ,
+.Nm hexdumpz
+.Nd hexdump a buffer
+.\"
+.Sh SYNOPSIS
+.In jeffpc/hexdump.h
+.Ft void
+.Fn hexdump "char *out" "const void *in" "size_t inlen" "bool upper"
+.Ft void
+.Fn hexdumpz "char *out" "const void *in" "size_t inlen" "bool upper"
+.\"
+.Sh DESCRIPTION
+.Fn hexdump
+dumps the first
+.Fa inlen
+bytes of the input buffer
+.Fa in
+as hexadecimal ASCII characters into the output buffer
+.Fa out .
+The output buffer is assumed to be large enough to hold the entire output.
+When the
+.Fa upper
+boolean argument is true, uppercase letters A through F are used for value
+10 to 15.
+If
+.Fa upper
+is false, lowercase letters a through f are used instead.
+.sp
+.Fn hexdumpz
+performs the same operation as
+.Fn hexdump ,
+however it also appends a nul terminator to the end of the output buffer.
+.\"
+.Sh RETURN VALUES
+None.
+.\"
+.Sh ERRORS
+None.
