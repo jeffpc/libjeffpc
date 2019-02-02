@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+# Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,7 @@ gethgrev(HG_COMMIT_STR "{node}" "0000000000000000000000000000000000000000")
 
 # TODO: if there are uncommitted changes, append -dirty
 gethgrev(VERSION
-	"{ifeq(latesttagdistance,0,\"{latesttag}\",\"{latesttag}-{latesttagdistance}-{node|short}\")}"
+	"{ifeq(latesttagdistance,0,\"{latesttag}\",\"{latesttag}+{latesttagdistance}-{node|short}\")}"
 	"${JEFFPC_VERSION}")
 
 if(${HG_COMMIT_STR} STREQUAL "0000000000000000000000000000000000000000")
