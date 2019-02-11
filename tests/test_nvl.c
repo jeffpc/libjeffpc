@@ -76,21 +76,11 @@ static inline void __check_lookup_err(bool iserr, bool expected_iserr,
 				      int err, int expected_err,
 				      const char *fxn, const char *key)
 {
-	if (!iserr && !expected_iserr)
-		return;
+	/* convert iserr to a 0 errno value */
+	err = iserr ? err : 0;
+	expected_err = expected_iserr ? expected_err : 0;
 
-	if (iserr && !expected_iserr)
-		fail("%s(..., '%s') failed (%s), expected success",
-		     fxn, key, xstrerror(err));
-
-	if (!iserr && expected_iserr)
-		fail("%s(..., '%s') succeded, expected failure (%s)",
-		     fxn, key, xstrerror(expected_err));
-
-	if (err != expected_err)
-		fail("%s(..., '%s') returned %s (%d), expected %s (%d)",
-		     fxn, key, xstrerror(err), err, xstrerror(expected_err),
-		     expected_err);
+	check_rets(expected_err, err, "%s(..., '%s')", fxn, key);
 }
 
 static void check_key_not_exists(struct nvlist *nvl, const char *key)

@@ -47,20 +47,8 @@ static inline void set_bool(struct nvlist *nvl, const char *key, bool b,
 
 	ret = nvl_set_bool(nvl, key, b);
 
-	if (ret == expected_ret)
-		return;
-
-	if (ret && !expected_ret)
-		fail("nvl_set_bool(..., '%s', %s) returned %s, expected success",
-		     key, bstr, xstrerror(ret));
-
-	if (ret && expected_ret)
-		fail("nvl_set_bool(..., '%s', %s) returned %s, expected %s", key,
-		     bstr, xstrerror(ret), xstrerror(expected_ret));
-
-	if (!ret && expected_ret)
-		fail("nvl_set_bool(..., '%s', %s) succeded, expected %s", key,
-		     bstr, xstrerror(expected_ret));
+	check_rets(expected_ret, ret, "nvl_set_bool(..., '%s', %s)", key,
+		   bstr);
 }
 
 static inline void set_int(struct nvlist *nvl, const char *key, uint64_t i,
@@ -70,21 +58,8 @@ static inline void set_int(struct nvlist *nvl, const char *key, uint64_t i,
 
 	ret = nvl_set_int(nvl, key, i);
 
-	if (ret == expected_ret)
-		return;
-
-	if (ret && !expected_ret)
-		fail("nvl_set_int(..., '%s', %"PRIu64") returned %s, "
-		     "expected success", key, i, xstrerror(ret));
-
-	if (ret && expected_ret)
-		fail("nvl_set_int(..., '%s', %"PRIu64") returned %s, "
-		     "expected %s", key, i, xstrerror(ret),
-		     xstrerror(expected_ret));
-
-	if (!ret && expected_ret)
-		fail("nvl_set_int(..., '%s', %"PRIu64") succeded, "
-		     "expected %s", key, i, xstrerror(expected_ret));
+	check_rets(expected_ret, ret, "nvl_set_int(..., '%s', %"PRIu64")", key,
+		   i);
 }
 
 static inline void set_null(struct nvlist *nvl, const char *key,
@@ -94,20 +69,7 @@ static inline void set_null(struct nvlist *nvl, const char *key,
 
 	ret = nvl_set_null(nvl, key);
 
-	if (ret == expected_ret)
-		return;
-
-	if (ret && !expected_ret)
-		fail("nvl_set_null(..., '%s') returned %s, expected success",
-		     key, xstrerror(ret));
-
-	if (ret && expected_ret)
-		fail("nvl_set_null(..., '%s') returned %s, expected %s", key,
-		     xstrerror(ret), xstrerror(expected_ret));
-
-	if (!ret && expected_ret)
-		fail("nvl_set_null(..., '%s') succeded, expected %s", key,
-		     xstrerror(expected_ret));
+	check_rets(expected_ret, ret, "nvl_set_null(..., '%s')", key);
 }
 
 static inline void set_str(struct nvlist *nvl, const char *key, struct str *str,
@@ -117,20 +79,7 @@ static inline void set_str(struct nvlist *nvl, const char *key, struct str *str,
 
 	ret = nvl_set_str(nvl, key, str);
 
-	if (ret == expected_ret)
-		return;
-
-	if (ret && !expected_ret)
-		fail("nvl_set_str(..., '%s', ...) returned %s, expected success",
-		     key, xstrerror(ret));
-
-	if (ret && expected_ret)
-		fail("nvl_set_str(..., '%s', ...) returned %s, expected %s", key,
-		     xstrerror(ret), xstrerror(expected_ret));
-
-	if (!ret && expected_ret)
-		fail("nvl_set_str(..., '%s', ...) succeded, expected %s", key,
-		     xstrerror(expected_ret));
+	check_rets(expected_ret, ret, "nvl_set_str(..., '%s', ...)", key);
 }
 
 static inline void unset(struct nvlist *nvl, const char *key, int expected_ret)
@@ -139,20 +88,7 @@ static inline void unset(struct nvlist *nvl, const char *key, int expected_ret)
 
 	ret = nvl_unset(nvl, key);
 
-	if (ret == expected_ret)
-		return;
-
-	if (ret && !expected_ret)
-		fail("nvl_unset(..., '%s') returned %s, expected success", key,
-		     xstrerror(ret));
-
-	if (ret && expected_ret)
-		fail("nvl_unset(..., '%s') returned %s, expected %s", key,
-		     xstrerror(ret), xstrerror(expected_ret));
-
-	if (!ret && expected_ret)
-		fail("nvl_unset(..., '%s') succeded, expected %s", key,
-		     xstrerror(expected_ret));
+	check_rets(expected_ret, ret, "nvl_unset(..., '%s')", key);
 }
 
 static inline void dumpbuf(struct buffer *buf, bool hex)
