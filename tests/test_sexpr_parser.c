@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@
 #include <jeffpc/val.h>
 #include <jeffpc/io.h>
 
-#include "test-file.c"
+#include "test.c"
 
 static void trim(char *ptr)
 {
