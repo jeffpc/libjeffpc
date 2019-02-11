@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,7 @@ struct unaligned_run {
 	uint32_t le32;
 	uint64_t le64;
 
-#ifdef CPU_BIG_ENDIAN
+#ifdef JEFFPC_CPU_BIG_ENDIAN
 #define cpu8 be8
 #define cpu16 be16
 #define cpu32 be32
