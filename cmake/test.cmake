@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+# Copyright (c) 2016-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -40,6 +40,14 @@ macro(build_test_bin name)
 	)
 endmacro()
 
+macro(build_test_bin_files name)
+	build_test_bin(${name})
+
+	set_source_files_properties("test_${name}.c" PROPERTIES
+		COMPILE_FLAGS "-DUSE_FILENAME_ARGS"
+	)
+endmacro()
+
 macro(build_test_bin_and_run name)
 	build_test_bin(${name})
 	add_test(NAME "${name}"
@@ -51,7 +59,7 @@ macro(build_test_bin_and_run name)
 endmacro()
 
 macro(build_test_bin_and_run_files name files)
-	build_test_bin(${name})
+	build_test_bin_files(${name})
 	file(GLOB TESTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${files})
 	foreach(TEST ${TESTS})
 		add_test(NAME "${name}:${TEST}"
