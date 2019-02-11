@@ -56,6 +56,42 @@ void NORETURN fail(const char *fmt, ...)
 	exit(1);
 }
 
+/*
+ * Compare two return values (0s or negated errnos), and fail if they don't
+ * match.
+ */
+void check_rets(int exp, int got, const char *fmt, ...)
+{
+	va_list ap;
+
+	if (exp == got)
+		return;
+
+	fprintf(stderr, "TEST FAILED: ");
+
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
+
+	fprintf(stderr, " ");
+
+	if (got && !exp)
+		fprintf(stderr, "returned %s (%d), expected success",
+			xstrerror(got), got);
+
+	if (got && exp)
+		fprintf(stderr, "returned %s (%d), expected %s (%d)",
+			xstrerror(got), got, xstrerror(exp), exp);
+
+	if (!got && exp)
+		fprintf(stderr, "succeded, expected %s (%d)",
+			xstrerror(exp), exp);
+
+	fprintf(stderr, "\n");
+
+	exit(1);
+}
+
 void test_set_panic_string(const char *str)
 {
 	expected_panic_string = str;
