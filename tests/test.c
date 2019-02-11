@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,11 @@
 #include <jeffpc/version.h>
 #include <jeffpc/error.h>
 
+#ifndef USE_FILENAME_ARGS
 static void test(void);
+#else
+static void test(const char *);
+#endif
 
 static const char *expected_panic_string;
 
@@ -103,9 +107,23 @@ int main(int argc, char **argv)
 	fprintf(stderr, "libjeffpc.so version %s\n", jeffpc_version);
 	fprintf(stderr, "Running tests (%s)\n", argv[0]);
 
+#ifndef USE_FILENAME_ARGS
+	fprintf(stderr, "Not expecteding any args\n");
+#else
+	fprintf(stderr, "Expecting filename args\n");
+#endif
+
 	jeffpc_init(&init_ops);
 
+#ifndef USE_FILENAME_ARGS
 	test();
+#else
+	for (int i = 1; i < argc; i++) {
+		fprintf(stderr, "Checking %s...\n", argv[i]);
+
+		test(argv[i]);
+	}
+#endif
 
 	/* no panics encountered */
 
