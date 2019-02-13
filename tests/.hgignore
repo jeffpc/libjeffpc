@@ -17,6 +17,7 @@ test_mutex-destroy-null
 test_mutex-init-null-both
 test_mutex-init-null-class
 test_mutex-init-null-lock
+test_mutex-lock-destroyed
 test_mutex-lock-held
 test_mutex-lock-held-class
 test_mutex-lock-held-multi-first
@@ -25,6 +26,7 @@ test_mutex-lock-held-multi-third
 test_mutex-lock-held-nesting
 test_mutex-lock-memcpy
 test_mutex-lock-null
+test_mutex-unlock-destroyed
 test_mutex-unlock-memcpy
 test_mutex-unlock-null
 test_mutex-unlock-unheld
@@ -42,3 +44,4 @@ test_utf32-to-utf8
 test_utf8-to-utf32
 test_uuid
 test_version
+test_xstrerror
