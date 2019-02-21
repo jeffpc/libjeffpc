@@ -38,7 +38,8 @@
 #define STR_TO_INT(size, imax)						\
 static inline int str2u##size##_full(const char *restrict s,		\
 				     uint##size##_t *i,			\
-				     int base)				\
+				     int base,				\
+				     char terminator)			\
 {									\
 	char *endptr;							\
 	uint64_t tmp;							\
@@ -55,8 +56,8 @@ static inline int str2u##size##_full(const char *restrict s,		\
 	if (endptr == s)						\
 		return -EINVAL;						\
 									\
-	/* nul-terminated? */						\
-	if (*endptr != '\0')						\
+	/* first unparsed char must be the expected terminator */	\
+	if (*endptr != (terminator))					\
 		return -EINVAL;						\
 									\
 	if (tmp > imax)							\
@@ -72,15 +73,15 @@ STR_TO_INT(64, 0xffffffffffffffffull)
 
 #undef STR_TO_INT
 
-/* base [2, 36] */
-#define str2u64_base(s, i, b)	str2u64_full((s), (i), (b))
-#define str2u32_base(s, i, b)	str2u32_full((s), (i), (b))
-#define str2u16_base(s, i, b)	str2u16_full((s), (i), (b))
+/* base [2, 36], nul-terminated */
+#define str2u64_base(s, i, b)	str2u64_full((s), (i), (b), '\0')
+#define str2u32_base(s, i, b)	str2u32_full((s), (i), (b), '\0')
+#define str2u16_base(s, i, b)	str2u16_full((s), (i), (b), '\0')
 
-/* base 10 */
-#define str2u64(s, i)	str2u64_full((s), (i), 10)
-#define str2u32(s, i)	str2u32_full((s), (i), 10)
-#define str2u16(s, i)	str2u16_full((s), (i), 10)
+/* base 10, nul-terminated */
+#define str2u64(s, i)	str2u64_full((s), (i), 10, '\0')
+#define str2u32(s, i)	str2u32_full((s), (i), 10, '\0')
+#define str2u16(s, i)	str2u16_full((s), (i), 10, '\0')
 
 /*
  * These prototypes exist to catch bugs in the code generating macros below.
