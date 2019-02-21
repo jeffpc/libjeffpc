@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -67,6 +67,12 @@ STR_TO_INT(64, 0xffffffffffffffffull)
 
 #undef STR_TO_INT
 
+/* base [2, 36] */
+#define str2u64_base(s, i, b)	__str2u64((s), (i), (b))
+#define str2u32_base(s, i, b)	__str2u32((s), (i), (b))
+#define str2u16_base(s, i, b)	__str2u16((s), (i), (b))
+
+/* base 10 */
 #define str2u64(s, i)	__str2u64((s), (i), 10)
 #define str2u32(s, i)	__str2u32((s), (i), 10)
 #define str2u16(s, i)	__str2u16((s), (i), 10)
