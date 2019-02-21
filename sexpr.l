@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,7 @@ static int getint(const char *str, uint64_t *i, int base, const char *type,
 {
 	int ret;
 
-	ret = __str2u64(str, i, base);
+	ret = str2u64_base(str, i, base);
 	if (ret) {
 		char err[256];
 
@@ -113,7 +113,7 @@ static int getutf8(const char *str, size_t len, uint64_t *out)
 					ssize_t len;
 					int ret;
 
-					ret = __str2u32(yytext + 2, &cp, 16);
+					ret = str2u32_base(yytext + 2, &cp, 16);
 					if (ret)
 						return ERROR;
 

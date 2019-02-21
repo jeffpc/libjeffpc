@@ -193,7 +193,7 @@ static const struct run runs[] = {
 		}							\
 		fprintf(stderr, "...");					\
 									\
-		check_rets(res->ret, ret, "__str2u%d", size);		\
+		check_rets(res->ret, ret, "str2u%d", size);		\
 									\
 		if (!ret)						\
 			ASSERT3U(out, ==, res->out);			\
@@ -214,16 +214,16 @@ void test(void)
 		TEST(i, B10, SZ64, str2u64(in, &tmp), uint64_t);
 
 		/* test underlying function with all bases */
-		TEST(i, B8, SZ16, __str2u16(in, &tmp, 8), uint16_t);
-		TEST(i, B8, SZ32, __str2u32(in, &tmp, 8), uint32_t);
-		TEST(i, B8, SZ64, __str2u64(in, &tmp, 8), uint64_t);
+		TEST(i, B8, SZ16, str2u16_base(in, &tmp, 8), uint16_t);
+		TEST(i, B8, SZ32, str2u32_base(in, &tmp, 8), uint32_t);
+		TEST(i, B8, SZ64, str2u64_base(in, &tmp, 8), uint64_t);
 
-		TEST(i, B10, SZ16, __str2u16(in, &tmp, 10), uint16_t);
-		TEST(i, B10, SZ32, __str2u32(in, &tmp, 10), uint32_t);
-		TEST(i, B10, SZ64, __str2u64(in, &tmp, 10), uint64_t);
+		TEST(i, B10, SZ16, str2u16_base(in, &tmp, 10), uint16_t);
+		TEST(i, B10, SZ32, str2u32_base(in, &tmp, 10), uint32_t);
+		TEST(i, B10, SZ64, str2u64_base(in, &tmp, 10), uint64_t);
 
-		TEST(i, B16, SZ16, __str2u16(in, &tmp, 16), uint16_t);
-		TEST(i, B16, SZ32, __str2u32(in, &tmp, 16), uint32_t);
-		TEST(i, B16, SZ64, __str2u64(in, &tmp, 16), uint64_t);
+		TEST(i, B16, SZ16, str2u16_base(in, &tmp, 16), uint16_t);
+		TEST(i, B16, SZ32, str2u32_base(in, &tmp, 16), uint32_t);
+		TEST(i, B16, SZ64, str2u64_base(in, &tmp, 16), uint64_t);
 	}
 }
