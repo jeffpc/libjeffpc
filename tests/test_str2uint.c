@@ -84,9 +84,8 @@ static const struct run runs[] = {
 	},
 	{
 		.in	  = "0x0",
-		/* FIXME: base 8 & 10 should return -EINVAL */
-		.out[B8]  = ENT(0, 0, 0, 0, 0, 0),
-		.out[B10] = ENT(0, 0, 0, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
 		.out[B16] = ENT(0, 0, 0, 0, 0, 0),
 	},
 	{
@@ -103,9 +102,8 @@ static const struct run runs[] = {
 	},
 	{
 		.in	  = "0x8",
-		/* FIXME: base 8 & 10 should return -EINVAL */
-		.out[B8]  = ENT(0, 0, 0, 0, 0, 0),
-		.out[B10] = ENT(0, 0, 0, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
 		.out[B16] = ENT(8, 8, 8, 0, 0, 0),
 	},
 	{
@@ -122,30 +120,26 @@ static const struct run runs[] = {
 	},
 	{
 		.in	  = "0XA",
-		/* FIXME: base 8 & 10 should return -EINVAL */
-		.out[B8]  = ENT(0, 0, 0, 0, 0, 0),
-		.out[B10] = ENT(0, 0, 0, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
 		.out[B16] = ENT(0xa, 0xa, 0xa, 0, 0, 0),
 	},
 	{
 		.in	  = "0Xa",
-		/* FIXME: base 8 & 10 should return -EINVAL */
-		.out[B8]  = ENT(0, 0, 0, 0, 0, 0),
-		.out[B10] = ENT(0, 0, 0, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
 		.out[B16] = ENT(0xa, 0xa, 0xa, 0, 0, 0),
 	},
 	{
 		.in	  = "0xA",
-		/* FIXME: base 8 & 10 should return -EINVAL */
-		.out[B8]  = ENT(0, 0, 0, 0, 0, 0),
-		.out[B10] = ENT(0, 0, 0, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
 		.out[B16] = ENT(0xa, 0xa, 0xa, 0, 0, 0),
 	},
 	{
 		.in	  = "0xa",
-		/* FIXME: base 8 & 10 should return -EINVAL */
-		.out[B8]  = ENT(0, 0, 0, 0, 0, 0),
-		.out[B10] = ENT(0, 0, 0, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
 		.out[B16] = ENT(0xa, 0xa, 0xa, 0, 0, 0),
 	},
 	/*

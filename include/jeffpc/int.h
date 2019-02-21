@@ -51,7 +51,12 @@ static inline int __str2u##size(const char *restrict s,			\
 	if (errno)							\
 		return -errno;						\
 									\
+	/* parsed nothing or input is empty */				\
 	if (endptr == s)						\
+		return -EINVAL;						\
+									\
+	/* nul-terminated? */						\
+	if (*endptr != '\0')						\
 		return -EINVAL;						\
 									\
 	if (tmp > imax)							\
