@@ -193,7 +193,7 @@ static const struct run runs[] = {
 		}							\
 		fprintf(stderr, "...");					\
 									\
-		check_rets(res->ret, ret, "__str2u%d", base);		\
+		check_rets(res->ret, ret, "__str2u%d", size);		\
 									\
 		if (!ret)						\
 			ASSERT3U(out, ==, res->out);			\
