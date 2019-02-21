@@ -36,9 +36,9 @@
  * string to integer conversion
  */
 #define STR_TO_INT(size, imax)						\
-static inline int __str2u##size(const char *restrict s,			\
-				uint##size##_t *i,			\
-				int base)				\
+static inline int str2u##size##_full(const char *restrict s,		\
+				     uint##size##_t *i,			\
+				     int base)				\
 {									\
 	char *endptr;							\
 	uint64_t tmp;							\
@@ -73,14 +73,14 @@ STR_TO_INT(64, 0xffffffffffffffffull)
 #undef STR_TO_INT
 
 /* base [2, 36] */
-#define str2u64_base(s, i, b)	__str2u64((s), (i), (b))
-#define str2u32_base(s, i, b)	__str2u32((s), (i), (b))
-#define str2u16_base(s, i, b)	__str2u16((s), (i), (b))
+#define str2u64_base(s, i, b)	str2u64_full((s), (i), (b))
+#define str2u32_base(s, i, b)	str2u32_full((s), (i), (b))
+#define str2u16_base(s, i, b)	str2u16_full((s), (i), (b))
 
 /* base 10 */
-#define str2u64(s, i)	__str2u64((s), (i), 10)
-#define str2u32(s, i)	__str2u32((s), (i), 10)
-#define str2u16(s, i)	__str2u16((s), (i), 10)
+#define str2u64(s, i)	str2u64_full((s), (i), 10)
+#define str2u32(s, i)	str2u32_full((s), (i), 10)
+#define str2u16(s, i)	str2u16_full((s), (i), 10)
 
 /*
  * These prototypes exist to catch bugs in the code generating macros below.
