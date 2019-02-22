@@ -70,6 +70,9 @@ static const struct run runs[] = {
 		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
 		.out[B16] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
 	},
+	/*
+	 * Check various well-formed (in at least one base) inputs
+	 */
 	{
 		.in	  = "0",
 		.out[B8]  = ENT(0, 0, 0, 0, 0, 0),
