@@ -46,6 +46,14 @@ static inline int str2u##size##_full(const char *restrict s,		\
 									\
 	*i = 0;								\
 									\
+	/*								\
+	 * negative numbers aren't representable by uintXX_t; this may	\
+	 * mask a -EINVAL if the input is of the form:			\
+	 * "-<some non-number>"						\
+	 */								\
+	if (*s == '-')							\
+		return -ERANGE;						\
+									\
 	errno = 0;							\
 	tmp = strtoull(s, &endptr, base);				\
 									\

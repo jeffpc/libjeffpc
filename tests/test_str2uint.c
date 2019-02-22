@@ -143,9 +143,65 @@ static const struct run runs[] = {
 		.out[B16] = ENT(0xa, 0xa, 0xa, 0, 0, 0),
 	},
 	/*
+	 * Check negative numbers
+	 */
+	{
+		.in       = "-0",
+		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in       = "-1",
+		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in       = "-8",
+		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in	  = "-A",
+		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in	  = "-a",
+		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in	  = "-0XA",
+		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in	  = "-0Xa",
+		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in	  = "-0xA",
+		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in	  = "-0xa",
+		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+	},
+	/*
 	 * FIXME: more test cases
 	 *   - check values > max for type
-	 *   - check inputs starting with '-' ?
 	 *   - check inputs with leading garbage
 	 *   - check inputs with trailing garbage
 	 */
