@@ -146,6 +146,93 @@ static const struct run runs[] = {
 		.out[B16] = ENT(0xa, 0xa, 0xa, 0, 0, 0),
 	},
 	/*
+	 * Check various well-formed inputs for overflows
+	 */
+	{
+		.in	  = "7",
+		.out[B8]  = ENT(7, 7, 7, 0, 0, 0),
+		.out[B10] = ENT(7, 7, 7, 0, 0, 0),
+		.out[B16] = ENT(7, 7, 7, 0, 0, 0),
+	},
+	{
+		.in	  = "70",
+		.out[B8]  = ENT(070,  070,  070,  0, 0, 0),
+		.out[B10] = ENT(70,   70,   70,   0, 0, 0),
+		.out[B16] = ENT(0x70, 0x70, 0x70, 0, 0, 0),
+	},
+	{
+		.in	  = "7070",
+		.out[B8]  = ENT(07070,  07070,  07070,  0, 0, 0),
+		.out[B10] = ENT(7070,   7070,   7070,   0, 0, 0),
+		.out[B16] = ENT(0x7070, 0x7070, 0x7070, 0, 0, 0),
+	},
+	{
+		.in	  = "70707",
+		.out[B8]  = ENT(070707,  070707,  070707, 0, 0, 0),
+		.out[B10] = ENT(     0,   70707,   70707, -ERANGE, 0, 0),
+		.out[B16] = ENT(     0, 0x70707, 0x70707, -ERANGE, 0, 0),
+	},
+	{
+		.in	  = "707070",
+		.out[B8]  = ENT(0,  0707070,  0707070, -ERANGE, 0, 0),
+		.out[B10] = ENT(0,   707070,   707070, -ERANGE, 0, 0),
+		.out[B16] = ENT(0, 0x707070, 0x707070, -ERANGE, 0, 0),
+	},
+	{
+		.in	  = "70707070",
+		.out[B8]  = ENT(0,  070707070,  070707070, -ERANGE, 0, 0),
+		.out[B10] = ENT(0,   70707070,   70707070, -ERANGE, 0, 0),
+		.out[B16] = ENT(0, 0x70707070, 0x70707070, -ERANGE, 0, 0),
+	},
+	{
+		.in	  = "7070707070",
+		.out[B8]  = ENT(0,  07070707070,  07070707070, -ERANGE, 0, 0),
+		.out[B10] = ENT(0,            0,   7070707070, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0,            0, 0x7070707070, -ERANGE, -ERANGE, 0),
+	},
+	{
+		.in	  = "707070707070",
+		.out[B8]  = ENT(0, 0,  0707070707070, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0,   707070707070, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0, 0x707070707070, -ERANGE, -ERANGE, 0),
+	},
+	{
+		.in	  = "70707070707070",
+		.out[B8]  = ENT(0, 0,  070707070707070, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0,   70707070707070, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0, 0x70707070707070, -ERANGE, -ERANGE, 0),
+	},
+	{
+		.in	  = "7070707070707070",
+		.out[B8]  = ENT(0, 0,  07070707070707070, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0,   7070707070707070, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0, 0x7070707070707070, -ERANGE, -ERANGE, 0),
+	},
+	{
+		.in	  = "707070707070707070",
+		.out[B8]  = ENT(0, 0, 0707070707070707070, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0,  707070707070707070, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0,                   0, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in	  = "70707070707070707070",
+		.out[B8]  = ENT(0, 0, 070707070707070707070, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0,                     0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0,                     0, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in	  = "707070707070707070707",
+		.out[B8]  = ENT(0, 0, 0707070707070707070707, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0,                      0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0,                      0, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in	  = "7070707070707070707070",
+		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+	},
+	/*
 	 * Check negative numbers
 	 */
 	{
@@ -204,7 +291,6 @@ static const struct run runs[] = {
 	},
 	/*
 	 * FIXME: more test cases
-	 *   - check values > max for type
 	 *   - check inputs with leading garbage
 	 *   - check inputs with trailing garbage
 	 */
