@@ -109,18 +109,23 @@ ssize_t sexpr_list_to_array(struct val *list, struct val **array, size_t alen)
 {
 	struct val *tmp;
 	size_t nvals = 0;
+	ssize_t ret;
 
 	for (tmp = list;
 	     !sexpr_is_null(tmp) && (alen > nvals);
 	     tmp = tmp->cons.tail, nvals++) {
-		if (tmp->type != VT_CONS)
+		if (tmp->type != VT_CONS) {
+			ret = -EINVAL;
 			goto err;
+		}
 
 		array[nvals] = val_getref(tmp->cons.head);
 	}
 
-	if ((alen == nvals) && !sexpr_is_null(tmp))
+	if ((alen == nvals) && !sexpr_is_null(tmp)) {
+		ret = -ENOMEM;
 		goto err;
+	}
 
 	return nvals;
 
@@ -128,7 +133,7 @@ err:
 	while (nvals)
 		val_putref(array[--nvals]);
 
-	return -1;
+	return ret;
 }
 
 /*
