@@ -25,10 +25,33 @@
 #include "val_impl.h"
 
 static struct val *__val_alloc_array(struct val **vals, size_t nelem,
-				     bool heap)
+				     bool dup, bool heap)
 {
 	struct val *val;
 	size_t i;
+
+	if (dup) {
+		struct val **tmp;
+
+		/* no reason to ever duplicate a heap allocated array */
+		ASSERT(!heap);
+
+		tmp = mem_reallocarray(NULL, nelem, sizeof(struct val *));
+		if (!tmp) {
+			val = ERR_PTR(-ENOMEM);
+			goto err;
+		}
+
+		/*
+		 * The multiplication can't overflow since the memory allocation
+		 * already checks for it.
+		 */
+		memcpy(tmp, vals, sizeof(struct val *) * nelem);
+
+		/* switch to the new array & free it on error or 0 refcnt */
+		vals = tmp;
+		heap = true;
+	}
 
 	val = __val_alloc(VT_ARRAY);
 	if (IS_ERR(val))
@@ -52,27 +75,15 @@ err:
 
 struct val *val_alloc_array(struct val **vals, size_t nelem)
 {
-	return __val_alloc_array(vals, nelem, true);
+	return __val_alloc_array(vals, nelem, false, true);
 }
 
 struct val *val_alloc_array_dup(struct val **vals, size_t nelem)
 {
-	struct val **tmp;
-
-	tmp = mem_reallocarray(NULL, nelem, sizeof(struct val *));
-	if (!tmp)
-		return ERR_PTR(-ENOMEM);
-
-	/*
-	 * The multiplication can't overflow since the memory allocation
-	 * already checks for it.
-	 */
-	memcpy(tmp, vals, sizeof(struct val *) * nelem);
-
-	return __val_alloc_array(tmp, nelem, true);
+	return __val_alloc_array(vals, nelem, true, false);
 }
 
 struct val *val_alloc_array_static(struct val **vals, size_t nelem)
 {
-	return __val_alloc_array(vals, nelem, false);
+	return __val_alloc_array(vals, nelem, false, false);
 }
