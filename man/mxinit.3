@@ -1,0 +1,39 @@
+.Dd February 24, 2019
+.Dt MXINIT 3
+.Os
+.\"
+.Sh NAME
+.Nm MXINIT ,
+.Nm MXDESTROY ,
+.Nm MXLOCK ,
+.Nm MXUNLOCK
+.Nd synchronize access to shared data structures
+.\"
+.Sh SYNOPSIS
+.In jeffpc/synch.h
+.Ft void
+.Fn MXINIT "struct lock *lock" "struct lock_class *lclass"
+.Ft void
+.Fn MXDESTROY "struct lock *lock"
+.Ft void
+.Fn MXLOCK "struct lock *lock"
+.Ft void
+.Fn MXUNLOCK "struct lock *lock"
+.\"
+.Sh DESCRIPTION
+These functions wrap the system provided pthread mutex type to simplify the
+mutex API, provide as close to identical error checks across all platforms,
+and in general increase the amount of error checking performed.
+.\"
+.Sh ERRORS
+Specifying illegal arguments results in a panic.
+The panic message includes detailed information about which constraint was
+violated.
+There is no way to recover from these panics as they imply something is very
+wrong with the codebase.
+.\"
+.Sh SEE ALSO
+.Xr pthread_mutex_destroy 3 ,
+.Xr pthread_mutex_init 3 ,
+.Xr pthread_mutex_lock 3 ,
+.Xr pthread_mutex_unlock 3
