@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -105,10 +105,10 @@ struct val *sexpr_args_to_list(size_t nvals, ...)
  * We fill in the passed in array with at most alen elements.  The number of
  * filled in elements is returned to the caller.
  */
-int sexpr_list_to_array(struct val *list, struct val **array, int alen)
+ssize_t sexpr_list_to_array(struct val *list, struct val **array, size_t alen)
 {
 	struct val *tmp;
-	int nvals = 0;
+	size_t nvals = 0;
 
 	for (tmp = list;
 	     !sexpr_is_null(tmp) && (alen > nvals);
