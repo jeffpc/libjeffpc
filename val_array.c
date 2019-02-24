@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2018-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,21 +28,24 @@ static struct val *__val_alloc_array(struct val **vals, size_t nelem,
 				     bool heap)
 {
 	struct val *val;
+	size_t i;
 
 	val = __val_alloc(VT_ARRAY);
-	if (IS_ERR(val)) {
-		size_t i;
+	if (IS_ERR(val))
+		goto err;
 
-		for (i = 0; i < nelem; i++)
-			val_putref(vals[i]);
+	val->_set_array.vals = vals;
+	val->_set_array.nelem = nelem;
+	val->static_alloc = !heap;
 
-		if (heap)
-			free(vals);
-	} else {
-		val->_set_array.vals = vals;
-		val->_set_array.nelem = nelem;
-		val->static_alloc = !heap;
-	}
+	return val;
+
+err:
+	for (i = 0; i < nelem; i++)
+		val_putref(vals[i]);
+
+	if (heap)
+		free(vals);
 
 	return val;
 }
