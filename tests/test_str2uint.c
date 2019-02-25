@@ -33,7 +33,7 @@ struct res {
 
 struct run {
 	const char *in;
-	struct res out[3][3]; /* out[base][size] */
+	struct res out[3][4]; /* out[base][size] */
 };
 
 #define B8	0
@@ -46,18 +46,21 @@ static const int bases[] = {
 	[B16] = 16,
 };
 
-#define SZ16	0
-#define SZ32	1
-#define SZ64	2
+#define SZ8	0
+#define SZ16	1
+#define SZ32	2
+#define SZ64	3
 
 static const int sizes[] = {
+	[SZ8]  = 8,
 	[SZ16] = 16,
 	[SZ32] = 32,
 	[SZ64] = 64,
 };
 
-#define ENT(v_s16, v_s32, v_s64, r_s16, r_s32, r_s64) \
+#define ENT(v_s8, v_s16, v_s32, v_s64, r_s8, r_s16, r_s32, r_s64) \
 	{ \
+		[SZ8]  = { .ret = (r_s8),  .out = (v_s8), }, \
 		[SZ16] = { .ret = (r_s16), .out = (v_s16), }, \
 		[SZ32] = { .ret = (r_s32), .out = (v_s32), }, \
 		[SZ64] = { .ret = (r_s64), .out = (v_s64), }, \
@@ -66,228 +69,228 @@ static const int sizes[] = {
 static const struct run runs[] = {
 	{
 		.in	  = "",
-		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B16] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
+		.out[B8]  = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
 	},
 	/*
 	 * Check various well-formed (in at least one base) inputs
 	 */
 	{
 		.in	  = "0",
-		.out[B8]  = ENT(0, 0, 0, 0, 0, 0),
-		.out[B10] = ENT(0, 0, 0, 0, 0, 0),
-		.out[B16] = ENT(0, 0, 0, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, 0, 0, 0, 0, 0),
+		.out[B10] = ENT(0, 0, 0, 0, 0, 0, 0, 0),
+		.out[B16] = ENT(0, 0, 0, 0, 0, 0, 0, 0),
 	},
 	{
 		.in	  = "00",
-		.out[B8]  = ENT(0, 0, 0, 0, 0, 0),
-		.out[B10] = ENT(0, 0, 0, 0, 0, 0),
-		.out[B16] = ENT(0, 0, 0, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, 0, 0, 0, 0, 0),
+		.out[B10] = ENT(0, 0, 0, 0, 0, 0, 0, 0),
+		.out[B16] = ENT(0, 0, 0, 0, 0, 0, 0, 0),
 	},
 	{
 		.in	  = "0x0",
-		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B16] = ENT(0, 0, 0, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0, 0, 0, 0, 0, 0, 0, 0),
 	},
 	{
 		.in	  = "5",
-		.out[B8]  = ENT(5, 5, 5, 0, 0, 0),
-		.out[B10] = ENT(5, 5, 5, 0, 0, 0),
-		.out[B16] = ENT(5, 5, 5, 0, 0, 0),
+		.out[B8]  = ENT(5, 5, 5, 5, 0, 0, 0, 0),
+		.out[B10] = ENT(5, 5, 5, 5, 0, 0, 0, 0),
+		.out[B16] = ENT(5, 5, 5, 5, 0, 0, 0, 0),
 	},
 	{
 		.in	  = "8",
-		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B10] = ENT(8, 8, 8, 0, 0, 0),
-		.out[B16] = ENT(8, 8, 8, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(8, 8, 8, 8, 0, 0, 0, 0),
+		.out[B16] = ENT(8, 8, 8, 8, 0, 0, 0, 0),
 	},
 	{
 		.in	  = "0x8",
-		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B16] = ENT(8, 8, 8, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(8, 8, 8, 8, 0, 0, 0, 0),
 	},
 	{
 		.in	  = "A",
-		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B16] = ENT(0xa, 0xa, 0xa, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0xa, 0xa, 0xa, 0xa, 0, 0, 0, 0),
 	},
 	{
 		.in	  = "a",
-		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B16] = ENT(0xa, 0xa, 0xa, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0xa, 0xa, 0xa, 0xa, 0, 0, 0, 0),
 	},
 	{
 		.in	  = "0XA",
-		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B16] = ENT(0xa, 0xa, 0xa, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0xa, 0xa, 0xa, 0xa, 0, 0, 0, 0),
 	},
 	{
 		.in	  = "0Xa",
-		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B16] = ENT(0xa, 0xa, 0xa, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0xa, 0xa, 0xa, 0xa, 0, 0, 0, 0),
 	},
 	{
 		.in	  = "0xA",
-		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B16] = ENT(0xa, 0xa, 0xa, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0xa, 0xa, 0xa, 0xa, 0, 0, 0, 0),
 	},
 	{
 		.in	  = "0xa",
-		.out[B8]  = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B10] = ENT(0, 0, 0, -EINVAL, -EINVAL, -EINVAL),
-		.out[B16] = ENT(0xa, 0xa, 0xa, 0, 0, 0),
+		.out[B8]  = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0xa, 0xa, 0xa, 0xa, 0, 0, 0, 0),
 	},
 	/*
 	 * Check various well-formed inputs for overflows
 	 */
 	{
 		.in	  = "7",
-		.out[B8]  = ENT(7, 7, 7, 0, 0, 0),
-		.out[B10] = ENT(7, 7, 7, 0, 0, 0),
-		.out[B16] = ENT(7, 7, 7, 0, 0, 0),
+		.out[B8]  = ENT(7, 7, 7, 7, 0, 0, 0, 0),
+		.out[B10] = ENT(7, 7, 7, 7, 0, 0, 0, 0),
+		.out[B16] = ENT(7, 7, 7, 7, 0, 0, 0, 0),
 	},
 	{
 		.in	  = "70",
-		.out[B8]  = ENT(070,  070,  070,  0, 0, 0),
-		.out[B10] = ENT(70,   70,   70,   0, 0, 0),
-		.out[B16] = ENT(0x70, 0x70, 0x70, 0, 0, 0),
+		.out[B8]  = ENT(070,  070,  070,  070,  0, 0, 0, 0),
+		.out[B10] = ENT(70,   70,   70,   70,   0, 0, 0, 0),
+		.out[B16] = ENT(0x70, 0x70, 0x70, 0x70, 0, 0, 0, 0),
 	},
 	{
 		.in	  = "7070",
-		.out[B8]  = ENT(07070,  07070,  07070,  0, 0, 0),
-		.out[B10] = ENT(7070,   7070,   7070,   0, 0, 0),
-		.out[B16] = ENT(0x7070, 0x7070, 0x7070, 0, 0, 0),
+		.out[B8]  = ENT(0, 07070,  07070,  07070,  -ERANGE, 0, 0, 0),
+		.out[B10] = ENT(0, 7070,   7070,   7070,   -ERANGE, 0, 0, 0),
+		.out[B16] = ENT(0, 0x7070, 0x7070, 0x7070, -ERANGE, 0, 0, 0),
 	},
 	{
 		.in	  = "70707",
-		.out[B8]  = ENT(070707,  070707,  070707, 0, 0, 0),
-		.out[B10] = ENT(     0,   70707,   70707, -ERANGE, 0, 0),
-		.out[B16] = ENT(     0, 0x70707, 0x70707, -ERANGE, 0, 0),
+		.out[B8]  = ENT(0, 070707,  070707,  070707, -ERANGE, 0, 0, 0),
+		.out[B10] = ENT(0,      0,   70707,   70707, -ERANGE, -ERANGE, 0, 0),
+		.out[B16] = ENT(0,      0, 0x70707, 0x70707, -ERANGE, -ERANGE, 0, 0),
 	},
 	{
 		.in	  = "707070",
-		.out[B8]  = ENT(0,  0707070,  0707070, -ERANGE, 0, 0),
-		.out[B10] = ENT(0,   707070,   707070, -ERANGE, 0, 0),
-		.out[B16] = ENT(0, 0x707070, 0x707070, -ERANGE, 0, 0),
+		.out[B8]  = ENT(0, 0,  0707070,  0707070, -ERANGE, -ERANGE, 0, 0),
+		.out[B10] = ENT(0, 0,   707070,   707070, -ERANGE, -ERANGE, 0, 0),
+		.out[B16] = ENT(0, 0, 0x707070, 0x707070, -ERANGE, -ERANGE, 0, 0),
 	},
 	{
 		.in	  = "70707070",
-		.out[B8]  = ENT(0,  070707070,  070707070, -ERANGE, 0, 0),
-		.out[B10] = ENT(0,   70707070,   70707070, -ERANGE, 0, 0),
-		.out[B16] = ENT(0, 0x70707070, 0x70707070, -ERANGE, 0, 0),
+		.out[B8]  = ENT(0, 0,  070707070,  070707070, -ERANGE, -ERANGE, 0, 0),
+		.out[B10] = ENT(0, 0,   70707070,   70707070, -ERANGE, -ERANGE, 0, 0),
+		.out[B16] = ENT(0, 0, 0x70707070, 0x70707070, -ERANGE, -ERANGE, 0, 0),
 	},
 	{
 		.in	  = "7070707070",
-		.out[B8]  = ENT(0,  07070707070,  07070707070, -ERANGE, 0, 0),
-		.out[B10] = ENT(0,            0,   7070707070, -ERANGE, -ERANGE, 0),
-		.out[B16] = ENT(0,            0, 0x7070707070, -ERANGE, -ERANGE, 0),
+		.out[B8]  = ENT(0, 0,  07070707070,  07070707070, -ERANGE, -ERANGE, 0, 0),
+		.out[B10] = ENT(0, 0,            0,   7070707070, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0,            0, 0x7070707070, -ERANGE, -ERANGE, -ERANGE, 0),
 	},
 	{
 		.in	  = "707070707070",
-		.out[B8]  = ENT(0, 0,  0707070707070, -ERANGE, -ERANGE, 0),
-		.out[B10] = ENT(0, 0,   707070707070, -ERANGE, -ERANGE, 0),
-		.out[B16] = ENT(0, 0, 0x707070707070, -ERANGE, -ERANGE, 0),
+		.out[B8]  = ENT(0, 0, 0,  0707070707070, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0, 0,   707070707070, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0, 0, 0x707070707070, -ERANGE, -ERANGE, -ERANGE, 0),
 	},
 	{
 		.in	  = "70707070707070",
-		.out[B8]  = ENT(0, 0,  070707070707070, -ERANGE, -ERANGE, 0),
-		.out[B10] = ENT(0, 0,   70707070707070, -ERANGE, -ERANGE, 0),
-		.out[B16] = ENT(0, 0, 0x70707070707070, -ERANGE, -ERANGE, 0),
+		.out[B8]  = ENT(0, 0, 0,  070707070707070, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0, 0,   70707070707070, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0, 0, 0x70707070707070, -ERANGE, -ERANGE, -ERANGE, 0),
 	},
 	{
 		.in	  = "7070707070707070",
-		.out[B8]  = ENT(0, 0,  07070707070707070, -ERANGE, -ERANGE, 0),
-		.out[B10] = ENT(0, 0,   7070707070707070, -ERANGE, -ERANGE, 0),
-		.out[B16] = ENT(0, 0, 0x7070707070707070, -ERANGE, -ERANGE, 0),
+		.out[B8]  = ENT(0, 0, 0,  07070707070707070, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0, 0,   7070707070707070, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0, 0, 0x7070707070707070, -ERANGE, -ERANGE, -ERANGE, 0),
 	},
 	{
 		.in	  = "707070707070707070",
-		.out[B8]  = ENT(0, 0, 0707070707070707070, -ERANGE, -ERANGE, 0),
-		.out[B10] = ENT(0, 0,  707070707070707070, -ERANGE, -ERANGE, 0),
-		.out[B16] = ENT(0, 0,                   0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B8]  = ENT(0, 0, 0, 0707070707070707070, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0, 0,  707070707070707070, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0, 0,                   0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
 	},
 	{
 		.in	  = "70707070707070707070",
-		.out[B8]  = ENT(0, 0, 070707070707070707070, -ERANGE, -ERANGE, 0),
-		.out[B10] = ENT(0, 0,                     0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B16] = ENT(0, 0,                     0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B8]  = ENT(0, 0, 0, 070707070707070707070, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0, 0,                     0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0,                     0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
 	},
 	{
 		.in	  = "707070707070707070707",
-		.out[B8]  = ENT(0, 0, 0707070707070707070707, -ERANGE, -ERANGE, 0),
-		.out[B10] = ENT(0, 0,                      0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B16] = ENT(0, 0,                      0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B8]  = ENT(0, 0, 0, 0707070707070707070707, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0, 0,                      0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0,                      0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
 	},
 	{
 		.in	  = "7070707070707070707070",
-		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B8]  = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
 	},
 	/*
 	 * Check negative numbers
 	 */
 	{
 		.in       = "-0",
-		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B8]  = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
 	},
 	{
 		.in       = "-1",
-		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B8]  = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
 	},
 	{
 		.in       = "-8",
-		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B8]  = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
 	},
 	{
 		.in	  = "-A",
-		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B8]  = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
 	},
 	{
 		.in	  = "-a",
-		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B8]  = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
 	},
 	{
 		.in	  = "-0XA",
-		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B8]  = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
 	},
 	{
 		.in	  = "-0Xa",
-		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B8]  = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
 	},
 	{
 		.in	  = "-0xA",
-		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B8]  = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
 	},
 	{
 		.in	  = "-0xa",
-		.out[B8]  = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B10] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
-		.out[B16] = ENT(0, 0, 0, -ERANGE, -ERANGE, -ERANGE),
+		.out[B8]  = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
 	},
 	/*
 	 * FIXME: more test cases
@@ -348,19 +351,23 @@ void test(void)
 		fprintf(stderr, "%2d: in='%s'...\n", i, runs[i].in);
 
 		/* test simple base 10 parsing */
+		TEST(i, B10, SZ8, str2u8(in, &tmp), uint8_t);
 		TEST(i, B10, SZ16, str2u16(in, &tmp), uint16_t);
 		TEST(i, B10, SZ32, str2u32(in, &tmp), uint32_t);
 		TEST(i, B10, SZ64, str2u64(in, &tmp), uint64_t);
 
 		/* test underlying function with all bases */
+		TEST(i, B8, SZ8, str2u8_base(in, &tmp, 8), uint8_t);
 		TEST(i, B8, SZ16, str2u16_base(in, &tmp, 8), uint16_t);
 		TEST(i, B8, SZ32, str2u32_base(in, &tmp, 8), uint32_t);
 		TEST(i, B8, SZ64, str2u64_base(in, &tmp, 8), uint64_t);
 
+		TEST(i, B10, SZ8, str2u8_base(in, &tmp, 10), uint8_t);
 		TEST(i, B10, SZ16, str2u16_base(in, &tmp, 10), uint16_t);
 		TEST(i, B10, SZ32, str2u32_base(in, &tmp, 10), uint32_t);
 		TEST(i, B10, SZ64, str2u64_base(in, &tmp, 10), uint64_t);
 
+		TEST(i, B16, SZ8, str2u8_base(in, &tmp, 16), uint8_t);
 		TEST(i, B16, SZ16, str2u16_base(in, &tmp, 16), uint16_t);
 		TEST(i, B16, SZ32, str2u32_base(in, &tmp, 16), uint32_t);
 		TEST(i, B16, SZ64, str2u64_base(in, &tmp, 16), uint64_t);

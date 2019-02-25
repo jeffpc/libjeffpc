@@ -78,6 +78,7 @@ static inline int str2u##size##_full(const char *restrict s,		\
 STR_TO_INT(64, 0xffffffffffffffffull)
 STR_TO_INT(32, 0x00000000fffffffful)
 STR_TO_INT(16, 0x000000000000fffful)
+STR_TO_INT(8,  0x00000000000000fful)
 
 #undef STR_TO_INT
 
@@ -90,16 +91,20 @@ static inline int str2u32_full(const char *restrict s, uint32_t *i,
 			       int base, char terminator);
 static inline int str2u16_full(const char *restrict s, uint16_t *i,
 			       int base, char terminator);
+static inline int str2u8_full(const char *restrict s, uint8_t *i,
+			      int base, char terminator);
 
 /* base [2, 36], nul-terminated */
 #define str2u64_base(s, i, b)	str2u64_full((s), (i), (b), '\0')
 #define str2u32_base(s, i, b)	str2u32_full((s), (i), (b), '\0')
 #define str2u16_base(s, i, b)	str2u16_full((s), (i), (b), '\0')
+#define str2u8_base(s, i, b)	str2u8_full((s), (i), (b), '\0')
 
 /* base 10, nul-terminated */
 #define str2u64(s, i)	str2u64_full((s), (i), 10, '\0')
 #define str2u32(s, i)	str2u32_full((s), (i), 10, '\0')
 #define str2u16(s, i)	str2u16_full((s), (i), 10, '\0')
+#define str2u8(s, i)	str2u8_full((s), (i), 10, '\0')
 
 /*
  * These prototypes exist to catch bugs in the code generating macros below.
