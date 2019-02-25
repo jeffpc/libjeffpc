@@ -81,6 +81,16 @@ STR_TO_INT(16, 0x000000000000fffful)
 
 #undef STR_TO_INT
 
+/*
+ * These prototypes exist to catch bugs in the code generating macros above.
+ */
+static inline int str2u64_full(const char *restrict s, uint64_t *i,
+			       int base, char terminator);
+static inline int str2u32_full(const char *restrict s, uint32_t *i,
+			       int base, char terminator);
+static inline int str2u16_full(const char *restrict s, uint16_t *i,
+			       int base, char terminator);
+
 /* base [2, 36], nul-terminated */
 #define str2u64_base(s, i, b)	str2u64_full((s), (i), (b), '\0')
 #define str2u32_base(s, i, b)	str2u32_full((s), (i), (b), '\0')
