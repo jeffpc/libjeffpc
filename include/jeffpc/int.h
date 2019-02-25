@@ -75,9 +75,9 @@ static inline int str2u##size##_full(const char *restrict s,		\
 	return 0;							\
 }
 
-STR_TO_INT(16, 0x000000000000fffful)
-STR_TO_INT(32, 0x00000000fffffffful)
 STR_TO_INT(64, 0xffffffffffffffffull)
+STR_TO_INT(32, 0x00000000fffffffful)
+STR_TO_INT(16, 0x000000000000fffful)
 
 #undef STR_TO_INT
 
