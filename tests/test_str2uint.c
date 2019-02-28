@@ -236,6 +236,261 @@ static const struct run runs[] = {
 		.out[B16] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
 	},
 	/*
+	 * Check min/max for each uint size
+	 *
+	 * Note: We don't use base prefixes (0 & 0x) in all the inputs to
+	 * test those inputs in different bases as well - they are "free"
+	 * test cases.
+	 */
+	/* highest 8-bit ... */
+	{
+		.in       = "255", /* ... base 10 */
+		.out[B8]  = ENT(0255,  0255,  0255,  0255, 0, 0, 0, 0),
+		.out[B10] = ENT( 255,   255,   255,   255, 0, 0, 0, 0),
+		.out[B16] = ENT(   0, 0x255, 0x255, 0x255, -ERANGE, 0, 0, 0),
+	},
+	{
+		.in       = "377", /* ... base 8 (no prefix) */
+		.out[B8]  = ENT(0377,  0377,  0377,  0377, 0, 0, 0, 0),
+		.out[B10] = ENT(   0,   377,   377,   377, -ERANGE, 0, 0, 0),
+		.out[B16] = ENT(   0, 0x377, 0x377, 0x377, -ERANGE, 0, 0, 0),
+	},
+	{
+		.in       = "0377", /* ... base 8 (prefix) */
+		.out[B8]  = ENT(0377,  0377,  0377,  0377, 0, 0, 0, 0),
+		.out[B10] = ENT(   0,   377,   377,   377, -ERANGE, 0, 0, 0),
+		.out[B16] = ENT(   0, 0x377, 0x377, 0x377, -ERANGE, 0, 0, 0),
+	},
+	{
+		.in       = "ff", /* ... base 16 (no prefix) */
+		.out[B8]  = ENT(   0,    0,    0,    0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(   0,    0,    0,    0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0xff, 0xff, 0xff, 0xff, 0, 0, 0, 0),
+	},
+	{
+		.in       = "0xff", /* ... base 16 (prefix) */
+		.out[B8]  = ENT(   0,    0,    0,    0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(   0,    0,    0,    0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0xff, 0xff, 0xff, 0xff, 0, 0, 0, 0),
+	},
+	/* higest 8-bit + 1 ... */
+	{
+		.in       = "256", /* ... base 10 */
+		.out[B8]  = ENT(0256,  0256,  0256,  0256, 0, 0, 0, 0),
+		.out[B10] = ENT(   0,   256,   256,   256, -ERANGE, 0, 0, 0),
+		.out[B16] = ENT(   0, 0x256, 0x256, 0x256, -ERANGE, 0, 0, 0),
+	},
+	{
+		.in       = "400", /* ... base 8 (no prefix) */
+		.out[B8]  = ENT(0,  0400,  0400,  0400, -ERANGE, 0, 0, 0),
+		.out[B10] = ENT(0,   400,   400,   400, -ERANGE, 0, 0, 0),
+		.out[B16] = ENT(0, 0x400, 0x400, 0x400, -ERANGE, 0, 0, 0),
+	},
+	{
+		.in       = "0400", /* ... base 8 (prefix) */
+		.out[B8]  = ENT(0,  0400,  0400,  0400, -ERANGE, 0, 0, 0),
+		.out[B10] = ENT(0,   400,   400,   400, -ERANGE, 0, 0, 0),
+		.out[B16] = ENT(0, 0x400, 0x400, 0x400, -ERANGE, 0, 0, 0),
+	},
+	{
+		.in       = "100", /* ... base 16 (no prefix) */
+		.out[B8]  = ENT(0100,  0100,  0100,  0100, 0, 0, 0, 0),
+		.out[B10] = ENT( 100,   100,   100,   100, 0, 0, 0, 0),
+		.out[B16] = ENT(   0, 0x100, 0x100, 0x100, -ERANGE, 0, 0, 0),
+	},
+	{
+		.in       = "0x100", /* ... base 16 (prefix) */
+		.out[B8]  = ENT(0,     0,     0,     0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0,     0,     0,     0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0, 0x100, 0x100, 0x100, -ERANGE, 0, 0, 0),
+	},
+	/* highest 16-bit ... */
+	{
+		.in       = "65535", /* ... base 10 */
+		.out[B8]  = ENT(0, 065535,  065535,  065535, -ERANGE, 0, 0, 0),
+		.out[B10] = ENT(0,  65535,   65535,   65535, -ERANGE, 0, 0, 0),
+		.out[B16] = ENT(0,      0, 0x65535, 0x65535, -ERANGE, -ERANGE, 0, 0),
+	},
+	{
+		.in       = "177777", /* ... base 8 (no prefix) */
+		.out[B8]  = ENT(0, 0177777,  0177777,  0177777, -ERANGE, 0, 0, 0),
+		.out[B10] = ENT(0,       0,   177777,   177777, -ERANGE, -ERANGE, 0, 0),
+		.out[B16] = ENT(0,       0, 0x177777, 0x177777, -ERANGE, -ERANGE, 0, 0),
+	},
+	{
+		.in       = "0177777", /* ... base 8 (prefix) */
+		.out[B8]  = ENT(0, 0177777,  0177777,  0177777, -ERANGE, 0, 0, 0),
+		.out[B10] = ENT(0,       0,   177777,   177777, -ERANGE, -ERANGE, 0, 0),
+		.out[B16] = ENT(0,       0, 0x177777, 0x177777, -ERANGE, -ERANGE, 0, 0),
+	},
+	{
+		.in       = "ffff", /* ... base 16 (no prefix) */
+		.out[B8]  = ENT(0,      0,      0,      0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0,      0,      0,      0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0, 0xffff, 0xffff, 0xffff, -ERANGE, 0, 0, 0),
+	},
+	{
+		.in       = "0xffff", /* ... base 16 (prefix) */
+		.out[B8]  = ENT(0,      0,      0,      0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0,      0,      0,      0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0, 0xffff, 0xffff, 0xffff, -ERANGE, 0, 0, 0),
+	},
+	/* highest 16-bit + 1 ... */
+	{
+		.in       = "65536", /* ... base 10 */
+		.out[B8]  = ENT(0, 065536,  065536,  065536, -ERANGE, 0, 0, 0),
+		.out[B10] = ENT(0,      0,   65536,   65536, -ERANGE, -ERANGE, 0, 0),
+		.out[B16] = ENT(0,      0, 0x65536, 0x65536, -ERANGE, -ERANGE, 0, 0),
+	},
+	{
+		.in       = "200000", /* ... base 8 (no prefix) */
+		.out[B8]  = ENT(0, 0,  0200000,  0200000, -ERANGE, -ERANGE, 0, 0),
+		.out[B10] = ENT(0, 0,   200000,   200000, -ERANGE, -ERANGE, 0, 0),
+		.out[B16] = ENT(0, 0, 0x200000, 0x200000, -ERANGE, -ERANGE, 0, 0),
+	},
+	{
+		.in       = "0200000", /* ... base 8 (prefix) */
+		.out[B8]  = ENT(0, 0,  0200000,  0200000, -ERANGE, -ERANGE, 0, 0),
+		.out[B10] = ENT(0, 0,   200000,   200000, -ERANGE, -ERANGE, 0, 0),
+		.out[B16] = ENT(0, 0, 0x200000, 0x200000, -ERANGE, -ERANGE, 0, 0),
+	},
+	{
+		.in       = "10000", /* ... base 16 (no prefix) */
+		.out[B8]  = ENT(0, 010000,  010000,  010000, -ERANGE, 0, 0, 0),
+		.out[B10] = ENT(0,  10000,   10000,   10000, -ERANGE, 0, 0, 0),
+		.out[B16] = ENT(0,      0, 0x10000, 0x10000, -ERANGE, -ERANGE, 0, 0),
+	},
+	{
+		.in       = "0x10000", /* ... base 16 (prefix) */
+		.out[B8]  = ENT(0,      0,      0,      0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0,      0,      0,      0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0, 0, 0x10000, 0x10000, -ERANGE, -ERANGE, 0, 0),
+	},
+	/* highest 32-bit ... */
+	{
+		.in       = "4294967295", /* ... base 10 */
+		.out[B8]  = ENT(0, 0,          0,            0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 4294967295,   4294967295, -ERANGE, -ERANGE, 0, 0),
+		.out[B16] = ENT(0, 0,          0, 0x4294967295, -ERANGE, -ERANGE, -ERANGE, 0),
+	},
+	{
+		.in       = "37777777777", /* ... base 8 (no prefix) */
+		.out[B8]  = ENT(0, 0, 037777777777,  037777777777, -ERANGE, -ERANGE, 0, 0),
+		.out[B10] = ENT(0, 0,            0,   37777777777, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0,            0, 0x37777777777, -ERANGE, -ERANGE, -ERANGE, 0),
+	},
+	{
+		.in       = "037777777777", /* ... base 8 (prefix) */
+		.out[B8]  = ENT(0, 0, 037777777777,  037777777777, -ERANGE, -ERANGE, 0, 0),
+		.out[B10] = ENT(0, 0,            0,   37777777777, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0,            0, 0x37777777777, -ERANGE, -ERANGE, -ERANGE, 0),
+	},
+	{
+		.in       = "ffffffff", /* ... base 16 (no prefix) */
+		.out[B8]  = ENT(0, 0,          0,          0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0,          0,          0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0, 0, 0xffffffff, 0xffffffff, -ERANGE, -ERANGE, 0, 0),
+	},
+	{
+		.in       = "0xffffffff", /* ... base 16 (prefix) */
+		.out[B8]  = ENT(0, 0,          0,          0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0,          0,          0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0, 0, 0xffffffff, 0xffffffff, -ERANGE, -ERANGE, 0, 0),
+	},
+	/* highest 32-bit + 1 ... */
+	{
+		.in       = "4294967296", /* ... base 10 */
+		.out[B8]  = ENT(0, 0, 0,            0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0,   4294967296, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0, 0, 0x4294967296, -ERANGE, -ERANGE, -ERANGE, 0),
+	},
+	{
+		.in       = "40000000000", /* ... base 8 (no prefix) */
+		.out[B8]  = ENT(0, 0, 0,  040000000000, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0, 0,   40000000000, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0, 0, 0x40000000000, -ERANGE, -ERANGE, -ERANGE, 0),
+	},
+	{
+		.in       = "040000000000", /* ... base 8 (prefix) */
+		.out[B8]  = ENT(0, 0, 0,  040000000000, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0, 0,   40000000000, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0, 0, 0x40000000000, -ERANGE, -ERANGE, -ERANGE, 0),
+	},
+	{
+		.in       = "100000000", /* ... base 16 (no prefix) */
+		.out[B8]  = ENT(0, 0, 0100000000,  0100000000, -ERANGE, -ERANGE, 0, 0),
+		.out[B10] = ENT(0, 0,  100000000,   100000000, -ERANGE, -ERANGE, 0, 0),
+		.out[B16] = ENT(0, 0,          0, 0x100000000, -ERANGE, -ERANGE, -ERANGE, 0),
+	},
+	{
+		.in       = "0x100000000", /* ... base 16 (prefix) */
+		.out[B8]  = ENT(0, 0, 0,           0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0,           0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0, 0, 0, 0x100000000, -ERANGE, -ERANGE, -ERANGE, 0),
+	},
+	/* highest 64-bit ... */
+	{
+		.in       = "18446744073709551615", /* ... base 10 */
+		.out[B8]  = ENT(0, 0, 0,                       0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, 18446744073709551615ull, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0, 0,                       0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in       = "1777777777777777777777", /* ... base 8 (no prefix) */
+		.out[B8]  = ENT(0, 0, 0, 01777777777777777777777, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0, 0,                       0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0,                       0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in       = "1777777777777777777777", /* ... base 8 (prefix) */
+		.out[B8]  = ENT(0, 0, 0, 01777777777777777777777, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0, 0,                       0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0,                       0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in       = "ffffffffffffffff", /* ... base 16 (no prefix) */
+		.out[B8]  = ENT(0, 0, 0,                  0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0,                  0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0, 0, 0, 0xffffffffffffffff, -ERANGE, -ERANGE, -ERANGE, 0),
+	},
+	{
+		.in       = "0xffffffffffffffff", /* ... base 16 (prefix) */
+		.out[B8]  = ENT(0, 0, 0,                  0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0,                  0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0, 0, 0, 0xffffffffffffffff, -ERANGE, -ERANGE, -ERANGE, 0),
+	},
+	/* highest 64-bit + 1 ... */
+	{
+		.in       = "18446744073709551616", /* ... base 10 */
+		.out[B8]  = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in       = "2000000000000000000000", /* ... base 8 (no prefix) */
+		.out[B8]  = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in       = "02000000000000000000000", /* ... base 8 (prefix) */
+		.out[B8]  = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B10] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+		.out[B16] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in       = "10000000000000000", /* ... base 16 (no prefix) */
+		.out[B8]  = ENT(0, 0, 0, 010000000000000000, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B10] = ENT(0, 0, 0,  10000000000000000, -ERANGE, -ERANGE, -ERANGE, 0),
+		.out[B16] = ENT(0, 0, 0,                  0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+	},
+	{
+		.in       = "0x10000000000000000", /* ... base 16 (prefix) */
+		.out[B8]  = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B10] = ENT(0, 0, 0, 0, -EINVAL, -EINVAL, -EINVAL, -EINVAL),
+		.out[B16] = ENT(0, 0, 0, 0, -ERANGE, -ERANGE, -ERANGE, -ERANGE),
+	},
+	/*
 	 * Check negative numbers
 	 */
 	{
