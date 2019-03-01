@@ -22,12 +22,13 @@
 
 #include <stdlib.h>
 
+#include <jeffpc/sexpr.h>
 #include <jeffpc/qstring.h>
 #include <jeffpc/io.h>
 
 #include "test.c"
 
-static int onefile(char *ibuf, size_t len)
+static int onefile(char *ibuf, size_t len, struct nvlist *out)
 {
 	struct nvlist *vars;
 	int ret;
@@ -37,23 +38,72 @@ static int onefile(char *ibuf, size_t len)
 		return -ENOMEM;
 
 	ret = qstring_parse_len(vars, ibuf, len);
-	if (!ret)
+	if (!ret) {
+		fprintf(stderr, "Got:\n");
 		nvl_dump_file(stderr, vars);
+
+		if (sexpr_equal(nvl_getref_val(out),
+				 nvl_getref_val(vars)))
+			fprintf(stderr, "ok.\n");
+		else
+			fail("mismatch!");
+	}
 
 	nvl_putref(vars);
 
 	return ret;
 }
 
+static struct nvlist *get_expected(const char *infname)
+{
+	const size_t len = strlen(infname);
+	char outfname[len + 3];
+	struct val *outval;
+	char *out;
+
+	strcpy(outfname, infname); /* duplicate */
+	outfname[len - 2] = '\0'; /* strip off 'qs' */
+	strcat(outfname, "lisp"); /* append 'lisp' */
+
+	out = read_file(outfname);
+	ASSERT(!IS_ERR(out));
+
+	outval = sexpr_parse(out, strlen(out));
+	ASSERT(!IS_ERR(outval));
+
+	outval = sexpr_compact(outval);
+	ASSERT(!IS_ERR(outval));
+
+	if (sexpr_is_null(outval)) {
+		val_putref(outval);
+
+		outval = val_alloc_nvl();
+		ASSERT(!IS_ERR(outval));
+	}
+
+	return val_cast_to_nvl(outval);
+
+}
+
 static void test(const char *fname)
 {
+	struct nvlist *out;
 	char *in;
 
+	/* input */
 	in = read_file(fname);
 	ASSERT(!IS_ERR(in));
 
-	if (onefile(in, strlen(in)))
+	/* output */
+	out = get_expected(fname);
+
+	fprintf(stderr, "Expected:\n");
+	nvl_dump_file(stderr, out);
+
+	if (onefile(in, strlen(in), out))
 		fail("failed");
+
+	nvl_putref(out);
 
 	free(in);
 }
