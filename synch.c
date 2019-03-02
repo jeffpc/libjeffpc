@@ -26,6 +26,7 @@
 #include <jeffpc/error.h>
 #include <jeffpc/atomic.h>
 #include <jeffpc/synch.h>
+#include <jeffpc/time.h>
 #include <jeffpc/config.h>
 
 /*
