@@ -88,7 +88,7 @@ static void test_one(void)
 		uint8_t in;
 		int ret;
 
-		fprintf(stderr, "%3zu: %02x expecting ret=%d (%s) type=%s...",
+		fprintf(stderr, "%3zu: %02zx expecting ret=%d (%s) type=%s...",
 			i, i, run->ret, xstrerror(run->ret),
 			val_typename(run->type));
 
