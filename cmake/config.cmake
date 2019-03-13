@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+# Copyright (c) 2016-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -70,6 +70,7 @@ check_function_exists(pthread_cond_reltimedwait_np
 check_function_exists(reallocarray JEFFPC_HAVE_REALLOCARRAY)
 check_function_exists(recallocarray JEFFPC_HAVE_RECALLOCARRAY)
 check_include_files(alloca.h JEFFPC_HAVE_ALLOCA_H)
+check_include_files(port.h JEFFPC_HAVE_PORT_H)
 check_include_files(sys/debug.h JEFFPC_HAVE_SYS_DEBUG_H)
 check_symbol_exists(EAI_ADDRFAMILY "netdb.h" JEFFPC_HAVE_EAI_ADDRFAMILY)
 check_symbol_exists(EAI_NODATA "netdb.h" JEFFPC_HAVE_EAI_NODATA)

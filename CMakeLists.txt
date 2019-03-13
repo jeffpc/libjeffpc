@@ -63,6 +63,13 @@ else()
 	set(UMEM_EXTRA_SOURCE slab_umem.c)
 endif()
 
+# select which event monitoring API to use
+if(JEFFPC_HAVE_PORT_H)
+	set(FILE_CACHE_EXTRA_SOURCE file_cache_event_port.c)
+else()
+	set(FILE_CACHE_EXTRA_SOURCE)
+endif()
+
 find_package(BISON)
 find_package(FLEX)
 
@@ -93,6 +100,7 @@ add_library(jeffpc SHARED
 	cstr.c
 	error.c
 	file_cache.c
+	${FILE_CACHE_EXTRA_SOURCE}
 	fmt_cbor.c
 	hexdump.c
 	init.c
