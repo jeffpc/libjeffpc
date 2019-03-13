@@ -54,13 +54,11 @@ include(cmake/mapfile.cmake)
 include(cmake/test.cmake)
 include(cmake/paths.cmake)
 
-# handle missing libumem
-if(NOT UMEM_FOUND)
-	set(UMEM_LIBRARY "")
-	set(UMEM_INCLUDE_DIR "")
-	set(UMEM_EXTRA_SOURCE)
+# select which slab allocator API to use
+if(JEFFPC_HAVE_UMEM)
+	set(SLAB_EXTRA_SOURCE slab_umem.c)
 else()
-	set(UMEM_EXTRA_SOURCE slab_umem.c)
+	set(SLAB_EXTRA_SOURCE)
 endif()
 
 # select which event monitoring API to use
@@ -120,6 +118,7 @@ add_library(jeffpc SHARED
 	sexpr_eval.c
 	${FLEX_sexpr_OUTPUTS} ${BISON_sexpr_OUTPUTS}
 	slab.c
+	${SLAB_EXTRA_SOURCE}
 	sock.c
 	socksvc.c
 	str.c
@@ -139,7 +138,6 @@ add_library(jeffpc SHARED
 	val_pack.c
 	val_unpack.c
 	version.c
-	${UMEM_EXTRA_SOURCE}
 )
 
 target_link_libraries(jeffpc PRIVATE

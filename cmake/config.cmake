@@ -84,8 +84,13 @@ include("${CMAKE_DIR}/config-gnu-ld.cmake")
 set(CMAKE_MODULE_PATH "${CMAKE_DIR}/Modules")
 find_package(umem)
 
-# set a value that's "exported" into the generated config file
+# set a value that's "exported" into the generated config file & set up fake
+# but safe values when libumem is missing
 set(JEFFPC_HAVE_UMEM ${UMEM_FOUND})
+if(NOT UMEM_FOUND)
+	set(UMEM_LIBRARY "")
+	set(UMEM_INCLUDE_DIR "")
+endif()
 
 if(NOT WITHOUT_LOCK_TRACKING)
 	set(JEFFPC_LOCK_TRACKING 1)
