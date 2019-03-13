@@ -125,7 +125,7 @@ static void print_cond(struct cond *cond, const struct lock_context *where)
 {
 	cmn_err(CE_CRIT, "lockdep:     %p <%c> at %s:%d",
 		cond,
-		GENERATE_LOCK_MASK_ARGS(cond),
+		GENERATE_COND_MASK_ARGS(cond),
 		where->file, where->line);
 }
 
