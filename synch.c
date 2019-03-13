@@ -225,6 +225,38 @@ static void error_unlock(struct lock *lock, const struct lock_context *where)
 	panic("lockdep: Aborting - releasing unheld lock");
 }
 
+static void error_condwait_circular(struct cond *cond, struct held_lock *held,
+				    bool timed, const struct lock_context *where)
+{
+	const char *op = timed ? "condtimedwait" : "condwait";
+
+	cmn_err(CE_CRIT, "lockdep: circular dependency detected");
+	cmn_err(CE_CRIT, "lockdep: thread is trying to %s with a non-most "
+		"recent lock:", op);
+	print_lock(held->lock, where);
+	cmn_err(CE_CRIT, "lockdep: while holding:");
+	print_held_locks(held);
+	cmn_err(CE_CRIT, "lockdep: the cond to wait on:");
+	print_cond(cond, where);
+
+	atomic_set(&lockdep_on, 0);
+}
+
+static void error_condwait_unheld(struct cond *cond, struct lock *lock,
+				  bool timed, const struct lock_context *where)
+{
+	const char *op = timed ? "condtimedwait" : "condwait";
+
+	cmn_err(CE_CRIT, "lockdep: thread is trying to %s with a lock it "
+		"doesn't hold:", op);
+	print_lock(lock, where);
+	cmn_err(CE_CRIT, "lockdep: while holding:");
+	print_held_locks(NULL);
+	cmn_err(CE_CRIT, "lockdep: the cond to wait on:");
+	print_cond(cond, where);
+	panic("lockdep: Aborting - %s with an unheld lock", op);
+}
+
 static void error_alloc(struct lock *lock, const struct lock_context *where,
 			const char *msg)
 {
@@ -499,6 +531,65 @@ static void verify_cond_wait(const struct lock_context *where, struct cond *c,
 				   where);
 
 	check_cond_magic(c, "wait on", where);
+
+#ifdef JEFFPC_LOCK_TRACKING
+	/*
+	 * Waiting on a condition is essentially the same as unlocking the
+	 * lock, sleeping for a while, and then reacquiring the lock.
+	 * Therefore, we need to sanity check that we don't run into lock
+	 * ordering issues.
+	 *
+	 * For example, consider:
+	 *
+	 *	MXLOCK(A);
+	 *	MXLOCK(B);
+	 *	CONDWAIT(cond, A);
+	 *
+	 * B obviously depends on A.  However, when the CONDWAIT attempts to
+	 * reacquire A, it will cause a potential deadlock.
+	 *
+	 * The above example essentially expands into:
+	 *
+	 *	MXLOCK(A);
+	 *	MXLOCK(B);
+	 *	MXUNLOCK(A);
+	 *	sleep(X);
+	 *	MXLOCK(A);
+	 *
+	 * which makes the circular dependency easier to see.
+	 *
+	 * The common case (when all is well and we have nothing to worry
+	 * about) is very simple to check for - the only situation that will
+	 * not generate a warning is when the lock we're (temporarily)
+	 * releasing is the most recently acquired lock.
+	 *
+	 * Note: We don't actually remove the lock from the held stack
+	 * because we'd have to re-add it the moment we returned from the
+	 * condwait.
+	 */
+	struct held_lock *held;
+	size_t i;
+
+	if (!atomic_read(&lockdep_on))
+		return;
+
+	held = last_acquired_lock();
+
+	if (held) {
+		if (held->lock == l)
+			return; /* all is well */
+
+		/* Check that we are holding the lock */
+		for_each_held_lock(i, held) {
+			if (held->lock == l) {
+				error_condwait_circular(c, held, timed, where);
+				return;
+			}
+		}
+	}
+
+	error_condwait_unheld(c, l, timed, where);
+#endif
 }
 
 static void verify_cond_sig(const struct lock_context *where, struct cond *c,
