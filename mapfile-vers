@@ -94,6 +94,12 @@ JEFFPC_0.10 {
 		save_stacktrace;
 		xstrerror;
 
+		# file cache
+		file_cache_get;
+		file_cache_has_newer;
+		file_cache_init;
+		file_cache_uncache_all;
+
 		# hexdump
 		hexdump;
 		hexdumpz;

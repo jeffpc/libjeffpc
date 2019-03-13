@@ -92,6 +92,7 @@ add_library(jeffpc SHARED
 	buffer_stdio.c
 	cstr.c
 	error.c
+	file_cache.c
 	fmt_cbor.c
 	hexdump.c
 	init.c
@@ -156,6 +157,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/buffer.h
 		include/jeffpc/cstr.h
 		include/jeffpc/error.h
+		include/jeffpc/file-cache.h
 		include/jeffpc/hexdump.h
 		include/jeffpc/int.h
 		include/jeffpc/io.h
