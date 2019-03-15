@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,5 +34,7 @@ enum ip_type {
 
 extern int connect_ip(const char *host, uint16_t port, bool v4, bool v6,
 		      enum ip_type type);
+
+extern const char *xgethostname(void);
 
 #endif

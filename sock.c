@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,49 @@
 #include <unistd.h>
 
 #include <jeffpc/sock.h>
+#include <jeffpc/atomic.h>
 #include <jeffpc/config.h>
+
+const char *xgethostname(void)
+{
+	static const char *cached;
+	char *name;
+	ssize_t len;
+	int ret;
+
+	if (cached)
+		return cached;
+
+#if defined(HOST_NAME_MAX)
+	len = HOST_NAME_MAX;
+#elif defined(MAXHOSTNAMELEN)
+	len = MAXHOSTNAMELEN;
+#else
+	len = sysconf(_SC_HOST_NAME_MAX);
+	if (len < 0)
+		goto unknown;
+#endif
+
+	len++; /* space for the trailing nul */
+
+	name = malloc(len);
+	if (!name)
+		goto unknown;
+
+	ret = gethostname(name, len);
+	if (ret) {
+		free(name);
+		goto unknown;
+	}
+
+	if (atomic_cas_ptr(&cached, NULL, name) != name)
+		free(name);
+
+	return cached;
+
+unknown:
+	return "<unknown>";
+}
 
 int connect_ip(const char *host, uint16_t port, bool v4, bool v6, enum ip_type type)
 {

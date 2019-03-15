@@ -238,6 +238,7 @@ JEFFPC_0.10 {
 
 		# sock
 		connect_ip;
+		xgethostname;
 
 		# socksvc
 		socksvc;
