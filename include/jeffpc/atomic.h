@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2014-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,8 +47,9 @@ typedef struct {
 #define atomic_inc(var)		atomic_add((var), 1)
 #define atomic_dec(var)		atomic_sub((var), 1)
 #define atomic_cas(var, old, new)	\
-				__sync_val_compare_and_swap(&(var)->v, \
-							    (old), (new))
+		__sync_val_compare_and_swap(&(var)->v, (old), (new))
+#define atomic_cas_ptr(var, old, new)	\
+		__sync_val_compare_and_swap((var), (old), (new))
 
 #define ATOMIC_INITIALIZER(val)		{ .v = (val) }
 
