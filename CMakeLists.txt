@@ -134,7 +134,7 @@ add_library(jeffpc SHARED
 	${UMEM_EXTRA_SOURCE}
 )
 
-target_link_libraries(jeffpc
+target_link_libraries(jeffpc PRIVATE
 	${UMEM_LIBRARY}
 	${EXECINFO_LIBRARY}
 	${SOCKET_LIBRARY}
