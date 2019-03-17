@@ -68,7 +68,6 @@ find_package(FLEX)
 
 include_directories(
 	include
-	${UMEM_INCLUDE_DIR}
 )
 
 # include the current source dir but only for: #include "foo.h"
@@ -140,6 +139,10 @@ target_link_libraries(jeffpc PRIVATE
 	${SOCKET_LIBRARY}
 	${XDR_LIBRARY}
 	pthread
+)
+
+target_include_directories(jeffpc PRIVATE
+	${UMEM_INCLUDE_DIR}
 )
 
 target_apply_mapfile(jeffpc mapfile-vers)
