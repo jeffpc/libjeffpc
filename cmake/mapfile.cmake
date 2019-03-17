@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+# Copyright (c) 2016-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -40,8 +40,14 @@ macro(target_apply_mapfile tgt mapfile)
 		set(ld_script "${CMAKE_CURRENT_SOURCE_DIR}/${mapfile}")
 		set(ld_flag "-Wl,-M '${ld_script}'")
 	endif()
+
+	get_target_property(${tgt}_tmp_link_flags "${tgt}" LINK_FLAGS)
+	if(NOT "${${tgt}_tmp_link_flags}")
+		set(${tgt}_tmp_link_flags "")
+	endif()
+
 	set_target_properties("${tgt}" PROPERTIES
-		LINK_FLAGS "${ld_flag}"
+		LINK_FLAGS "${ld_flag} ${${tgt}_tmp_link_flags}"
 		LINK_DEPENDS "${ld_script}"
 	)
 endmacro()
