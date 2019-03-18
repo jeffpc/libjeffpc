@@ -365,6 +365,8 @@ int cbor_peek_type(struct buffer *buffer, enum val_type *type)
  * unpack
  */
 
+static struct val *unpack_cbor_val(struct buffer *buffer);
+
 static int read_cbor_type(struct buffer *buffer, enum major_type *type,
 			  uint8_t *extra)
 {
@@ -771,4 +773,274 @@ int cbor_unpack_array_end(struct buffer *buffer, bool end_required)
 		return 0;
 
 	return cbor_unpack_break(buffer);
+}
+
+static struct val *unpack_cbor_null(struct buffer *buffer)
+{
+	int ret;
+
+	ret = cbor_unpack_null(buffer);
+
+	return ret ? ERR_PTR(ret) : VAL_ALLOC_NULL();
+}
+
+static struct val *unpack_cbor_uint(struct buffer *buffer)
+{
+	uint64_t tmp;
+	int ret;
+
+	ret = cbor_unpack_uint(buffer, &tmp);
+
+	return ret ? ERR_PTR(ret) : val_alloc_int(tmp);
+}
+
+static struct val *unpack_cbor_str(struct buffer *buffer)
+{
+	struct str *str;
+	int ret;
+
+	ret = cbor_unpack_str(buffer, &str);
+
+	return ret ? ERR_PTR(ret) : str_cast_to_val(str);
+}
+
+static struct val *unpack_cbor_bool(struct buffer *buffer)
+{
+	bool tmp;
+	int ret;
+
+	ret = cbor_unpack_bool(buffer, &tmp);
+
+	return ret ? ERR_PTR(ret) : val_alloc_bool(tmp);
+}
+
+static struct val *unpack_cbor_blob(struct buffer *buffer)
+{
+	size_t size;
+	void *data;
+	int ret;
+
+	ret = cbor_unpack_blob(buffer, &data, &size);
+
+	return ret ? ERR_PTR(ret) : val_alloc_blob(data, size);
+}
+
+static struct val *unpack_cbor_array(struct buffer *buffer)
+{
+	bool end_required;
+	struct val **arr;
+	uint64_t nelem;
+	int ret;
+
+	ret = cbor_unpack_array_start(buffer, &nelem, &end_required);
+	if (ret)
+		return ERR_PTR(ret);
+
+	arr = NULL;
+
+	if (end_required) {
+		/* indef */
+		nelem = 0;
+
+		for (;;) {
+			struct val **tmparr;
+			struct val *elem;
+
+			ret = cbor_unpack_break(buffer);
+			if (!ret)
+				break; /* end of map */
+			/* TODO: check for errors */
+
+			elem = unpack_cbor_val(buffer);
+			if (IS_ERR(elem)) {
+				ret = PTR_ERR(elem);
+				goto err;
+			}
+
+			tmparr = mem_reallocarray(arr, nelem + 1,
+						  sizeof(struct val *));
+			if (!tmparr) {
+				ret = -ENOMEM;
+				goto err;
+			}
+
+			arr = tmparr;
+
+			arr[nelem++] = elem;
+		}
+	} else {
+		/* def */
+		size_t i;
+
+		if (nelem > SIZE_MAX)
+			return ERR_PTR(-ENOMEM);
+
+		arr = mem_recallocarray(NULL, 0, nelem, sizeof(struct val *));
+		if (!arr)
+			return ERR_PTR(-ENOMEM);
+
+		for (i = 0; i < nelem; i++) {
+			struct val *elem;
+
+			elem = unpack_cbor_val(buffer);
+			if (IS_ERR(elem)) {
+				ret = PTR_ERR(elem);
+				goto err;
+			}
+
+			arr[i] = elem;
+		}
+	}
+
+	ret = cbor_unpack_array_end(buffer, end_required);
+	if (ret)
+		goto err;
+
+	return val_alloc_array(arr, nelem);
+
+err:
+	if (arr) {
+		size_t i;
+
+		for (i = 0; i < nelem; i++)
+			val_putref(arr[i]);
+
+		free(arr);
+	}
+
+	return ERR_PTR(ret);
+}
+
+static int __unpack_cbor_pair(struct buffer *buffer, struct nvlist *nvl)
+{
+	struct nvpair pair;
+	struct val *name;
+	struct val *value;
+
+	name = unpack_cbor_str(buffer);
+	if (IS_ERR(name))
+		return PTR_ERR(name);
+
+	value = unpack_cbor_val(buffer);
+	if (IS_ERR(value)) {
+		val_putref(name);
+		return PTR_ERR(value);
+	}
+
+	pair.name = val_cast_to_str(name);
+	pair.value = value;
+
+	return nvl_set_pair(nvl, &pair);
+}
+
+static struct val *unpack_cbor_nvl(struct buffer *buffer)
+{
+	struct nvlist *nvl;
+	bool end_required;
+	uint64_t npairs;
+	int ret;
+
+	ret = cbor_unpack_map_start(buffer, &npairs, &end_required);
+	if (ret)
+		return ERR_PTR(ret);
+
+	nvl = nvl_alloc();
+	if (IS_ERR(nvl))
+		return ERR_CAST(nvl);
+
+	if (end_required) {
+		/* indef */
+		for (;;) {
+			ret = cbor_unpack_break(buffer);
+			if (!ret)
+				break; /* end of map */
+			/* TODO: check for errors */
+
+			ret = __unpack_cbor_pair(buffer, nvl);
+			if (ret)
+				goto err;
+		}
+	} else {
+		/* def */
+		size_t i;
+
+		if (npairs > SIZE_MAX) {
+			ret = -ENOMEM;
+			goto err;
+		}
+
+		for (i = 0; i < npairs; i++) {
+			ret = __unpack_cbor_pair(buffer, nvl);
+			if (ret)
+				goto err;
+		}
+	}
+
+	ret = cbor_unpack_map_end(buffer, end_required);
+	if (ret)
+		goto err;
+
+	return nvl_cast_to_val(nvl);
+
+err:
+	nvl_putref(nvl);
+
+	return ERR_PTR(ret);
+}
+
+static struct val *unpack_cbor_val(struct buffer *buffer)
+{
+	enum val_type type;
+	int ret;
+
+	ret = cbor_peek_type(buffer, &type);
+	if (ret)
+		return ERR_PTR(ret);
+
+	switch (type) {
+		case VT_NULL:
+			return unpack_cbor_null(buffer);
+		case VT_INT:
+			return unpack_cbor_uint(buffer);
+		case VT_STR:
+			return unpack_cbor_str(buffer);
+		case VT_SYM:
+			return ERR_PTR(-ENOTSUP);
+		case VT_BOOL:
+			return unpack_cbor_bool(buffer);
+		case VT_CONS:
+			return ERR_PTR(-ENOTSUP);
+		case VT_CHAR:
+			return ERR_PTR(-ENOTSUP);
+		case VT_BLOB:
+			return unpack_cbor_blob(buffer);
+		case VT_ARRAY:
+			return unpack_cbor_array(buffer);
+		case VT_NVL:
+			return unpack_cbor_nvl(buffer);
+	}
+
+	return ERR_PTR(-ENOTSUP);
+}
+
+struct val *cbor_unpack_val(struct buffer *buffer)
+{
+	struct buffer tmp;
+	struct val *val;
+	int ret;
+
+	buffer_init_static(&tmp, buffer_data_current(buffer),
+			   buffer_remain(buffer), false);
+
+	val = unpack_cbor_val(&tmp);
+	if (IS_ERR(val))
+		return val;
+
+	ret = sync_buffers(buffer, &tmp);
+	if (!ret)
+		return val;
+
+	val_putref(val);
+
+	return ERR_PTR(ret);
 }

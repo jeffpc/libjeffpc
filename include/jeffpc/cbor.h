@@ -78,5 +78,6 @@ extern int cbor_unpack_map_end(struct buffer *buffer, bool end_required);
 extern int cbor_unpack_array_start(struct buffer *buffer, uint64_t *nelem,
 				   bool *end_required);
 extern int cbor_unpack_array_end(struct buffer *buffer, bool end_required);
+extern struct val *cbor_unpack_val(struct buffer *buffer);
 
 #endif

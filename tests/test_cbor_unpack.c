@@ -53,7 +53,7 @@ static inline void dumpbuf(struct buffer *buf)
 		ret = fxn;						\
 									\
 		check_rets((exp_ret), ret,				\
-			   "failed to unpack value directly");		\
+			   "failed to unpack value directly:");		\
 									\
 		if (ret) {						\
 			/* failed, so there is no value to compare */	\
@@ -63,9 +63,43 @@ static inline void dumpbuf(struct buffer *buf)
 									\
 		wrap = alloc;						\
 		if (!sexpr_equal(wrap, val_getref(exp)))		\
-			fail("not equal");				\
+			fail("direct unpack not equal");		\
 									\
-		/* TODO: unpack via cbor_unpack_val & compare value */	\
+		fprintf(stderr, "ok.\n");				\
+	} while (0)
+
+#define RUN_ONE_VAL(in, _exp)						\
+	do {								\
+		struct val *exp = (_exp);				\
+		struct buffer tmp;					\
+		struct val *ret;					\
+									\
+		buffer_init_static(&tmp, buffer_data(in),		\
+				   buffer_size(in), false);		\
+									\
+		fprintf(stderr, "unpack via cbor_unpack_val (should %s)...",\
+			IS_ERR(exp) ? "fail" : "succeed");		\
+									\
+		ret = cbor_unpack_val(&tmp);				\
+									\
+		check_rets(IS_ERR(exp) ? PTR_ERR(exp) : 0,		\
+			   IS_ERR(ret) ? PTR_ERR(ret) : 0,		\
+			   "failed to unpack value indirectly:");	\
+									\
+		if (IS_ERR(ret)) {					\
+			/* failed, so there is no value to compare */	\
+			fprintf(stderr, "ok.\n");			\
+			break;						\
+		}							\
+									\
+		if (sexpr_is_null(exp)) {				\
+			if ((ret->type != VT_ARRAY) ||			\
+			    (ret->array.nelem != 0))			\
+				fail("indirect unpack not empty array");\
+		} else if (!sexpr_equal(ret, val_getref(exp))) {	\
+			fail("indirect unpack not equal");		\
+		}							\
+									\
 		fprintf(stderr, "ok.\n");				\
 	} while (0)
 
@@ -331,6 +365,10 @@ static void onefile(struct buffer *in, struct val *expected)
 		val_dump(expected, 1);
 	}
 
+	/* test generic unpacking */
+	RUN_ONE_VAL(in, expected);
+
+	/* test specific unpacking */
 	switch (expected->type) {
 		case VT_NULL:
 			check_null(in, expected);
