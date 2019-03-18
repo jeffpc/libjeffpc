@@ -65,8 +65,7 @@ extern int cbor_peek_type(struct buffer *buffer, enum val_type *type);
 extern int cbor_unpack_uint(struct buffer *buffer, uint64_t *v);
 extern int cbor_unpack_nint(struct buffer *buffer, uint64_t *v);
 extern int cbor_unpack_int(struct buffer *buffer, int64_t *v);
-extern int cbor_unpack_blob(struct buffer *buffer, const void **data,
-			    size_t *size);
+extern int cbor_unpack_blob(struct buffer *buffer, void **data, size_t *size);
 extern int cbor_unpack_cstr_len(struct buffer *buffer, char **str,
 				size_t *len);
 extern int cbor_unpack_str(struct buffer *buffer, struct str **str);

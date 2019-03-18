@@ -585,8 +585,7 @@ int cbor_unpack_int(struct buffer *buffer, int64_t *v)
 	return ret;
 }
 
-int cbor_unpack_blob(struct buffer *buffer, const void **data,
-		     size_t *size)
+int cbor_unpack_blob(struct buffer *buffer, void **data, size_t *size)
 {
 	return -ENOTSUP;
 }
