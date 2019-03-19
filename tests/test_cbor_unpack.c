@@ -57,9 +57,15 @@ static inline void dumpbuf(struct buffer *buf)
 									\
 		if (ret) {						\
 			/* failed, so there is no value to compare */	\
+			if (buffer_offset(&tmp) != 0)			\
+				fail("direct unpack changed buffer");	\
+									\
 			fprintf(stderr, "ok.\n");			\
 			break;						\
 		}							\
+									\
+		if (buffer_offset(&tmp) != buffer_size(&tmp))		\
+			fail("direct unpack didn't consume buffer");	\
 									\
 		wrap = alloc;						\
 		if (!sexpr_equal(wrap, val_getref(exp)))		\
@@ -88,9 +94,15 @@ static inline void dumpbuf(struct buffer *buf)
 									\
 		if (IS_ERR(ret)) {					\
 			/* failed, so there is no value to compare */	\
+			if (buffer_offset(&tmp) != 0)			\
+				fail("indirect unpack changed buffer");	\
+									\
 			fprintf(stderr, "ok.\n");			\
 			break;						\
 		}							\
+									\
+		if (buffer_offset(&tmp) != buffer_size(&tmp))		\
+			fail("indirect unpack didn't consume buffer");	\
 									\
 		if (sexpr_is_null(exp)) {				\
 			if ((ret->type != VT_ARRAY) ||			\
