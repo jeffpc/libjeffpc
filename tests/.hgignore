@@ -6,7 +6,7 @@ test_atomic-single-thread
 test_bswap
 test_buffer
 test_cbor_pack
-test_cbor_peek_type
+test_cbor_peek
 test_cbor_unpack
 test_container_of
 test_endian
