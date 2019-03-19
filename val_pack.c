@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -202,6 +202,9 @@ static int do_val_pack(struct buffer *buffer, struct val *val,
 	ops = select_ops(format);
 	if (!ops)
 		return -ENOTSUP;
+
+	if (ops->pack_val)
+		return ops->pack_val(buffer, val);
 
 	ret = pack_val(&ops->pack, buffer, val);
 	if (ret)
