@@ -51,7 +51,7 @@ ssize_t val_pack_into(struct val *val, void *buf, size_t bufsize,
 
 	ret = do_val_pack(&buffer, val, format);
 
-	return ret ? ret : buffer_used(&buffer);
+	return ret ? ret : buffer_size(&buffer);
 }
 
 struct buffer *val_pack(struct val *val, enum val_format format)
@@ -80,5 +80,5 @@ ssize_t val_size(struct val *val, enum val_format format)
 
 	ret = do_val_pack(&buffer, val, format);
 
-	return ret ? ret : buffer_used(&buffer);
+	return ret ? ret : buffer_size(&buffer);
 }

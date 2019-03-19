@@ -30,7 +30,7 @@
 
 static inline void dumpbuf(struct buffer *buf)
 {
-	const size_t len = buffer_used(buf);
+	const size_t len = buffer_size(buf);
 	char tmp[len * 2 + 1];
 
 	hexdumpz(tmp, buffer_data(buf), len, false);
@@ -46,12 +46,12 @@ static void cmp_buffers(struct buffer *exp, struct buffer *got)
 	dumpbuf(got);
 	fprintf(stderr, "\n");
 
-	if (buffer_used(got) != buffer_used(exp))
+	if (buffer_size(got) != buffer_size(exp))
 		fail("cbor packing failed: length mismatch "
-		     "(got %zu, expected %zu)", buffer_used(got),
-		     buffer_used(exp));
+		     "(got %zu, expected %zu)", buffer_size(got),
+		     buffer_size(exp));
 
-	if (memcmp(buffer_data(got), buffer_data(exp), buffer_used(got)))
+	if (memcmp(buffer_data(got), buffer_data(exp), buffer_size(got)))
 		fail("cbor packing failed: content mismatch");
 }
 

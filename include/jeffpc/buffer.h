@@ -81,7 +81,7 @@ extern ssize_t buffer_pread(struct buffer *buffer, void *data, size_t len,
 extern ssize_t buffer_pwrite(struct buffer *buffer, const void *data, size_t len,
 			     size_t off);
 
-static inline size_t buffer_used(struct buffer *buffer)
+static inline size_t buffer_size(struct buffer *buffer)
 {
 	return buffer->used;
 }

@@ -31,7 +31,7 @@
 
 static inline void dumpbuf(struct buffer *buf)
 {
-	const size_t len = buffer_used(buf);
+	const size_t len = buffer_size(buf);
 	char tmp[len * 2 + 1];
 
 	hexdumpz(tmp, buffer_data(buf), len, false);
@@ -45,7 +45,7 @@ static inline void dumpbuf(struct buffer *buf)
 		int ret;						\
 									\
 		buffer_init_static(&tmp, buffer_data(in),		\
-				   buffer_used(in), false);		\
+				   buffer_size(in), false);		\
 									\
 		fprintf(stderr, "unpack via %s (should %s)...",		\
 			#fxn, (exp_ret) ? "fail" : "succeed");		\

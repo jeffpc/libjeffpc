@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ static inline void check_data_zeroes(struct buffer *buffer, size_t startoff)
 	size_t i;
 
 	data = buffer_data(buffer);
-	len = buffer_used(buffer);
+	len = buffer_size(buffer);
 
 	if (startoff > len)
 		fail("%s startoff > len (%zu > %zu)", __func__, startoff, len);
@@ -82,9 +82,9 @@ static inline void check_used(struct buffer *buffer, size_t expected)
 {
 	size_t got;
 
-	got = buffer_used(buffer);
+	got = buffer_size(buffer);
 	if (got != expected)
-		fail("buffer_used() == %zu, should be %zu", got, expected);
+		fail("buffer_size() == %zu, should be %zu", got, expected);
 }
 
 static inline void check_append_err(struct buffer *buffer, const void *ptr,
@@ -184,7 +184,7 @@ static void inner_loop(size_t niter, struct buffer *buffer, uint8_t *data,
 		check_used(buffer, i + 1);
 
 		/* truncate to same size */
-		check_truncate(buffer, buffer_used(buffer));
+		check_truncate(buffer, buffer_size(buffer));
 		check(buffer);
 		check_used(buffer, i + 1);
 	}

@@ -93,7 +93,7 @@ static inline void unset(struct nvlist *nvl, const char *key, int expected_ret)
 
 static inline void dumpbuf(struct buffer *buf, bool hex)
 {
-	const size_t len = buffer_used(buf);
+	const size_t len = buffer_size(buf);
 	char tmp[len * 2 + 1];
 
 	if (hex) {
@@ -116,12 +116,12 @@ static void cmp_buffers(const char *name, bool hex,
 	dumpbuf(got, hex);
 	fprintf(stderr, "\n");
 
-	if (buffer_used(got) != buffer_used(exp))
+	if (buffer_size(got) != buffer_size(exp))
 		fail("%s packing failed: length mismatch "
-		     "(got %zu, expected %zu)", name, buffer_used(got),
-		     buffer_used(exp));
+		     "(got %zu, expected %zu)", name, buffer_size(got),
+		     buffer_size(exp));
 
-	if (memcmp(buffer_data(got), buffer_data(exp), buffer_used(got)))
+	if (memcmp(buffer_data(got), buffer_data(exp), buffer_size(got)))
 		fail("%s packing failed: content mismatch", name);
 }
 
@@ -130,7 +130,7 @@ static inline void check_packing_fmt(const char *name, bool hex,
 				     struct buffer *expected,
 				     enum val_format fmt)
 {
-	const size_t rawsize = buffer_used(expected);
+	const size_t rawsize = buffer_size(expected);
 	uint8_t *raw = alloca(rawsize);
 	struct buffer *buf;
 	struct buffer tmp;
