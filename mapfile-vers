@@ -115,6 +115,25 @@ JEFFPC_0.10 {
 		xread;
 		xwrite;
 
+		# json
+		json_pack_array_elem_sep;
+		json_pack_array_end;
+		json_pack_array_start;
+		json_pack_array_vals;
+		json_pack_bool;
+		json_pack_cstr_len;
+		json_pack_int;
+		json_pack_map_end;
+		json_pack_map_name_sep;
+		json_pack_map_pair_sep;
+		json_pack_map_start;
+		json_pack_map_val;
+		json_pack_nint;
+		json_pack_null;
+		json_pack_str;
+		json_pack_uint;
+		json_pack_val;
+
 		# list
 		list_create;
 		list_destroy;

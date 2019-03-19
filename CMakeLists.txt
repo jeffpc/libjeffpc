@@ -100,6 +100,7 @@ add_library(jeffpc SHARED
 	file_cache.c
 	${FILE_CACHE_EXTRA_SOURCE}
 	fmt_cbor.c
+	fmt_json.c
 	hexdump.c
 	init.c
 	io.c
@@ -169,6 +170,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/int.h
 		include/jeffpc/io.h
 		include/jeffpc/jeffpc.h
+		include/jeffpc/json.h
 		include/jeffpc/list.h
 		include/jeffpc/mem.h
 		include/jeffpc/mmap.h
