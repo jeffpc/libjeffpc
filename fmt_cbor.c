@@ -847,10 +847,11 @@ static struct val *unpack_cbor_array(struct buffer *buffer)
 			struct val **tmparr;
 			struct val *elem;
 
-			ret = cbor_unpack_break(buffer);
+			ret = cbor_peek_break(buffer);
 			if (!ret)
-				break; /* end of map */
-			/* TODO: check for errors */
+				break; /* end of array */
+			if (ret != -EILSEQ)
+				goto err; /* error */
 
 			elem = unpack_cbor_val(buffer);
 			if (IS_ERR(elem)) {
@@ -952,10 +953,11 @@ static struct val *unpack_cbor_nvl(struct buffer *buffer)
 	if (end_required) {
 		/* indef */
 		for (;;) {
-			ret = cbor_unpack_break(buffer);
+			ret = cbor_peek_break(buffer);
 			if (!ret)
 				break; /* end of map */
-			/* TODO: check for errors */
+			if (ret != -EILSEQ)
+				goto err; /* error */
 
 			ret = __unpack_cbor_pair(buffer, nvl);
 			if (ret)
