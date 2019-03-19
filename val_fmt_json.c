@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,154 +21,10 @@
  */
 
 #include <jeffpc/nvl.h>
+#include <jeffpc/json.h>
 
 #include "val_impl_packing.h"
 
-static int json_nvl_prologue(struct buffer *buffer, struct nvlist *nvl)
-{
-	return buffer_append_c(buffer, '{');
-}
-
-static int json_nvl_name_sep(struct buffer *buffer, const struct nvpair *pair)
-{
-	return buffer_append_c(buffer, ':');
-}
-
-static int json_nvl_val_sep(struct buffer *buffer, const struct nvpair *pair)
-{
-	return buffer_append_c(buffer, ',');
-}
-
-static int json_nvl_epilogue(struct buffer *buffer, struct nvlist *nvl)
-{
-	return buffer_append_c(buffer, '}');
-}
-
-static int json_array_prologue(struct buffer *buffer, struct val *const *vals,
-			       size_t nelem)
-{
-	return buffer_append_c(buffer, '[');
-}
-
-static int json_array_val_sep(struct buffer *buffer, const struct val *val)
-{
-	return buffer_append_c(buffer, ',');
-}
-
-static int json_array_epilogue(struct buffer *buffer, struct val *const *vals,
-			       size_t nelem)
-{
-	return buffer_append_c(buffer, ']');
-}
-
-static int json_val_bool(struct buffer *buffer, bool b)
-{
-	return buffer_append_cstr(buffer, b ? "true" : "false");
-}
-
-static int json_val_int(struct buffer *buffer, uint64_t i)
-{
-	char tmp[sizeof(i) * 2 * 2 + 1]; /* FIXME: hexdump would take 2x */
-
-	snprintf(tmp, sizeof(tmp), "%"PRIu64, i);
-
-	return buffer_append_cstr(buffer, tmp);
-}
-
-static int json_val_null(struct buffer *buffer)
-{
-	return buffer_append_cstr(buffer, "null");
-}
-
-static int __escape_char(struct buffer *buffer, uint64_t c)
-{
-	char tmp[7];
-
-	/* FIXME: char outside of basic multilingual plane */
-	if (c > 0xffff)
-		return -ENOTSUP;
-
-	snprintf(tmp, sizeof(tmp), "\\u%04"PRIX64, c);
-
-	return buffer_append_cstr(buffer, tmp);
-}
-
-static int __escape_ctrl_char(struct buffer *buffer, uint8_t c)
-{
-	const char *mapped = NULL;
-
-	switch (c) {
-		case '\b':
-			mapped = "\\b";
-			break;
-		case '\f':
-			mapped = "\\f";
-			break;
-		case '\n':
-			mapped = "\\n";
-			break;
-		case '\r':
-			mapped = "\\r";
-			break;
-		case '\t':
-			mapped = "\\t";
-			break;
-	}
-
-	if (mapped)
-		return buffer_append_cstr(buffer, mapped);
-
-	return __escape_char(buffer, c);
-}
-
-static int json_val_str(struct buffer *buffer, const char *str)
-{
-	int ret;
-
-	if ((ret = buffer_append_c(buffer, '"')))
-		return ret;
-
-	/* append the string... escaped */
-	for (; *str; str++) {
-		uint8_t c = *str;
-
-		if (c <= 0x1f) {
-			/* control character, must be escaped */
-			ret = __escape_ctrl_char(buffer, c);
-		} else if ((c == '"') || (c == '\\')) {
-			/* quote or backslash */
-			char tmp[3] = { '\\', c, '\0' };
-
-			ret = buffer_append_cstr(buffer, tmp);
-		} else {
-			/* no escape necessary */
-			ret = buffer_append_c(buffer, c);
-		}
-
-		if (ret)
-			return ret;
-	}
-
-	if ((ret = buffer_append_c(buffer, '"')))
-		return ret;
-
-	return 0;
-}
-
 const struct valops valops_json = {
-	.pack = {
-		.nvl_prologue = json_nvl_prologue,	/* { */
-		.nvl_name_sep = json_nvl_name_sep,	/* : */
-		.nvl_val_sep = json_nvl_val_sep,	/* , */
-		.nvl_epilogue = json_nvl_epilogue,	/* } */
-
-		.array_prologue = json_array_prologue,	/* [ */
-		.array_val_sep = json_array_val_sep,	/* , */
-		.array_epilogue = json_array_epilogue,	/* ] */
-
-		.val_bool = json_val_bool,
-		.val_int = json_val_int,
-		.val_null = json_val_null,
-		.val_str = json_val_str,
-	}
+	.pack_val = json_pack_val,
 };
