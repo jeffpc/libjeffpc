@@ -71,6 +71,34 @@ static inline int cbor_pack_cstr(struct buffer *buffer, const char *str)
 extern int cbor_peek_type(struct buffer *buffer, enum val_type *type);
 
 /*
+ * Peek at whether or not the next data item is a CBOR "break".  Returns:
+ *
+ * 0:
+ *	if next value is a CBOR "break"
+ * -EILSEQ:
+ *	if next value can be represented by a VT_*
+ * -ENOTSUP:
+ *	if next value cannot be represented by a VT_*
+ * -EFAULT:
+ *	if the buffer is not large enough to contain another value
+ */
+static inline int cbor_peek_break(struct buffer *buffer)
+{
+	enum val_type type;
+	int ret;
+
+	ret = cbor_peek_type(buffer, &type);
+	switch (ret) {
+		case 0:
+			return -EILSEQ;
+		case -EINTR:
+			return 0;
+		default:
+			return ret;
+	}
+}
+
+/*
  * On failure, the buffer state is unchanged.  On success, the buffer is
  * updated to point to the first byte of the next data item.
  */
