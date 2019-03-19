@@ -133,8 +133,6 @@ add_library(jeffpc SHARED
 	val.c
 	val_array.c
 	val_dump.c
-	val_fmt_cbor.c
-	val_fmt_json.c
 	val_nvl.c
 	val_pack.c
 	val_unpack.c

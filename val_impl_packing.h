@@ -25,99 +25,20 @@
 
 #include <jeffpc/nvl.h>
 #include <jeffpc/buffer.h>
-
-#define CALL(ops, op, args)						\
-	({								\
-		int _ret = 0;						\
-									\
-		if ((ops)->op)						\
-			_ret = (ops)->op args;				\
-									\
-		_ret;							\
-	 })
-
-#define CALL_OR_FAIL(ops, op, args)					\
-	({								\
-		int _ret = -ENOTSUP;					\
-									\
-		if ((ops)->op)						\
-			_ret = (ops)->op args;				\
-									\
-		_ret;							\
-	 })
-
-/*
- * Packing operations
- *
- * A required function pointer is only required when an item of that type
- * must be encoded.  For example, if an encoder doesn't implement packing of
- * strings, packing of all strings vals will fail because of this limitation.
- * Packing of other (non string) vals may or may not fail for
- * other reasons.
- */
-struct packops {
-	/*
-	 * top-level encoder hooks
-	 *
-	 * Optional: All.
-	 */
-	int (*buffer_finish)(struct buffer *buffer);
-
-	/*
-	 * nvlist encoders
-	 *
-	 * Required: At least one of prologue or epilogue.
-	 * Optional: The rest.
-	 */
-	int (*nvl_prologue)(struct buffer *buffer, struct nvlist *nvl);
-	int (*nvl_name_sep)(struct buffer *buffer, const struct nvpair *pair);
-	int (*nvl_val_sep)(struct buffer *buffer, const struct nvpair *pair);
-	int (*nvl_epilogue)(struct buffer *buffer, struct nvlist *nvl);
-
-	/*
-	 * array encoders
-	 *
-	 * Required: At least one of prologue or epilogue.
-	 * Optional: The rest.
-	 */
-	int (*array_prologue)(struct buffer *buffer, struct val *const *vals,
-			      size_t nelem);
-	int (*array_val_sep)(struct buffer *buffer, const struct val *val);
-	int (*array_epilogue)(struct buffer *buffer, struct val *const *vals,
-			      size_t nelem);
-
-	/*
-	 * nvpair
-	 *
-	 * Optional: All.
-	 */
-	int (*pair_prologue)(struct buffer *buffer, const struct nvpair *pair);
-	int (*pair_epilogue)(struct buffer *buffer, const struct nvpair *pair);
-
-	/*
-	 * value encoders
-	 *
-	 * Required: All.
-	 */
-	int (*val_blob)(struct buffer *buffer, const void *data, size_t size);
-	int (*val_bool)(struct buffer *buffer, bool b);
-	int (*val_int)(struct buffer *buffer, uint64_t i);
-	int (*val_null)(struct buffer *buffer);
-	int (*val_str)(struct buffer *buffer, const char *str);
-};
-
-struct unpackops {
-	/* TODO */
-};
+#include <jeffpc/cbor.h>
+#include <jeffpc/json.h>
 
 struct valops {
-	int (*pack_val)(struct buffer *buffer, struct val *val);
-	const struct packops pack;
-	const struct unpackops unpack;
+	int (*pack)(struct buffer *buffer, struct val *val);
 };
 
-extern const struct valops valops_cbor;
-extern const struct valops valops_json;
+static const struct valops valops_cbor = {
+	.pack = cbor_pack_val,
+};
+
+static const struct valops valops_json = {
+	.pack = json_pack_val,
+};
 
 static inline const struct valops *select_ops(enum val_format format)
 {
