@@ -506,7 +506,7 @@ static int sync_buffers(struct buffer *orig, struct buffer *tmp)
 {
 	ssize_t ret;
 
-	ret = buffer_seek(orig, buffer_size(tmp), SEEK_CUR);
+	ret = buffer_seek(orig, buffer_offset(tmp), SEEK_CUR);
 
 	return (ret < 0) ? ret : 0;
 }
