@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ static int static_buffer_check_append_ro(struct buffer *buffer, const void *data
 static int static_buffer_check_append_rw(struct buffer *buffer, const void *data,
 					 size_t size)
 {
-	if ((buffer->used + size) <= buffer->allocsize)
+	if ((buffer->size + size) <= buffer->allocsize)
 		return 0;
 
 	return -ENOSPC;

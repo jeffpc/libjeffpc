@@ -41,7 +41,7 @@ struct buffer *buffer_alloc(size_t expected_size)
 	}
 
 	buffer->off = 0;
-	buffer->used = 0;
+	buffer->size = 0;
 	buffer->allocsize = expected_size;
 	buffer->ops = &heap_buffer;
 
@@ -63,7 +63,7 @@ void buffer_init_sink(struct buffer *buffer)
 {
 	buffer->data = NULL;
 	buffer->off = 0;
-	buffer->used = 0;
+	buffer->size = 0;
 	buffer->allocsize = SIZE_MAX;
 	buffer->ops = &sink_buffer;
 }
@@ -73,7 +73,7 @@ void buffer_init_static(struct buffer *buffer, const void *data, size_t size,
 {
 	buffer->data = (void *) data;
 	buffer->off = 0;
-	buffer->used = size;
+	buffer->size = size;
 	buffer->allocsize = size;
 	buffer->ops = writable ? &static_buffer_rw : &static_buffer_ro;
 }
@@ -82,7 +82,7 @@ void buffer_init_stdio(struct buffer *buffer, FILE *f)
 {
 	buffer->data = NULL;
 	buffer->off = 0;
-	buffer->used = 0;
+	buffer->size = 0;
 	buffer->allocsize = SIZE_MAX;
 	buffer->ops = &stdio_buffer;
 	buffer->private = f;
@@ -127,13 +127,13 @@ int buffer_append(struct buffer *buffer, const void *data, size_t size)
 	if (!size)
 		return 0; /* append(..., 0) is a no-op */
 
-	ret = resize(buffer, buffer->used + size);
+	ret = resize(buffer, buffer->size + size);
 	if (ret)
 		return ret;
 
-	buffer->ops->copyin(buffer, buffer->used, data, size);
+	buffer->ops->copyin(buffer, buffer->size, data, size);
 
-	buffer->used += size;
+	buffer->size += size;
 
 	return 0;
 }
@@ -149,14 +149,14 @@ ssize_t buffer_seek(struct buffer *buffer, off_t offset, int whence)
 		case SEEK_SET:
 			if (offset < 0)
 				return -EINVAL;
-			if (offset > buffer->used)
+			if (offset > buffer->size)
 				return -EINVAL;
 
 			newoff = offset;
 			break;
 		case SEEK_CUR:
 			if ((offset > 0) &&
-			    (offset > (buffer->used - buffer->off)))
+			    (offset > (buffer->size - buffer->off)))
 				return -EINVAL;
 			if ((offset < 0) && (-offset > buffer->off))
 				return -EINVAL;
@@ -166,7 +166,7 @@ ssize_t buffer_seek(struct buffer *buffer, off_t offset, int whence)
 		case SEEK_END:
 			if (offset > 0)
 				return -EINVAL;
-			if (-offset > buffer->used)
+			if (-offset > buffer->size)
 				return -EINVAL;
 
 			newoff = buffer->off + offset;
@@ -209,10 +209,10 @@ int buffer_truncate(struct buffer *buffer, size_t size)
 		return ret;
 
 	/* clear any expansion */
-	if (buffer->used < size)
-		buffer->ops->clear(buffer, buffer->used, size - buffer->used);
+	if (buffer->size < size)
+		buffer->ops->clear(buffer, buffer->size, size - buffer->size);
 
-	buffer->used = size;
+	buffer->size = size;
 
 	return 0;
 }
@@ -230,10 +230,10 @@ ssize_t buffer_pread(struct buffer *buffer, void *buf, size_t len, size_t off)
 			return ret;
 	}
 
-	if (off >= buffer->used)
+	if (off >= buffer->size)
 		ret = 0;
-	else if ((off + len) > buffer->used)
-		ret = buffer->used - off;
+	else if ((off + len) > buffer->size)
+		ret = buffer->size - off;
 	else
 		ret = len;
 
@@ -262,12 +262,12 @@ ssize_t buffer_pwrite(struct buffer *buffer, const void *buf, size_t len,
 		return ret;
 
 	/* clear any holes */
-	if (buffer->used < off)
-		buffer->ops->clear(buffer, buffer->used, off - buffer->used);
+	if (buffer->size < off)
+		buffer->ops->clear(buffer, buffer->size, off - buffer->size);
 
 	buffer->ops->copyin(buffer, off, buf, len);
 
-	buffer->used = MAX(buffer->used, off + len);
+	buffer->size = MAX(buffer->size, off + len);
 
 	return len;
 }

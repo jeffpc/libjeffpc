@@ -52,7 +52,7 @@ struct buffer_ops {
 struct buffer {
 	void *data;		/* the data itself */
 	size_t off;		/* current pointer */
-	size_t used;		/* bytes filled */
+	size_t size;		/* bytes filled */
 	size_t allocsize;	/* allocated buffer size */
 	const struct buffer_ops *ops;
 	void *private;		/* private data for implementation */
@@ -83,13 +83,13 @@ extern ssize_t buffer_pwrite(struct buffer *buffer, const void *data, size_t len
 
 static inline size_t buffer_size(struct buffer *buffer)
 {
-	return buffer->used;
+	return buffer->size;
 }
 
-/* number of bytes between current location and end of used data */
+/* number of bytes between current location and the end of data */
 static inline size_t buffer_remain(struct buffer *buffer)
 {
-	return buffer->used - buffer->off;
+	return buffer->size - buffer->off;
 }
 
 static inline const void *buffer_data(struct buffer *buffer)
@@ -101,7 +101,7 @@ static inline const void *buffer_data_current(struct buffer *buffer)
 {
 	if (!buffer->data)
 		return NULL;
-	if (buffer->off == buffer->used)
+	if (buffer->off == buffer->size)
 		return NULL;
 	return buffer->data + buffer->off;
 }
