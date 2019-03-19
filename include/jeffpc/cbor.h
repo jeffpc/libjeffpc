@@ -56,6 +56,18 @@ static inline int cbor_pack_cstr(struct buffer *buffer, const char *str)
 	return cbor_pack_cstr_len(buffer, str, strlen(str));
 }
 
+/*
+ * Peek at what the next type is.  Returns:
+ *
+ * 0:
+ *	if the next value can be represented by a VT_*
+ * -EINTR:
+ *	if the next value is a CBOR "break"
+ * -ENOTSUP:
+ *	if next value cannot be represented by a VT_*
+ * -EFAULT:
+ *	if the buffer is not large enough to contain another value
+ */
 extern int cbor_peek_type(struct buffer *buffer, enum val_type *type);
 
 /*
