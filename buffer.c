@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -156,7 +156,7 @@ ssize_t buffer_seek(struct buffer *buffer, off_t offset, int whence)
 			break;
 		case SEEK_CUR:
 			if ((offset > 0) &&
-			    (offset > buffer->used - buffer->off))
+			    (offset > (buffer->used - buffer->off)))
 				return -EINVAL;
 			if ((offset < 0) && (-offset > buffer->off))
 				return -EINVAL;
