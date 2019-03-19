@@ -161,6 +161,7 @@ install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/array.h
 		include/jeffpc/bst.h
 		include/jeffpc/buffer.h
+		include/jeffpc/cbor.h
 		include/jeffpc/cstr.h
 		include/jeffpc/error.h
 		include/jeffpc/file-cache.h
