@@ -57,7 +57,7 @@ static const struct test {
 	V4 (0xf8, -ENOTSUP, 0),		/* CMT_FLOAT */
 	V2 (0xfc, -ENOTSUP, 0),		/* CMT_FLOAT */
 	V1 (0xfe, -ENOTSUP, 0),		/* CMT_FLOAT */
-	V1 (0xff, -ENOTSUP, 0),		/* CMT_FLOAT => break */
+	V1 (0xff, -EINTR,   0),		/* CMT_FLOAT => break */
 };
 
 static void test_zero(void)

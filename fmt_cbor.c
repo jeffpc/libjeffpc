@@ -343,6 +343,7 @@ int cbor_peek_type(struct buffer *buffer, enum val_type *type)
 					*type = VT_NULL;
 					break;
 				case ADDL_FLOAT_BREAK:
+					return -EINTR;
 				default:
 					return -ENOTSUP;
 			}
