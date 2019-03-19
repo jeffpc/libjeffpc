@@ -1,0 +1,1 @@
+../valid/def-array-3int.lisp

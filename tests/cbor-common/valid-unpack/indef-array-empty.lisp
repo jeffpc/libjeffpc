@@ -1,0 +1,1 @@
+../valid/def-array-empty.lisp
