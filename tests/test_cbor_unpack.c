@@ -38,7 +38,7 @@ static inline void dumpbuf(struct buffer *buf)
 	fprintf(stderr, "%s", tmp);
 }
 
-#define RUN_ONE(fxn, exp_ret, alloc, in, exp)				\
+#define RUN_ONE_SIMPLE(fxn, exp_ret, alloc, in, exp)				\
 	do {								\
 		struct buffer tmp;					\
 		struct val *wrap;					\
@@ -87,25 +87,25 @@ static void check_null(struct buffer *in, struct val *exp)
 	char *s;
 	bool b;
 
-	RUN_ONE(cbor_unpack_uint(&tmp, &u), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_nint(&tmp, &u), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_int(&tmp, &i),  -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_cstr_len(&tmp, &s, &ss),
+	RUN_ONE_SIMPLE(cbor_unpack_uint(&tmp, &u), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_nint(&tmp, &u), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_int(&tmp, &i),  -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_cstr_len(&tmp, &s, &ss),
 		                            -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_str(&tmp, &str),-EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_bool(&tmp, &b), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_null(&tmp),     0,       VNULL(), in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_str(&tmp, &str),-EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_bool(&tmp, &b), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_null(&tmp),     0,       VNULL(), in, exp);
 
 	/* only need to check the starts & forced ends */
-	RUN_ONE(cbor_unpack_array_start(in, &nelem, &end_required),
+	RUN_ONE_SIMPLE(cbor_unpack_array_start(in, &nelem, &end_required),
 					    -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_array_end(in, true),
+	RUN_ONE_SIMPLE(cbor_unpack_array_end(in, true),
 					    -EILSEQ, NULL, in, exp);
 
 	/* only need to check the starts & forced ends */
-	RUN_ONE(cbor_unpack_map_start(in, &npairs, &end_required),
+	RUN_ONE_SIMPLE(cbor_unpack_map_start(in, &npairs, &end_required),
 					    -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_map_end(in, true),
+	RUN_ONE_SIMPLE(cbor_unpack_map_end(in, true),
 					    -EILSEQ, NULL, in, exp);
 }
 
@@ -120,25 +120,25 @@ static void check_bool(struct buffer *in, struct val *exp)
 	char *s;
 	bool b;
 
-	RUN_ONE(cbor_unpack_uint(&tmp, &u), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_nint(&tmp, &u), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_int(&tmp, &i),  -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_cstr_len(&tmp, &s, &ss),
+	RUN_ONE_SIMPLE(cbor_unpack_uint(&tmp, &u), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_nint(&tmp, &u), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_int(&tmp, &i),  -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_cstr_len(&tmp, &s, &ss),
 		                            -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_str(&tmp, &str),-EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_bool(&tmp, &b), 0,       VBOOL(b), in, exp);
-	RUN_ONE(cbor_unpack_null(&tmp),     -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_str(&tmp, &str),-EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_bool(&tmp, &b), 0,       VBOOL(b), in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_null(&tmp),     -EILSEQ, NULL, in, exp);
 
 	/* only need to check the starts & forced ends */
-	RUN_ONE(cbor_unpack_array_start(in, &nelem, &end_required),
+	RUN_ONE_SIMPLE(cbor_unpack_array_start(in, &nelem, &end_required),
 					    -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_array_end(in, true),
+	RUN_ONE_SIMPLE(cbor_unpack_array_end(in, true),
 					    -EILSEQ, NULL, in, exp);
 
 	/* only need to check the starts & forced ends */
-	RUN_ONE(cbor_unpack_map_start(in, &npairs, &end_required),
+	RUN_ONE_SIMPLE(cbor_unpack_map_start(in, &npairs, &end_required),
 					    -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_map_end(in, true),
+	RUN_ONE_SIMPLE(cbor_unpack_map_end(in, true),
 					    -EILSEQ, NULL, in, exp);
 }
 
@@ -154,25 +154,25 @@ static void check_int(struct buffer *in, struct val *exp)
 	char *s;
 	bool b;
 
-	RUN_ONE(cbor_unpack_uint(&tmp, &u), 0,       VINT(u), in, exp);
-	RUN_ONE(cbor_unpack_nint(&tmp, &u), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_int(&tmp, &i),  int_ret, VINT(i), in, exp);
-	RUN_ONE(cbor_unpack_cstr_len(&tmp, &s, &ss),
+	RUN_ONE_SIMPLE(cbor_unpack_uint(&tmp, &u), 0,       VINT(u), in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_nint(&tmp, &u), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_int(&tmp, &i),  int_ret, VINT(i), in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_cstr_len(&tmp, &s, &ss),
 		                            -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_str(&tmp, &str),-EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_bool(&tmp, &b), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_null(&tmp),     -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_str(&tmp, &str),-EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_bool(&tmp, &b), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_null(&tmp),     -EILSEQ, NULL, in, exp);
 
 	/* only need to check the starts & forced ends */
-	RUN_ONE(cbor_unpack_array_start(in, &nelem, &end_required),
+	RUN_ONE_SIMPLE(cbor_unpack_array_start(in, &nelem, &end_required),
 					    -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_array_end(in, true),
+	RUN_ONE_SIMPLE(cbor_unpack_array_end(in, true),
 					    -EILSEQ, NULL, in, exp);
 
 	/* only need to check the starts & forced ends */
-	RUN_ONE(cbor_unpack_map_start(in, &npairs, &end_required),
+	RUN_ONE_SIMPLE(cbor_unpack_map_start(in, &npairs, &end_required),
 					    -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_map_end(in, true),
+	RUN_ONE_SIMPLE(cbor_unpack_map_end(in, true),
 					    -EILSEQ, NULL, in, exp);
 }
 
@@ -187,25 +187,25 @@ static void check_str(struct buffer *in, struct val *exp)
 	char *s;
 	bool b;
 
-	RUN_ONE(cbor_unpack_uint(&tmp, &u), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_nint(&tmp, &u), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_int(&tmp, &i),  -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_cstr_len(&tmp, &s, &ss),
+	RUN_ONE_SIMPLE(cbor_unpack_uint(&tmp, &u), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_nint(&tmp, &u), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_int(&tmp, &i),  -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_cstr_len(&tmp, &s, &ss),
 		                            0,       VSTR(s), in, exp);
-	RUN_ONE(cbor_unpack_str(&tmp, &str),0,       VSTRCAST(str), in, exp);
-	RUN_ONE(cbor_unpack_bool(&tmp, &b), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_null(&tmp),     -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_str(&tmp, &str),0,       VSTRCAST(str), in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_bool(&tmp, &b), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_null(&tmp),     -EILSEQ, NULL, in, exp);
 
 	/* only need to check the starts & forced ends */
-	RUN_ONE(cbor_unpack_array_start(in, &nelem, &end_required),
+	RUN_ONE_SIMPLE(cbor_unpack_array_start(in, &nelem, &end_required),
 					    -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_array_end(in, true),
+	RUN_ONE_SIMPLE(cbor_unpack_array_end(in, true),
 					    -EILSEQ, NULL, in, exp);
 
 	/* only need to check the starts & forced ends */
-	RUN_ONE(cbor_unpack_map_start(in, &npairs, &end_required),
+	RUN_ONE_SIMPLE(cbor_unpack_map_start(in, &npairs, &end_required),
 					    -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_map_end(in, true),
+	RUN_ONE_SIMPLE(cbor_unpack_map_end(in, true),
 					    -EILSEQ, NULL, in, exp);
 }
 
@@ -220,28 +220,28 @@ static void check_arr(struct buffer *in, struct val *exp)
 	char *s;
 	bool b;
 
-	RUN_ONE(cbor_unpack_uint(&tmp, &u), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_nint(&tmp, &u), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_int(&tmp, &i),  -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_cstr_len(&tmp, &s, &ss),
+	RUN_ONE_SIMPLE(cbor_unpack_uint(&tmp, &u), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_nint(&tmp, &u), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_int(&tmp, &i),  -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_cstr_len(&tmp, &s, &ss),
 		                            -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_str(&tmp, &str),-EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_bool(&tmp, &b), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_null(&tmp),     -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_str(&tmp, &str),-EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_bool(&tmp, &b), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_null(&tmp),     -EILSEQ, NULL, in, exp);
 
 #if 0
-	/* FIXME: RUN_ONE resets the buffer state */
-	RUN_ONE(cbor_unpack_array_start(in, &npairs, &end_required),
+	/* FIXME: RUN_ONE_SIMPLE resets the buffer state */
+	RUN_ONE_SIMPLE(cbor_unpack_array_start(in, &npairs, &end_required),
 					    0,       X, in, exp);
 	/* TODO: unpack vals in a loop */
-	RUN_ONE(cbor_unpack_array_end(in, end_required),
+	RUN_ONE_SIMPLE(cbor_unpack_array_end(in, end_required),
 					    0,       X, in, exp);
 #endif
 
 	/* only need to check the starts & forced ends */
-	RUN_ONE(cbor_unpack_map_start(in, &npairs, &end_required),
+	RUN_ONE_SIMPLE(cbor_unpack_map_start(in, &npairs, &end_required),
 					    -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_map_end(in, true),
+	RUN_ONE_SIMPLE(cbor_unpack_map_end(in, true),
 					    -EILSEQ, NULL, in, exp);
 }
 
@@ -256,27 +256,27 @@ static void check_nvl(struct buffer *in, struct val *exp)
 	char *s;
 	bool b;
 
-	RUN_ONE(cbor_unpack_uint(&tmp, &u), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_nint(&tmp, &u), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_int(&tmp, &i),  -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_cstr_len(&tmp, &s, &ss),
+	RUN_ONE_SIMPLE(cbor_unpack_uint(&tmp, &u), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_nint(&tmp, &u), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_int(&tmp, &i),  -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_cstr_len(&tmp, &s, &ss),
 		                            -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_str(&tmp, &str),-EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_bool(&tmp, &b), -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_null(&tmp),     -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_str(&tmp, &str),-EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_bool(&tmp, &b), -EILSEQ, NULL, in, exp);
+	RUN_ONE_SIMPLE(cbor_unpack_null(&tmp),     -EILSEQ, NULL, in, exp);
 
 	/* only need to check the starts & forced ends */
-	RUN_ONE(cbor_unpack_array_start(in, &nelem, &end_required),
+	RUN_ONE_SIMPLE(cbor_unpack_array_start(in, &nelem, &end_required),
 					    -EILSEQ, NULL, in, exp);
-	RUN_ONE(cbor_unpack_array_end(in, true),
+	RUN_ONE_SIMPLE(cbor_unpack_array_end(in, true),
 					    -EILSEQ, NULL, in, exp);
 
 #if 0
-	/* FIXME: RUN_ONE resets the buffer state */
-	RUN_ONE(cbor_unpack_map_start(in, &npairs, &end_required),
+	/* FIXME: RUN_ONE_SIMPLE resets the buffer state */
+	RUN_ONE_SIMPLE(cbor_unpack_map_start(in, &npairs, &end_required),
 					    0,       X, in, exp);
 	/* TODO: unpack vals in a loop */
-	RUN_ONE(cbor_unpack_map_end(in, end_required),
+	RUN_ONE_SIMPLE(cbor_unpack_map_end(in, end_required),
 					    0,       X, in, exp);
 #endif
 }
