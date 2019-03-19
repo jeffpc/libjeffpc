@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,40 +29,6 @@
  * nvl packing interface
  */
 
-static int cbor_nvl_prologue(struct buffer *buffer, struct nvlist *nvl)
-{
-	return cbor_pack_map_start(buffer, CBOR_UNKNOWN_NELEM);
-}
-
-static int cbor_nvl_epilogue(struct buffer *buffer, struct nvlist *nvl)
-{
-	return cbor_pack_map_end(buffer, CBOR_UNKNOWN_NELEM);
-}
-
-static int cbor_array_prologue(struct buffer *buffer, struct val *const *vals,
-			       size_t nelem)
-{
-	return cbor_pack_array_start(buffer, nelem);
-}
-
-static int cbor_array_epilogue(struct buffer *buffer, struct val *const *vals,
-			       size_t nelem)
-{
-	return cbor_pack_array_end(buffer, nelem);
-}
-
 const struct valops valops_cbor = {
-	.pack = {
-		.nvl_prologue = cbor_nvl_prologue,
-		.nvl_epilogue = cbor_nvl_epilogue,
-
-		.array_prologue = cbor_array_prologue,
-		.array_epilogue = cbor_array_epilogue,
-
-		.val_blob = cbor_pack_blob,
-		.val_bool = cbor_pack_bool,
-		.val_int = cbor_pack_uint,
-		.val_null = cbor_pack_null,
-		.val_str = cbor_pack_cstr,
-	}
+	.pack_val = cbor_pack_val,
 };
