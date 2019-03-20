@@ -14,6 +14,7 @@ sexpr.tab.c
 sexpr.tab.h
 
 libjeffpc.so
+cbor-dumper
 sexpr-repl
 
 hgversion.h

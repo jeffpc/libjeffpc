@@ -212,6 +212,18 @@ add_custom_command(TARGET revisiontag
 add_dependencies(jeffpc revisiontag)
 
 #
+# CBOR file dumper
+#
+
+add_executable(cbor-dumper
+	cbor-dumper.c
+)
+
+target_link_libraries(cbor-dumper
+	jeffpc
+)
+
+#
 # REPL executable
 #
 
