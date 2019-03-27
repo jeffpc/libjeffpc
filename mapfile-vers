@@ -28,6 +28,10 @@ JEFFPC_0.10 {
 		array_size;
 		array_truncate;
 
+		# base64
+		base64_decode;
+		base64_encode;
+
 		# bst
 		bst_add;
 		bst_create;

@@ -89,6 +89,7 @@ ADD_FLEX_BISON_DEPENDENCY(sexpr sexpr)
 
 add_library(jeffpc SHARED
 	array.c
+	base64.c
 	bst.c
 	buffer.c
 	buffer_heap.c
@@ -158,6 +159,7 @@ install(TARGETS	jeffpc
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 install(FILES	include/jeffpc/atomic.h
 		include/jeffpc/array.h
+		include/jeffpc/base64.h
 		include/jeffpc/bst.h
 		include/jeffpc/buffer.h
 		include/jeffpc/cbor.h
