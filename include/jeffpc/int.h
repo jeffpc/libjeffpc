@@ -23,6 +23,7 @@
 #ifndef __JEFFPC_INT_H
 #define __JEFFPC_INT_H
 
+#include <sys/types.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <stdint.h>
