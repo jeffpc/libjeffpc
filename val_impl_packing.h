@@ -30,10 +30,12 @@
 
 struct valops {
 	int (*pack)(struct buffer *buffer, struct val *val);
+	struct val *(*unpack)(struct buffer *buffer);
 };
 
 static const struct valops valops_cbor = {
 	.pack = cbor_pack_val,
+	.unpack = cbor_unpack_val,
 };
 
 static const struct valops valops_json = {
