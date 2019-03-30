@@ -228,6 +228,7 @@ static struct val *sexpr_compact_cons_nvl(struct val *in)
 		struct val *value = cur->cons.tail;
 		struct nvpair new;
 
+		/* NOTE: what_is_it already verified that we have a str/sym */
 		if (name->type == VT_STR)
 			new.name = val_getref_str(name);
 		else
