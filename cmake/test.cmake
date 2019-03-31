@@ -58,10 +58,12 @@ macro(build_test_bin_and_run name)
 	)
 endmacro()
 
-macro(build_test_bin_and_run_files name ext dirs)
+macro(build_test_bin_and_run_files name iext oext dirs)
 	build_test_bin_files(${name})
 	foreach(DIR ${dirs})
-		file(GLOB TESTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${DIR}/*.${ext}")
+		file(GLOB TESTS
+		     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+		     "${DIR}/*.${iext}")
 		foreach(TEST ${TESTS})
 			add_test(NAME "${name}:${TEST}"
 				 COMMAND "${CMAKE_BINARY_DIR}/tests/test_${name}"

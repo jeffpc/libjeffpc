@@ -22,14 +22,14 @@
 
 build_perf_bin(tree)
 
-build_test_bin_and_run_files(base64_encode raw base64/valid)
-build_test_bin_and_run_files(base64_decode b64 base64/valid)
-build_test_bin_and_run_files(cbor_pack lisp cbor-common/valid)
-build_test_bin_and_run_files(cbor_unpack cbor
+build_test_bin_and_run_files(base64_encode raw b64 base64/valid)
+build_test_bin_and_run_files(base64_decode b64 raw base64/valid)
+build_test_bin_and_run_files(cbor_pack lisp cbor cbor-common/valid)
+build_test_bin_and_run_files(cbor_unpack cbor lisp
 	"cbor-common/valid;cbor-common/valid-unpack")
-build_test_bin_and_run_files(nvl_pack lisp nvl-pack)
-build_test_bin_and_run_files(qstring qs qstring-basic)
-build_test_bin_and_run_files(sexpr_parser lisp sexpr-parser)
+build_test_bin_and_run_files(nvl_pack lisp "" nvl-pack)
+build_test_bin_and_run_files(qstring qs lisp qstring-basic)
+build_test_bin_and_run_files(sexpr_parser lisp "" sexpr-parser)
 
 build_test_bin_and_run(array)
 build_test_bin_and_run(atomic-single-thread)
