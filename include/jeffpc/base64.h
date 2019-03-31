@@ -30,6 +30,9 @@
 extern ssize_t base64_decode(void *out, const char *in, size_t inlen);
 extern void base64_encode(char *out, const void *in, size_t inlen);
 
+extern ssize_t base64url_decode(void *out, const char *in, size_t inlen);
+extern void base64url_encode(char *out, const void *in, size_t inlen);
+
 /* returns number of bytes needed to encode an input of @inlen bytes */
 static inline size_t base64_required_length(size_t inlen)
 {

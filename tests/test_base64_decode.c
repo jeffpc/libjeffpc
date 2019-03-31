@@ -35,7 +35,8 @@ static inline void dumpraw(const void *buf, size_t len)
 	fprintf(stderr, "%s", tmp);
 }
 
-static void check(const void *raw, size_t rawlen, const char *b64, size_t b64len)
+static void check(const void *raw, size_t rawlen, const char *b64, size_t b64len,
+		  bool url)
 {
 	/* +10 as a redzone to catch out of bounds writes */
 	uint8_t out[rawlen + 10];
@@ -48,7 +49,11 @@ static void check(const void *raw, size_t rawlen, const char *b64, size_t b64len
 	dumpraw(raw, rawlen);
 	fprintf(stderr, "\n");
 
-	ret = base64_decode(out, b64, b64len);
+	if (!url)
+		ret = base64_decode(out, b64, b64len);
+	else
+		ret = base64url_decode(out, b64, b64len);
+
 	if (ret < 0)
 		fail("failed to decode");
 
@@ -66,5 +71,5 @@ static void check(const void *raw, size_t rawlen, const char *b64, size_t b64len
 void test(const char *ifname, void *in, size_t ilen, const char *iext,
 	  const char *ofname, void *out, size_t olen, const char *oext)
 {
-	check(out, olen, in, ilen);
+	check(out, olen, in, ilen, !strcmp(iext, "b64url"));
 }

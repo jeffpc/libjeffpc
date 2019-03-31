@@ -22,8 +22,8 @@
 
 build_perf_bin(tree)
 
-build_test_bin_and_run_files(base64_encode raw b64 base64/valid)
-build_test_bin_and_run_files(base64_decode b64 raw base64/valid)
+build_test_bin_and_run_files(base64_encode raw "b64;b64url" base64/valid)
+build_test_bin_and_run_files(base64_decode "b64;b64url" raw base64/valid)
 build_test_bin_and_run_files(cbor_pack lisp cbor cbor-common/valid)
 build_test_bin_and_run_files(cbor_unpack cbor lisp
 	"cbor-common/valid;cbor-common/valid-unpack")
