@@ -144,8 +144,7 @@ static void usage(const char *prog)
 
 static int test_prep(const char *iext, const char *oext, const char *ifname)
 {
-	char _ofname[FILENAME_MAX];
-	char *ofname;
+	char ofname[FILENAME_MAX];
 	size_t ilen, olen;
 	void *in, *out;
 
@@ -158,22 +157,14 @@ static int test_prep(const char *iext, const char *oext, const char *ifname)
 	}
 
 	/* get the output */
-	if (oext[0] != '\0') {
-		ofname = _ofname;
+	strcpy(ofname, ifname);
+	strcpy(ofname + strlen(ofname) - strlen(iext), oext);
 
-		strcpy(ofname, ifname);
-		strcpy(ofname + strlen(ofname) - strlen(iext), oext);
-
-		out = read_file_len(ofname, &olen);
-		if (IS_ERR(out)) {
-			fprintf(stderr, "failed to read output file: %s\n",
-				xstrerror(PTR_ERR(out)));
-			return 19;
-		}
-	} else {
-		ofname = NULL;
-		out = NULL;
-		olen = 0;
+	out = read_file_len(ofname, &olen);
+	if (IS_ERR(out)) {
+		fprintf(stderr, "failed to read output file: %s\n",
+			xstrerror(PTR_ERR(out)));
+		return 19;
 	}
 
 	fprintf(stderr, "Checking %s => %s...\n", ifname, ofname);

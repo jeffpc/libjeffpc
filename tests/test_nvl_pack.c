@@ -149,17 +149,27 @@ static inline void check_packing_fmt(const char *name, bool hex,
 	cmp_buffers(name, hex, expected, &tmp);
 }
 
-static inline void check_packing(struct nvlist *nvl,
-				 struct buffer *expected_json,
-				 struct buffer *expected_cbor)
+static inline void check_packing(struct nvlist *nvl, struct buffer *expected,
+				 const char *fmt)
 {
-	check_packing_fmt("JSON", false, nvl, expected_json, VF_JSON);
-	check_packing_fmt("CBOR", true, nvl, expected_cbor, VF_CBOR);
+	enum val_format vfmt;
+	bool binary;
+
+	if (!strcmp(fmt, "cbor")) {
+		vfmt = VF_CBOR;
+		binary = true;
+	} else if (!strcmp(fmt, "json")) {
+		vfmt = VF_JSON;
+		binary = false;
+	} else {
+		fail("unknown format '%s'", fmt);
+	}
+
+	check_packing_fmt(fmt, binary, nvl, expected, vfmt);
 }
 
-static void onefile(struct val *prog,
-		    struct buffer *expected_json,
-		    struct buffer *expected_cbor)
+static void onefile(struct val *prog, struct buffer *expected,
+		    const char *fmt)
 {
 	struct val *tmp;
 	struct val *cur;
@@ -250,50 +260,22 @@ static void onefile(struct val *prog,
 		}
 	}
 
-	check_packing(nvl, expected_json, expected_cbor);
+	check_packing(nvl, expected, fmt);
 
 	nvl_putref(nvl);
-}
-
-static void get_expected_output(const char *fname, const char *ext,
-				struct buffer *buf)
-{
-	char expfname[FILENAME_MAX];
-	size_t len;
-	char *tmp;
-
-	VERIFY3U(strlen(ext), <=, strlen("lisp"));
-
-	/* replace .lisp with .ext */
-	strcpy(expfname, fname);
-	strcpy(expfname + strlen(expfname) - 4, ext);
-
-	tmp = read_file_len(expfname, &len);
-	ASSERT(!IS_ERR(tmp));
-
-	buffer_init_static(buf, tmp, len, false);
 }
 
 void test(const char *ifname, const void *in, size_t ilen, const char *iext,
 	  const char *ofname, const void *out, size_t olen, const char *oext)
 {
-	struct buffer expected_json;
-	struct buffer expected_cbor;
+	struct buffer expected;
 	struct val *lv;
-
-	ASSERT3P(ofname, ==, NULL);
-	ASSERT3P(out, ==, NULL);
-	ASSERT3U(olen, ==, 0);
 
 	lv = sexpr_parse(in, ilen);
 	if (IS_ERR(lv))
 		fail("failed to parse input: %s", xstrerror(PTR_ERR(lv)));
 
-	get_expected_output(ifname, "json", &expected_json);
-	get_expected_output(ifname, "cbor", &expected_cbor);
+	buffer_init_static(&expected, out, olen, false);
 
-	onefile(lv, &expected_json, &expected_cbor);
-
-	free((void *) buffer_data(&expected_json));
-	free((void *) buffer_data(&expected_cbor));
+	onefile(lv, &expected, oext);
 }

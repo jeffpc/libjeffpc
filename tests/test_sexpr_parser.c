@@ -40,18 +40,10 @@ static void trim(char *ptr)
 		ptr[len - 1] = '\0';
 }
 
-static void check_file(struct val *got, char *fname, bool raw)
+static void check_file(struct val *got, const char *exp, bool raw)
 {
 	const char *pfx = raw ? "raw   " : "pretty";
 	struct str *dumped;
-	char *exp;
-
-	exp = read_file(fname);
-	if (IS_ERR(exp))
-		fail("failed to read expected file (%s): %s", fname,
-		     xstrerror(PTR_ERR(exp)));
-
-	trim(exp);
 
 	fprintf(stderr, "%s exp: %s\n", pfx, exp);
 
@@ -64,27 +56,26 @@ static void check_file(struct val *got, char *fname, bool raw)
 	if (strcmp(str_cstr(dumped), exp))
 		fail("mismatch!");
 
-	free(exp);
-
 	str_putref(dumped);
 }
 
 void test(const char *ifname, const void *_in, size_t ilen, const char *iext,
-	  const char *ofname, const void *out, size_t olen, const char *oext)
+	  const char *ofname, const void *_out, size_t olen, const char *oext)
 {
-	char expfname[FILENAME_MAX];
 	struct val *lv;
+	char *out;
 	char *in;
-
-	ASSERT3P(ofname, ==, NULL);
-	ASSERT3P(out, ==, NULL);
-	ASSERT3U(olen, ==, 0);
 
 	in = strdup(_in);
 	if (!in)
 		fail("failed to duplicate input buffer");
 
+	out = strdup(_out);
+	if (!out)
+		fail("failed to duplicate output buffer");
+
 	trim(in);
+	trim(out);
 
 	fprintf(stderr, "input     : %s\n", in);
 
@@ -92,17 +83,10 @@ void test(const char *ifname, const void *_in, size_t ilen, const char *iext,
 	if (IS_ERR(lv))
 		fail("failed to parse input: %s", xstrerror(PTR_ERR(lv)));
 
-	free(in);
-
-	/* replace .lisp with .raw & check it*/
-	strcpy(expfname, ifname);
-	strcpy(expfname + strlen(expfname) - 4, "raw");
-	check_file(lv, expfname, true);
-
-	/* replace .lisp with .txt & check it*/
-	strcpy(expfname, ifname);
-	strcpy(expfname + strlen(expfname) - 4, "txt");
-	check_file(lv, expfname, false);
+	check_file(lv, out, !strcmp(oext, "raw"));
 
 	val_putref(lv);
+
+	free(in);
+	free(out);
 }
