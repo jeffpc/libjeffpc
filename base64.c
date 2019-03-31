@@ -63,9 +63,10 @@ static const uint8_t b64_decode_table[256] = {
 	 INV,  INV,  INV,  INV,  INV,  INV,  INV,  INV, /* 0xf8..0xff */
 };
 
-void base64_encode(char *out, const void *_in, size_t inlen)
+__attribute__((always_inline))
+static inline void __b64_encode(char *out, const void *_in, size_t inlen,
+				const char *table)
 {
-	const char *table = b64_encode_table;
 	const uint8_t *in = _in;
 	const size_t groups = inlen / 3;
 	uint32_t v;
@@ -114,9 +115,15 @@ void base64_encode(char *out, const void *_in, size_t inlen)
 	}
 }
 
-ssize_t base64_decode(void *_out, const char *_in, size_t inlen)
+void base64_encode(char *out, const void *in, size_t inlen)
 {
-	const uint8_t *table = b64_decode_table;
+	__b64_encode(out, in, inlen, b64_encode_table);
+}
+
+__attribute__((always_inline))
+static inline ssize_t __b64_decode(void *_out, const char *_in, size_t inlen,
+				   const uint8_t *table)
+{
 	const uint8_t *in = (const uint8_t *) _in;
 	uint8_t *out = _out;
 	size_t groups;
@@ -180,4 +187,9 @@ ssize_t base64_decode(void *_out, const char *_in, size_t inlen)
 		/* zero pad chars, nothing to do */
 		return (groups * 3);
 	}
+}
+
+ssize_t base64_decode(void *out, const char *in, size_t inlen)
+{
+	return __b64_decode(out, in, inlen, b64_decode_table);
 }
