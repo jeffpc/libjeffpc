@@ -58,16 +58,18 @@ macro(build_test_bin_and_run name)
 	)
 endmacro()
 
-macro(build_test_bin_and_run_files name files)
+macro(build_test_bin_and_run_files name ext dirs)
 	build_test_bin_files(${name})
-	file(GLOB TESTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${files})
-	foreach(TEST ${TESTS})
-		add_test(NAME "${name}:${TEST}"
-			 COMMAND "${CMAKE_BINARY_DIR}/tests/test_${name}"
-			 	 "${CMAKE_CURRENT_SOURCE_DIR}/${TEST}"
-		)
-		set_tests_properties("${name}:${TEST}" PROPERTIES
-			ENVIRONMENT "UMEM_DEBUG=default,verbose"
-		)
+	foreach(DIR ${dirs})
+		file(GLOB TESTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${DIR}/*.${ext}")
+		foreach(TEST ${TESTS})
+			add_test(NAME "${name}:${TEST}"
+				 COMMAND "${CMAKE_BINARY_DIR}/tests/test_${name}"
+					 "${CMAKE_CURRENT_SOURCE_DIR}/${TEST}"
+			)
+			set_tests_properties("${name}:${TEST}" PROPERTIES
+				ENVIRONMENT "UMEM_DEBUG=default,verbose"
+			)
+		endforeach()
 	endforeach()
 endmacro()
