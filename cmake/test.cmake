@@ -59,26 +59,28 @@ macro(build_test_bin_and_run name)
 endmacro()
 
 # name  = name of test
-# iext  = the test input file extension
+# iexts = the test input file extensions
 # oexts = the expected test output file extensions
 # dirs  = directories to look for iext/oext files
-macro(build_test_bin_and_run_files name iext oexts dirs)
+macro(build_test_bin_and_run_files name iexts oexts dirs)
 	build_test_bin_files(${name})
 	foreach(DIR ${dirs})
 		foreach(OEXT ${oexts})
-			file(GLOB TESTS
-			     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-			     "${DIR}/*.${iext}")
-			foreach(TEST ${TESTS})
-				add_test(NAME "${name}:${OEXT}:${TEST}"
-					 COMMAND "${CMAKE_BINARY_DIR}/tests/test_${name}"
-						 -i "${iext}"
-						 -o "${OEXT}"
-						 "${CMAKE_CURRENT_SOURCE_DIR}/${TEST}"
-				)
-			set_tests_properties("${name}:${OEXT}:${TEST}" PROPERTIES
-					ENVIRONMENT "UMEM_DEBUG=default,verbose"
-				)
+			foreach(IEXT ${iexts})
+				file(GLOB TESTS
+				     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+				     "${DIR}/*.${IEXT}")
+				foreach(TEST ${TESTS})
+					add_test(NAME "${name}:${OEXT}:${TEST}"
+						 COMMAND "${CMAKE_BINARY_DIR}/tests/test_${name}"
+							 -i "${IEXT}"
+							 -o "${OEXT}"
+							 "${CMAKE_CURRENT_SOURCE_DIR}/${TEST}"
+					)
+				set_tests_properties("${name}:${OEXT}:${TEST}" PROPERTIES
+						ENVIRONMENT "UMEM_DEBUG=default,verbose"
+					)
+				endforeach()
 			endforeach()
 		endforeach()
 	endforeach()
