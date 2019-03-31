@@ -274,25 +274,23 @@ static void get_expected_output(const char *fname, const char *ext,
 	buffer_init_static(buf, tmp, len, false);
 }
 
-static void test(const char *fname)
+void test(const char *ifname, const void *in, size_t ilen, const char *iext,
+	  const char *ofname, const void *out, size_t olen, const char *oext)
 {
 	struct buffer expected_json;
 	struct buffer expected_cbor;
 	struct val *lv;
-	char *in;
 
-	in = read_file(fname);
-	if (IS_ERR(in))
-		fail("failed to read input (%s)", xstrerror(PTR_ERR(in)));
+	ASSERT3P(ofname, ==, NULL);
+	ASSERT3P(out, ==, NULL);
+	ASSERT3U(olen, ==, 0);
 
-	lv = sexpr_parse(in, strlen(in));
+	lv = sexpr_parse(in, ilen);
 	if (IS_ERR(lv))
 		fail("failed to parse input: %s", xstrerror(PTR_ERR(lv)));
 
-	free(in);
-
-	get_expected_output(fname, "json", &expected_json);
-	get_expected_output(fname, "cbor", &expected_cbor);
+	get_expected_output(ifname, "json", &expected_json);
+	get_expected_output(ifname, "cbor", &expected_cbor);
 
 	onefile(lv, &expected_json, &expected_cbor);
 

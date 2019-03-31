@@ -418,44 +418,23 @@ static void onefile(struct buffer *in, struct val *expected)
 	val_putref(expected);
 }
 
-static struct val *get_expected_output(const char *fname)
+static struct val *get_expected_output(const char *ptr, size_t len)
 {
-	char expfname[FILENAME_MAX];
 	struct val *lv;
-	size_t len;
-	char *tmp;
 
-	VERIFY3U(strlen("lisp"), <=, strlen("cbor"));
-
-	/* replace .cbor with .lisp */
-	strcpy(expfname, fname);
-	strcpy(expfname + strlen(expfname) - 4, "lisp");
-
-	tmp = read_file_len(expfname, &len);
-	ASSERT(!IS_ERR(tmp));
-
-	lv = sexpr_parse(tmp, len);
+	lv = sexpr_parse(ptr, len);
 	if (IS_ERR(lv))
 		fail("failed to parse input: %s", xstrerror(PTR_ERR(lv)));
-
-	free(tmp);
 
 	return lv;
 }
 
-static void test(const char *fname)
+void test(const char *ifname, const void *in, size_t ilen, const char *iext,
+	  const char *ofname, const void *out, size_t olen, const char *oext)
 {
 	struct buffer input;
-	size_t len;
-	char *in;
 
-	in = read_file_len(fname, &len);
-	if (IS_ERR(in))
-		fail("failed to read input (%s)", xstrerror(PTR_ERR(in)));
+	buffer_init_static(&input, in, ilen, false);
 
-	buffer_init_static(&input, in, len, false);
-
-	onefile(&input, get_expected_output(fname));
-
-	free((void *) buffer_data(&input));
+	onefile(&input, get_expected_output(out, olen));
 }

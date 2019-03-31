@@ -28,7 +28,7 @@
 
 #include "test.c"
 
-static int onefile(char *ibuf, size_t len, struct nvlist *out)
+static int onefile(const char *ibuf, size_t len, struct nvlist *out)
 {
 	struct nvlist *vars;
 	int ret;
@@ -54,21 +54,11 @@ static int onefile(char *ibuf, size_t len, struct nvlist *out)
 	return ret;
 }
 
-static struct nvlist *get_expected(const char *infname)
+static struct nvlist *get_expected(const void *ptr, size_t len)
 {
-	const size_t len = strlen(infname);
-	char outfname[len + 3];
 	struct val *outval;
-	char *out;
 
-	strcpy(outfname, infname); /* duplicate */
-	outfname[len - 2] = '\0'; /* strip off 'qs' */
-	strcat(outfname, "lisp"); /* append 'lisp' */
-
-	out = read_file(outfname);
-	ASSERT(!IS_ERR(out));
-
-	outval = sexpr_parse(out, strlen(out));
+	outval = sexpr_parse(ptr, len);
 	ASSERT(!IS_ERR(outval));
 
 	outval = sexpr_compact(outval);
@@ -82,28 +72,20 @@ static struct nvlist *get_expected(const char *infname)
 	}
 
 	return val_cast_to_nvl(outval);
-
 }
 
-static void test(const char *fname)
+void test(const char *ifname, const void *in, size_t ilen, const char *iext,
+	  const char *ofname, const void *out, size_t olen, const char *oext)
 {
-	struct nvlist *out;
-	char *in;
+	struct nvlist *exp;
 
-	/* input */
-	in = read_file(fname);
-	ASSERT(!IS_ERR(in));
-
-	/* output */
-	out = get_expected(fname);
+	exp = get_expected(out, olen);
 
 	fprintf(stderr, "Expected:\n");
-	nvl_dump_file(stderr, out);
+	nvl_dump_file(stderr, exp);
 
-	if (onefile(in, strlen(in), out))
+	if (onefile(in, ilen, exp))
 		fail("failed");
 
-	nvl_putref(out);
-
-	free(in);
+	nvl_putref(exp);
 }

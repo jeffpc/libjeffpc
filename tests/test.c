@@ -32,7 +32,8 @@
 #ifndef USE_FILENAME_ARGS
 static void test(void);
 #else
-static void test(const char *);
+static void test(const char *, const void *, size_t, const char *,
+		 const char *, const void *, size_t, const char *);
 #endif
 
 static const char *expected_panic_string;
@@ -134,8 +135,65 @@ static void test_print(enum errlevel level, const char *fmt, va_list ap)
 	 */
 }
 
+#ifdef USE_FILENAME_ARGS
+static void usage(const char *prog)
+{
+	fprintf(stderr, "Usage: %s -i <ext> -o <ext> <input file>\n", prog);
+	exit(17);
+}
+
+static int test_prep(const char *iext, const char *oext, const char *ifname)
+{
+	char _ofname[FILENAME_MAX];
+	char *ofname;
+	size_t ilen, olen;
+	void *in, *out;
+
+	/* get the input */
+	in = read_file_len(ifname, &ilen);
+	if (IS_ERR(in)) {
+		fprintf(stderr, "failed to read input file: %s\n",
+			xstrerror(PTR_ERR(in)));
+		return 18;
+	}
+
+	/* get the output */
+	if (oext[0] != '\0') {
+		ofname = _ofname;
+
+		strcpy(ofname, ifname);
+		strcpy(ofname + strlen(ofname) - strlen(iext), oext);
+
+		out = read_file_len(ofname, &olen);
+		if (IS_ERR(out)) {
+			fprintf(stderr, "failed to read output file: %s\n",
+				xstrerror(PTR_ERR(out)));
+			return 19;
+		}
+	} else {
+		ofname = NULL;
+		out = NULL;
+		olen = 0;
+	}
+
+	fprintf(stderr, "Checking %s => %s...\n", ifname, ofname);
+
+	test(ifname, in, ilen, iext, ofname, out, olen, oext);
+
+	free(in);
+	free(out);
+
+	return 0;
+}
+#endif
+
 int main(int argc, char **argv)
 {
+#ifdef USE_FILENAME_ARGS
+	const char *iext;
+	const char *oext;
+	int opt;
+#endif
 	struct jeffpc_ops init_ops = {
 		.print = test_print,
 	};
@@ -154,11 +212,32 @@ int main(int argc, char **argv)
 #ifndef USE_FILENAME_ARGS
 	test();
 #else
-	for (int i = 1; i < argc; i++) {
-		fprintf(stderr, "Checking %s...\n", argv[i]);
-
-		test(argv[i]);
+	iext = NULL;
+	oext = NULL;
+	while ((opt = getopt(argc, argv, "+i:o:")) != -1) {
+		switch (opt) {
+			case 'i':
+				if (iext)
+					usage(argv[0]);
+				iext = optarg;
+				break;
+			case 'o':
+				if (oext)
+					usage(argv[0]);
+				oext = optarg;
+				break;
+			default:
+				usage(argv[0]);
+		}
 	}
+
+	if (!iext || !oext)
+		usage(argv[0]);
+
+	if (optind != (argc - 1))
+		usage(argv[0]);
+
+	return test_prep(iext, oext, argv[argc - 1]);
 #endif
 
 	/* no panics encountered */

@@ -69,15 +69,20 @@ static void check_file(struct val *got, char *fname, bool raw)
 	str_putref(dumped);
 }
 
-static void test(const char *fname)
+void test(const char *ifname, const void *_in, size_t ilen, const char *iext,
+	  const char *ofname, const void *out, size_t olen, const char *oext)
 {
 	char expfname[FILENAME_MAX];
 	struct val *lv;
 	char *in;
 
-	in = read_file(fname);
-	if (IS_ERR(in))
-		fail("failed to read input (%s)", xstrerror(PTR_ERR(in)));
+	ASSERT3P(ofname, ==, NULL);
+	ASSERT3P(out, ==, NULL);
+	ASSERT3U(olen, ==, 0);
+
+	in = strdup(_in);
+	if (!in)
+		fail("failed to duplicate input buffer");
 
 	trim(in);
 
@@ -90,12 +95,12 @@ static void test(const char *fname)
 	free(in);
 
 	/* replace .lisp with .raw & check it*/
-	strcpy(expfname, fname);
+	strcpy(expfname, ifname);
 	strcpy(expfname + strlen(expfname) - 4, "raw");
 	check_file(lv, expfname, true);
 
 	/* replace .lisp with .txt & check it*/
-	strcpy(expfname, fname);
+	strcpy(expfname, ifname);
 	strcpy(expfname + strlen(expfname) - 4, "txt");
 	check_file(lv, expfname, false);
 

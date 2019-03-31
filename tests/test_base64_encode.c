@@ -55,25 +55,8 @@ static void check(const void *raw, size_t rawlen, const char *b64, size_t b64len
 		fail("base64_encode wrote beyond end of buffer");
 }
 
-void test(const char *fname)
+void test(const char *ifname, const void *in, size_t ilen, const char *iext,
+	  const char *ofname, const void *out, size_t olen, const char *oext)
 {
-	char expfname[FILENAME_MAX];
-	size_t rawlen;
-	size_t b64len;
-	void *raw;
-	char *b64;
-
-	/* replace .raw with .b64 */
-	strcpy(expfname, fname);
-	strcpy(expfname + strlen(expfname) - 3, "b64");
-
-	/* read input */
-	raw = read_file_len(fname, &rawlen);
-	ASSERT(!IS_ERR(raw));
-
-	/* read expected output */
-	b64 = read_file_len(expfname, &b64len);
-	ASSERT(!IS_ERR(b64));
-
-	check(raw, rawlen, b64, b64len);
+	check(in, ilen, out, olen);
 }

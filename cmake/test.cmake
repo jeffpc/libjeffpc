@@ -58,6 +58,11 @@ macro(build_test_bin_and_run name)
 	)
 endmacro()
 
+# name = name of test
+# iext = the test input file extension
+# oext = the expected test output file extension, or "" if there is no 1:1
+#        mapping between input and expected output
+# dirs = directories to look for iext/oext files
 macro(build_test_bin_and_run_files name iext oext dirs)
 	build_test_bin_files(${name})
 	foreach(DIR ${dirs})
@@ -67,6 +72,8 @@ macro(build_test_bin_and_run_files name iext oext dirs)
 		foreach(TEST ${TESTS})
 			add_test(NAME "${name}:${TEST}"
 				 COMMAND "${CMAKE_BINARY_DIR}/tests/test_${name}"
+				 	 -i "${iext}"
+					 -o "${oext}"
 					 "${CMAKE_CURRENT_SOURCE_DIR}/${TEST}"
 			)
 			set_tests_properties("${name}:${TEST}" PROPERTIES
