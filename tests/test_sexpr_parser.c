@@ -29,15 +29,15 @@
 
 #include "test.c"
 
-static void trim(char *ptr)
+static void trim(char *ptr, size_t *len)
 {
-	size_t len = strlen(ptr);
-
-	if (!len)
+	if (!*len)
 		return;
 
-	if (ptr[len - 1] == '\n')
-		ptr[len - 1] = '\0';
+	if (ptr[*len - 1] == '\n') {
+		ptr[*len - 1] = '\0';
+		(*len)--;
+	}
 }
 
 static void check_file(struct val *got, const char *exp, bool raw)
@@ -59,34 +59,21 @@ static void check_file(struct val *got, const char *exp, bool raw)
 	str_putref(dumped);
 }
 
-void test(const char *ifname, void *_in, size_t ilen, const char *iext,
-	  const char *ofname, void *_out, size_t olen, const char *oext)
+void test(const char *ifname, void *in, size_t ilen, const char *iext,
+	  const char *ofname, void *out, size_t olen, const char *oext)
 {
 	struct val *lv;
-	char *out;
-	char *in;
 
-	in = strdup(_in);
-	if (!in)
-		fail("failed to duplicate input buffer");
+	trim(in, &ilen);
+	trim(out, &olen);
 
-	out = strdup(_out);
-	if (!out)
-		fail("failed to duplicate output buffer");
+	fprintf(stderr, "input     : %s\n", (char *) in);
 
-	trim(in);
-	trim(out);
-
-	fprintf(stderr, "input     : %s\n", in);
-
-	lv = sexpr_parse(in, strlen(in));
+	lv = sexpr_parse(in, ilen);
 	if (IS_ERR(lv))
 		fail("failed to parse input: %s", xstrerror(PTR_ERR(lv)));
 
 	check_file(lv, out, !strcmp(oext, "raw"));
 
 	val_putref(lv);
-
-	free(in);
-	free(out);
 }
