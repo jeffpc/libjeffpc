@@ -74,8 +74,8 @@ static struct nvlist *get_expected(const void *ptr, size_t len)
 	return val_cast_to_nvl(outval);
 }
 
-void test(const char *ifname, const void *in, size_t ilen, const char *iext,
-	  const char *ofname, const void *out, size_t olen, const char *oext)
+void test(const char *ifname, void *in, size_t ilen, const char *iext,
+	  const char *ofname, void *out, size_t olen, const char *oext)
 {
 	struct nvlist *exp;
 

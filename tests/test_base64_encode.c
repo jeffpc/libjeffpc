@@ -55,8 +55,8 @@ static void check(const void *raw, size_t rawlen, const char *b64, size_t b64len
 		fail("base64_encode wrote beyond end of buffer");
 }
 
-void test(const char *ifname, const void *in, size_t ilen, const char *iext,
-	  const char *ofname, const void *out, size_t olen, const char *oext)
+void test(const char *ifname, void *in, size_t ilen, const char *iext,
+	  const char *ofname, void *out, size_t olen, const char *oext)
 {
 	check(in, ilen, out, olen);
 }

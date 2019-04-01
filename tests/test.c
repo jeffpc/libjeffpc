@@ -32,8 +32,8 @@
 #ifndef USE_FILENAME_ARGS
 static void test(void);
 #else
-static void test(const char *, const void *, size_t, const char *,
-		 const char *, const void *, size_t, const char *);
+static void test(const char *, void *, size_t, const char *,
+		 const char *, void *, size_t, const char *);
 #endif
 
 static const char *expected_panic_string;

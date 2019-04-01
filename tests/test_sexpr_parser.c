@@ -59,8 +59,8 @@ static void check_file(struct val *got, const char *exp, bool raw)
 	str_putref(dumped);
 }
 
-void test(const char *ifname, const void *_in, size_t ilen, const char *iext,
-	  const char *ofname, const void *_out, size_t olen, const char *oext)
+void test(const char *ifname, void *_in, size_t ilen, const char *iext,
+	  const char *ofname, void *_out, size_t olen, const char *oext)
 {
 	struct val *lv;
 	char *out;

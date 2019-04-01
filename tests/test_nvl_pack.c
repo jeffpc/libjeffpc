@@ -265,8 +265,8 @@ static void onefile(struct val *prog, struct buffer *expected,
 	nvl_putref(nvl);
 }
 
-void test(const char *ifname, const void *in, size_t ilen, const char *iext,
-	  const char *ofname, const void *out, size_t olen, const char *oext)
+void test(const char *ifname, void *in, size_t ilen, const char *iext,
+	  const char *ofname, void *out, size_t olen, const char *oext)
 {
 	struct buffer expected;
 	struct val *lv;
