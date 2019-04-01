@@ -1,5 +1,7 @@
 syntax: glob
 
+cmake/check-for-gnu-ld/libshared-test.so
+
 CMakeCache.txt
 CMakeFiles
 CTestTestfile.cmake
