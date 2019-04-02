@@ -50,7 +50,7 @@ int json_pack_int(struct buffer *buffer, int64_t v)
 	return json_pack_uint(buffer, v);
 }
 
-static int __escape_char(struct buffer *buffer, uint64_t c)
+static int __escape_char(struct buffer *buffer, uint32_t c)
 {
 	char tmp[7];
 
@@ -58,7 +58,7 @@ static int __escape_char(struct buffer *buffer, uint64_t c)
 	if (c > 0xffff)
 		return -ENOTSUP;
 
-	snprintf(tmp, sizeof(tmp), "\\u%04"PRIX64, c);
+	snprintf(tmp, sizeof(tmp), "\\u%04X", c);
 
 	return buffer_append_cstr(buffer, tmp);
 }
