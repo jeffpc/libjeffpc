@@ -607,8 +607,11 @@ int cbor_unpack_cstr_len(struct buffer *buffer, char **str, size_t *len)
 	if (ret)
 		return ret;
 
-	/* can't handle strings longer than what fits in memory */
-	if (parsed_len > SIZE_MAX)
+	/*
+	 * We can't handle strings longer than what fits in memory (the +1
+	 * is for nul termination).
+	 */
+	if (parsed_len >= SIZE_MAX)
 		return -EOVERFLOW;
 
 	out = malloc(parsed_len + 1);
