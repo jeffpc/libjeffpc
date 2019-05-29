@@ -188,7 +188,15 @@ static inline ssize_t __b64_decode(void *_out, const char *_in, size_t inlen,
 		const uint8_t d = table[in[(i * 4) + 3]];
 		uint32_t v;
 
-		if ((a == INV) || (b == INV) || (c == INV) || (d == INV))
+		/*
+		 * If any one of the four chars in this group is INV, error
+		 * out.
+		 *
+		 * Optimization: Since no valid char translates to a value
+		 * with with 0x40 or 0x80 set, the only way to get 0xff out
+		 * is if one of the four values was 0xff - aka. INV.
+		 */
+		if ((a | b | c | d) == INV)
 			return -1;
 
 		v = (a << 18) | (b << 12) | (c << 6) | d;
