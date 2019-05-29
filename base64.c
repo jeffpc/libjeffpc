@@ -214,7 +214,7 @@ static inline ssize_t __b64_decode(void *_out, const char *_in, size_t inlen,
 		const uint8_t b = table[in[inlen - 3]];
 		uint32_t v;
 
-		if ((a == INV) || (b == INV))
+		if (CHECK_INV(a, b, 0, 0))
 			return -1;
 
 		v = (a << 2) | (b >> 4);
@@ -229,7 +229,7 @@ static inline ssize_t __b64_decode(void *_out, const char *_in, size_t inlen,
 		const uint8_t c = table[in[inlen - 2]];
 		uint32_t v;
 
-		if ((a == INV) || (b == INV) || (c == INV))
+		if (CHECK_INV(a, b, c, 0))
 			return -1;
 
 		v = (a << 10) | (b << 4) | (c >> 2);
