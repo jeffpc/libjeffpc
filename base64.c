@@ -33,6 +33,16 @@ static const char b64url_encode_table[64] =
 	"0123456789-_";
 
 #define INV	0xff
+
+/*
+ * Check for any one of the four chars being INV.
+ *
+ * Optimization: Since no valid char translates to a value with with 0x40 or
+ * 0x80 set, the only way to get 0xff out is if one of the four values was
+ * 0xff - aka. INV.
+ */
+#define CHECK_INV(a, b, c, d)	(((a) | (b) | (c) | (d)) == INV)
+
 static const uint8_t b64_decode_table[256] = {
 	 INV,  INV,  INV,  INV,  INV,  INV,  INV,  INV, /* 0x00..0x07 */
 	 INV,  INV,  INV,  INV,  INV,  INV,  INV,  INV, /* 0x08..0x0f */
@@ -188,15 +198,7 @@ static inline ssize_t __b64_decode(void *_out, const char *_in, size_t inlen,
 		const uint8_t d = table[in[(i * 4) + 3]];
 		uint32_t v;
 
-		/*
-		 * If any one of the four chars in this group is INV, error
-		 * out.
-		 *
-		 * Optimization: Since no valid char translates to a value
-		 * with with 0x40 or 0x80 set, the only way to get 0xff out
-		 * is if one of the four values was 0xff - aka. INV.
-		 */
-		if ((a | b | c | d) == INV)
+		if (CHECK_INV(a, b, c, d))
 			return -1;
 
 		v = (a << 18) | (b << 12) | (c << 6) | d;
