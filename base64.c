@@ -153,8 +153,8 @@ static inline void __b64_encode(char *out, const void *_in, size_t inlen,
 			break;
 		case 2:
 			/* 2 bytes left - encoded them & pad with = */
-			v =  in[i * 3] << 8;
-			v |= in[i * 3 + 1];
+			v =  in[i * 3] << 10;
+			v |= in[i * 3 + 1] << 2;
 
 			out[i * 4]     = table[(v >> 12) & 0x3f];
 			out[i * 4 + 1] = table[(v >> 6) & 0x3f];
