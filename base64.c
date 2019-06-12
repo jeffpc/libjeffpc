@@ -143,7 +143,8 @@ static inline void __b64_encode(char *out, const void *_in, size_t inlen,
 			break;
 		case 1:
 			/* 1 byte left - encoded it & pad with == */
-			v = in[i * 3] << 4;
+			v = in[i * 3];
+			v <<= 4;
 
 			out[i * 4]     = table[(v >> 6) & 0x3f];
 			out[i * 4 + 1] = table[(v >> 0) & 0x3f];
@@ -153,8 +154,9 @@ static inline void __b64_encode(char *out, const void *_in, size_t inlen,
 			break;
 		case 2:
 			/* 2 bytes left - encoded them & pad with = */
-			v =  in[i * 3] << 10;
-			v |= in[i * 3 + 1] << 2;
+			v =  in[i * 3] << 8;
+			v |= in[i * 3 + 1];
+			v <<= 2;
 
 			out[i * 4]     = table[(v >> 12) & 0x3f];
 			out[i * 4 + 1] = table[(v >> 6) & 0x3f];
@@ -217,7 +219,8 @@ static inline ssize_t __b64_decode(void *_out, const char *_in, size_t inlen,
 		if (CHECK_INV(a, b, 0, 0))
 			return -1;
 
-		v = (a << 2) | (b >> 4);
+		v = (a << 6) | b;
+		v >>= 4;
 
 		out[(groups * 3) + 0] = v & 0xff;
 
@@ -232,7 +235,8 @@ static inline ssize_t __b64_decode(void *_out, const char *_in, size_t inlen,
 		if (CHECK_INV(a, b, c, 0))
 			return -1;
 
-		v = (a << 10) | (b << 4) | (c >> 2);
+		v = (a << 12) | (b << 6) | c;
+		v >>= 2;
 
 		out[(groups * 3) + 0] = (v >> 8) & 0xff;
 		out[(groups * 3) + 1] = (v >> 0) & 0xff;
