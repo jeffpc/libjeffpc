@@ -64,6 +64,9 @@ static void check(const void *raw, size_t rawlen, const char *b64, size_t b64len
 	if (ret != rawlen)
 		fail("length mismatch (exp: %zu, got: %zu)", rawlen, ret);
 
+	if (memcmp(raw, out, rawlen))
+		fail("output mismatch");
+
 	if (!check_padding(&out[rawlen], 0xfa, 10))
 		fail("base64_encode wrote beyond end of buffer");
 }
