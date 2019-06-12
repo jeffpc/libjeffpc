@@ -186,6 +186,11 @@ static inline ssize_t __b64_decode(void *_out, const char *_in, size_t inlen,
 	size_t groups;
 	size_t i;
 
+	/* special case: empty input means empty output */
+	if (!inlen)
+		return 0;
+
+	/* must have full groups */
 	if (inlen % 4)
 		return -1;
 
