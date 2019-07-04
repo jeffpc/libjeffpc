@@ -213,6 +213,7 @@ int buffer_truncate(struct buffer *buffer, size_t size)
 		buffer->ops->clear(buffer, buffer->size, size - buffer->size);
 
 	buffer->size = size;
+	buffer->off = MIN(buffer->off, size);
 
 	return 0;
 }
