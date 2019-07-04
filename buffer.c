@@ -169,7 +169,7 @@ ssize_t buffer_seek(struct buffer *buffer, off_t offset, int whence)
 			if (-offset > buffer->size)
 				return -EINVAL;
 
-			newoff = buffer->off + offset;
+			newoff = buffer->size + offset;
 			break;
 		default:
 			return -EINVAL;
