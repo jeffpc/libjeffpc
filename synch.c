@@ -238,18 +238,19 @@ static void error_destroy(struct held_lock *held,
 	panic("lockdep: Aborting - destroying held lock");
 }
 
-static void error_lock(struct held_lock *held, struct lock *new,
+static void error_lock(struct held_lock *held, struct lock_info *new,
+		       enum synch_type new_type,
 		       const struct lock_context *where)
 {
-	const bool deadlock = (&new->info == held->info);
+	const bool deadlock = (new == held->info);
 
 	if (deadlock)
 		cmn_err(CE_CRIT, "lockdep: deadlock detected");
 	else
 		cmn_err(CE_CRIT, "lockdep: possible recursive locking detected");
 
-	cmn_err(CE_CRIT, "lockdep: thread is trying to acquire lock:");
-	print_lock(new, where);
+	cmn_err(CE_CRIT, "lockdep: thread is trying to acquire:");
+	print_synch_as(new, where, new_type);
 
 	if (deadlock)
 		cmn_err(CE_CRIT, "lockdep: but the thread is already "
@@ -266,15 +267,15 @@ static void error_lock(struct held_lock *held, struct lock *new,
 	atomic_set(&lockdep_on, 0);
 }
 
-static void error_lock_circular(struct lock *new,
+static void error_lock_circular(struct lock_info *new,
 				const struct lock_context *where)
 {
 	struct held_lock *last = last_acquired_lock();
 
 	cmn_err(CE_CRIT, "lockdep: circular dependency detected");
 	cmn_err(CE_CRIT, "lockdep: thread is trying to acquire lock of "
-		"class %s (%p):", new->info.lc->name, new->info.lc);
-	print_lock(new, where);
+		"class %s (%p):", new->lc->name, new->lc);
+	print_synch_as(new, where, new->type);
 	cmn_err(CE_CRIT, "lockdep: but the thread is already holding of "
 		"class %s (%p):", last->info->lc->name, last->info->lc);
 	print_synch_as(last->info, &last->where, last->type);
@@ -285,11 +286,12 @@ static void error_lock_circular(struct lock *new,
 	atomic_set(&lockdep_on, 0);
 }
 
-static void error_unlock(struct lock *lock, const struct lock_context *where)
+static void error_unlock(struct lock_info *info,
+			 const struct lock_context *where)
 {
 	cmn_err(CE_CRIT, "lockdep: thread is trying to release lock it "
 		"doesn't hold:");
-	print_lock(lock, where);
+	print_synch_as(info, where, info->type);
 	cmn_err(CE_CRIT, "lockdep: while holding:");
 	print_held_locks(NULL);
 	panic("lockdep: Aborting - releasing unheld lock");
@@ -327,12 +329,13 @@ static void error_condwait_unheld(struct cond *cond, struct lock *lock,
 	panic("lockdep: Aborting - %s with an unheld lock", op);
 }
 
-static void error_alloc(struct lock *lock, const struct lock_context *where,
+static void error_alloc(struct lock_info *info, const struct lock_context *where,
 			const char *msg)
 {
 	cmn_err(CE_CRIT, "lockdep: %s", msg);
-	cmn_err(CE_CRIT, "lockdep: thread trying to acquire lock:");
-	print_lock(lock, where);
+	cmn_err(CE_CRIT, "lockdep: thread trying to acquire %s:",
+		synch_type_str(info->type));
+	print_synch_as(info, where, info->type);
 	cmn_err(CE_CRIT, "lockdep: while holding:");
 	print_held_locks(NULL);
 
@@ -391,7 +394,7 @@ static bool __find_path(struct lock *lock,
 	size_t i;
 
 	if (from == to) {
-		error_lock_circular(lock, where);
+		error_lock_circular(&lock->info, where);
 		print_lock_class(from);
 		return true;
 	}
@@ -431,7 +434,7 @@ static bool check_circular_deps(struct lock *lock,
 
 	ret = add_dependency(lock->info.lc, last->info->lc);
 	if (ret < 0)
-		error_alloc(lock, where, "lock dependency count limit reached");
+		error_alloc(&lock->info, where, "lock dependency count limit reached");
 	else if (ret > 0)
 		find_path(lock, where, last->info->lc, lock->info.lc, last);
 
@@ -550,7 +553,7 @@ static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 		if (held->info == &l->info)
 			sanity_check_held_synch_type(held, SYNCH_TYPE_MUTEX);
 
-		error_lock(held, l, where);
+		error_lock(held, &l->info, SYNCH_TYPE_MUTEX, where);
 		return;
 	}
 
@@ -560,7 +563,7 @@ static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 
 	held = held_stack_alloc();
 	if (!held) {
-		error_alloc(l, where, "lock nesting limit reached");
+		error_alloc(&l->info, where, "lock nesting limit reached");
 		return;
 	}
 
@@ -595,7 +598,7 @@ static void verify_lock_unlock(const struct lock_context *where, struct lock *l)
 		goto out;
 	}
 
-	error_unlock(l, where);
+	error_unlock(&l->info, where);
 	return;
 
 out:
