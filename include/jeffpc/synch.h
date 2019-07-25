@@ -55,6 +55,7 @@ struct lock_context {
 
 struct lock_info {
 	uintptr_t magic;
+	unsigned int type;
 };
 
 struct lock {

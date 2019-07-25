@@ -37,6 +37,15 @@
  */
 #define DESTROYED_MAGIC	(~0ul)
 
+/*
+ * Synch types
+ */
+enum synch_type {
+	SYNCH_TYPE_MUTEX = 0x4d4d4d4du, /* MMMM */
+	SYNCH_TYPE_RW    = 0x52575257u, /* RWRW */
+	SYNCH_TYPE_COND  = 0x43434343u, /* CCCC */
+};
+
 #ifdef JEFFPC_LOCK_TRACKING
 static atomic_t lockdep_on = ATOMIC_INITIALIZER(1);
 static pthread_mutex_t lockdep_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -428,6 +437,7 @@ static void verify_lock_init(const struct lock_context *where, struct lock *l,
 		print_invalid_call("MXINIT", where);
 
 	l->info.magic = (uintptr_t) &l->info;
+	l->info.type = SYNCH_TYPE_MUTEX;
 
 #ifdef JEFFPC_LOCK_TRACKING
 	l->lc = lc;
@@ -456,6 +466,7 @@ static void verify_lock_destroy(const struct lock_context *where, struct lock *l
 #endif
 
 	l->info.magic = DESTROYED_MAGIC;
+	/* keep the synch type set to aid debugging */
 }
 
 static void verify_lock_lock(const struct lock_context *where, struct lock *l)
@@ -532,6 +543,7 @@ static void verify_rw_init(const struct lock_context *where, struct rwlock *l)
 		print_invalid_call("RWINIT", where);
 
 	l->info.magic = (uintptr_t) &l->info;
+	l->info.type = SYNCH_TYPE_RW;
 }
 
 static void verify_rw_destroy(const struct lock_context *where, struct rwlock *l)
@@ -542,6 +554,7 @@ static void verify_rw_destroy(const struct lock_context *where, struct rwlock *l
 	check_rw_magic(l, "destroy", where);
 
 	l->info.magic = DESTROYED_MAGIC;
+	/* keep the synch type set to aid debugging */
 }
 
 static void verify_rw_lock(const struct lock_context *where, struct rwlock *l,
@@ -567,6 +580,7 @@ static void verify_cond_init(const struct lock_context *where, struct cond *c)
 		print_invalid_call("CONDINIT", where);
 
 	c->info.magic = (uintptr_t) &c->info;
+	c->info.type = SYNCH_TYPE_COND;
 }
 
 static void verify_cond_destroy(const struct lock_context *where, struct cond *c)
@@ -577,6 +591,7 @@ static void verify_cond_destroy(const struct lock_context *where, struct cond *c
 	check_cond_magic(c, "destroy", where);
 
 	c->info.magic = DESTROYED_MAGIC;
+	/* keep the synch type set to aid debugging */
 }
 
 static void verify_cond_wait(const struct lock_context *where, struct cond *c,
