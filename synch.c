@@ -72,7 +72,7 @@ static const char *synch_type_str(enum synch_type type)
 #ifdef JEFFPC_LOCK_TRACKING
 
 struct held_lock {
-	struct lock *lock;
+	struct lock_info *info;
 	struct lock_context where;
 	enum synch_type type;
 };
@@ -128,8 +128,8 @@ static void print_invalid_call(const char *fxn, const struct lock_context *where
 	      where->line);
 }
 
-#define GENERATE_LOCK_MASK_ARGS(l)						\
-	((l)->info.magic != (uintptr_t) &(l)->info) ? 'M' : '.'
+#define GENERATE_LOCK_MASK_ARGS(i)						\
+	((i)->magic != (uintptr_t) (i)) ? 'M' : '.'
 #define GENERATE_RW_MASK_ARGS(l)						\
 	((l)->info.magic != (uintptr_t) &(l)->info) ? 'M' : '.'
 #define GENERATE_COND_MASK_ARGS(c)						\
@@ -144,7 +144,7 @@ static void print_lock(struct lock *lock, const struct lock_context *where)
 		"<unknown>",
 #endif
 		lock,
-		GENERATE_LOCK_MASK_ARGS(lock),
+		GENERATE_LOCK_MASK_ARGS(&lock->info),
 		where->file, where->line);
 }
 
@@ -199,12 +199,13 @@ static void print_held_locks(struct held_lock *highlight)
 	}
 
 	for_each_held_lock(i, cur) {
-		struct lock *lock = cur->lock;
+		struct lock_info *info = cur->info;
+		struct lock *lock = container_of(info, struct lock, info);
 
 		cmn_err(CE_CRIT, "lockdep:  %s #%zd: %s (%p) <%c> acquired at %s:%d",
 			(cur == highlight) ? "->" : "  ",
-			i, lock->info.name, lock,
-			GENERATE_LOCK_MASK_ARGS(lock),
+			i, info->name, lock,
+			GENERATE_LOCK_MASK_ARGS(info),
 			cur->where.file, cur->where.line);
 	}
 }
@@ -214,7 +215,7 @@ static void error_destroy(struct held_lock *held,
 {
 	cmn_err(CE_CRIT, "lockdep: thread is trying to destroy a lock it is "
 		"still holding:");
-	print_lock(held->lock, where);
+	print_synch_as(held->info, where, held->type);
 	cmn_err(CE_CRIT, "lockdep: while holding:");
 	print_held_locks(held);
 	panic("lockdep: Aborting - destroying held lock");
@@ -223,7 +224,7 @@ static void error_destroy(struct held_lock *held,
 static void error_lock(struct held_lock *held, struct lock *new,
 		       const struct lock_context *where)
 {
-	const bool deadlock = (new == held->lock);
+	const bool deadlock = (&new->info == held->info);
 
 	if (deadlock)
 		cmn_err(CE_CRIT, "lockdep: deadlock detected");
@@ -258,9 +259,8 @@ static void error_lock_circular(struct lock *new,
 		"class %s (%p):", new->info.lc->name, new->info.lc);
 	print_lock(new, where);
 	cmn_err(CE_CRIT, "lockdep: but the thread is already holding of "
-		"class %s (%p):", last->lock->info.lc->name,
-		last->lock->info.lc);
-	print_lock(last->lock, &last->where);
+		"class %s (%p):", last->info->lc->name, last->info->lc);
+	print_synch_as(last->info, &last->where, last->type);
 	cmn_err(CE_CRIT, "lockdep: which already depends on the new lock's "
 		"class.");
 	cmn_err(CE_CRIT, "lockdep: the reverse dependency chain:");
@@ -286,7 +286,7 @@ static void error_condwait_circular(struct cond *cond, struct held_lock *held,
 	cmn_err(CE_CRIT, "lockdep: circular dependency detected");
 	cmn_err(CE_CRIT, "lockdep: thread is trying to %s with a non-most "
 		"recent lock:", op);
-	print_lock(held->lock, where);
+	print_synch_as(held->info, where, held->type);
 	cmn_err(CE_CRIT, "lockdep: while holding:");
 	print_held_locks(held);
 	cmn_err(CE_CRIT, "lockdep: the cond to wait on:");
@@ -412,11 +412,11 @@ static bool check_circular_deps(struct lock *lock,
 
 	LOCK_DEP_GRAPH();
 
-	ret = add_dependency(lock->info.lc, last->lock->info.lc);
+	ret = add_dependency(lock->info.lc, last->info->lc);
 	if (ret < 0)
 		error_alloc(lock, where, "lock dependency count limit reached");
 	else if (ret > 0)
-		find_path(lock, where, last->lock->info.lc, lock->info.lc, last);
+		find_path(lock, where, last->info->lc, lock->info.lc, last);
 
 	UNLOCK_DEP_GRAPH();
 
@@ -497,7 +497,7 @@ static void verify_lock_destroy(const struct lock_context *where, struct lock *l
 
 	/* check that we're not holding it */
 	for_each_held_lock(i, held) {
-		if (held->lock == l) {
+		if (held->info == &l->info) {
 			error_destroy(held, where);
 			return;
 		}
@@ -524,7 +524,7 @@ static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 
 	/* check for deadlocks & recursive locking */
 	for_each_held_lock(i, held) {
-		if ((held->lock == l) || (held->lock->info.lc == l->info.lc)) {
+		if ((held->info == &l->info) || (held->info->lc == l->info.lc)) {
 			error_lock(held, l, where);
 			return;
 		}
@@ -540,7 +540,7 @@ static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 		return;
 	}
 
-	held->lock = l;
+	held->info = &l->info;
 	held->where = *where;
 	held->type = SYNCH_TYPE_MUTEX;
 #endif
@@ -561,7 +561,7 @@ static void verify_lock_unlock(const struct lock_context *where, struct lock *l)
 		return;
 
 	for_each_held_lock(i, held) {
-		if (held->lock != l)
+		if (held->info != &l->info)
 			continue;
 
 		held_stack_remove(held);
@@ -687,12 +687,12 @@ static void verify_cond_wait(const struct lock_context *where, struct cond *c,
 	held = last_acquired_lock();
 
 	if (held) {
-		if (held->lock == l)
+		if (held->info == &l->info)
 			return; /* all is well */
 
 		/* Check that we are holding the lock */
 		for_each_held_lock(i, held) {
-			if (held->lock == l) {
+			if (held->info == &l->info) {
 				error_condwait_circular(c, held, timed, where);
 				return;
 			}
