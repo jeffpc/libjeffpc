@@ -467,17 +467,6 @@ static void check_magic(struct lock_info *info, const char *op,
 		__bad_type(info, op, where, expected_type);
 }
 
-static void check_cond_magic(struct cond *cond, const char *op,
-			     const struct lock_context *where)
-{
-	if (cond->info.magic == (uintptr_t) &cond->info)
-		return;
-
-	cmn_err(CE_CRIT, "lockdep: thread trying to %s cond with bad magic", op);
-	print_cond(cond, where);
-	panic("lockdep: Aborting - bad cond magic");
-}
-
 static void verify_lock_init(const struct lock_context *where, struct lock *l,
 			     struct lock_class *lc)
 {
@@ -636,7 +625,7 @@ static void verify_cond_destroy(const struct lock_context *where, struct cond *c
 	if (!c)
 		print_invalid_call("CONDDESTROY", where);
 
-	check_cond_magic(c, "destroy", where);
+	check_magic(&c->info, "destroy", where, SYNCH_TYPE_COND);
 
 	c->info.magic = DESTROYED_MAGIC;
 	/* keep the synch type set to aid debugging */
@@ -649,7 +638,7 @@ static void verify_cond_wait(const struct lock_context *where, struct cond *c,
 		print_invalid_call(timed ? "CONDTIMEDWAIT" : "CONDWAIT",
 				   where);
 
-	check_cond_magic(c, "wait on", where);
+	check_magic(&c->info, "wait on", where, SYNCH_TYPE_COND);
 
 #ifdef JEFFPC_LOCK_TRACKING
 	/*
@@ -717,7 +706,8 @@ static void verify_cond_sig(const struct lock_context *where, struct cond *c,
 	if (!c)
 		print_invalid_call(all ? "CONDBCAST" : "CONDSIG", where);
 
-	check_cond_magic(c, all ? "broadcast" : "signal", where);
+	check_magic(&c->info, all ? "broadcast" : "signal", where,
+		    SYNCH_TYPE_COND);
 }
 
 /*
