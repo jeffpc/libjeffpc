@@ -309,7 +309,7 @@ static void error_condwait_circular(struct cond *cond, struct held_lock *held,
 	cmn_err(CE_CRIT, "lockdep: while holding:");
 	print_held_locks(held);
 	cmn_err(CE_CRIT, "lockdep: the cond to wait on:");
-	print_cond(cond, where);
+	print_synch_as(&cond->info, where, cond->info.type);
 
 	atomic_set(&lockdep_on, 0);
 }
@@ -321,11 +321,11 @@ static void error_condwait_unheld(struct cond *cond, struct lock *lock,
 
 	cmn_err(CE_CRIT, "lockdep: thread is trying to %s with a lock it "
 		"doesn't hold:", op);
-	print_lock(lock, where);
+	print_synch_as(&lock->info, where, lock->info.type);
 	cmn_err(CE_CRIT, "lockdep: while holding:");
 	print_held_locks(NULL);
 	cmn_err(CE_CRIT, "lockdep: the cond to wait on:");
-	print_cond(cond, where);
+	print_synch_as(&cond->info, where, cond->info.type);
 	panic("lockdep: Aborting - %s with an unheld lock", op);
 }
 
