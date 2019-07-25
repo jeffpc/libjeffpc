@@ -64,6 +64,7 @@ struct lock {
 
 struct rwlock {
 	pthread_rwlock_t lock;
+	uintptr_t magic;
 };
 
 struct cond {
