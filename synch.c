@@ -152,7 +152,7 @@ static void print_invalid_call(const char *fxn, const struct lock_context *where
 #define GENERATE_COND_MASK_ARGS(c)						\
 	((c)->info.magic != (uintptr_t) &(c)->info) ? 'M' : '.'
 
-static void print_lock(struct lock *lock, const struct lock_context *where)
+static void __print_lock(struct lock *lock, const struct lock_context *where)
 {
 	cmn_err(CE_CRIT, "lockdep:     %s (%p) <%c> at %s:%d",
 #ifdef JEFFPC_LOCK_TRACKING
@@ -165,7 +165,7 @@ static void print_lock(struct lock *lock, const struct lock_context *where)
 		where->file, where->line);
 }
 
-static void print_rw(struct rwlock *lock, const struct lock_context *where)
+static void __print_rw(struct rwlock *lock, const struct lock_context *where)
 {
 	cmn_err(CE_CRIT, "lockdep:     %p <%c> at %s:%d",
 		lock,
@@ -173,7 +173,7 @@ static void print_rw(struct rwlock *lock, const struct lock_context *where)
 		where->file, where->line);
 }
 
-static void print_cond(struct cond *cond, const struct lock_context *where)
+static void __print_cond(struct cond *cond, const struct lock_context *where)
 {
 	cmn_err(CE_CRIT, "lockdep:     %p <%c> at %s:%d",
 		cond,
@@ -187,13 +187,13 @@ static void print_synch_as(struct lock_info *info,
 {
 	switch (type) {
 		case SYNCH_TYPE_MUTEX:
-			print_lock(container_of(info, struct lock, info), where);
+			__print_lock(container_of(info, struct lock, info), where);
 			break;
 		case SYNCH_TYPE_RW:
-			print_rw(container_of(info, struct rwlock, info), where);
+			__print_rw(container_of(info, struct rwlock, info), where);
 			break;
 		case SYNCH_TYPE_COND:
-			print_cond(container_of(info, struct cond, info), where);
+			__print_cond(container_of(info, struct cond, info), where);
 			break;
 	}
 }
