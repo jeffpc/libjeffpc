@@ -24,6 +24,7 @@
 #include <stdlib.h>
 
 #include <jeffpc/error.h>
+#include <jeffpc/types.h>
 #include <jeffpc/atomic.h>
 #include <jeffpc/synch.h>
 #include <jeffpc/time.h>
@@ -50,6 +51,20 @@ enum synch_type {
 static atomic_t lockdep_on = ATOMIC_INITIALIZER(1);
 static pthread_mutex_t lockdep_lock = PTHREAD_MUTEX_INITIALIZER;
 #endif
+
+static const char *synch_type_str(enum synch_type type)
+{
+	switch (type) {
+		case SYNCH_TYPE_MUTEX:
+			return "lock";
+		case SYNCH_TYPE_RW:
+			return "rwlock";
+		case SYNCH_TYPE_COND:
+			return "cond";
+	}
+
+	return "<corrupted synch primitive type>";
+}
 
 /*
  * held stack management
@@ -146,6 +161,23 @@ static void print_cond(struct cond *cond, const struct lock_context *where)
 		cond,
 		GENERATE_COND_MASK_ARGS(cond),
 		where->file, where->line);
+}
+
+static void print_synch_as(struct lock_info *info,
+			   const struct lock_context *where,
+			   enum synch_type type)
+{
+	switch (type) {
+		case SYNCH_TYPE_MUTEX:
+			print_lock(container_of(info, struct lock, info), where);
+			break;
+		case SYNCH_TYPE_RW:
+			print_rw(container_of(info, struct rwlock, info), where);
+			break;
+		case SYNCH_TYPE_COND:
+			print_cond(container_of(info, struct cond, info), where);
+			break;
+	}
 }
 
 #ifdef JEFFPC_LOCK_TRACKING
@@ -393,24 +425,31 @@ static bool check_circular_deps(struct lock *lock,
 /*
  * state checking
  */
-static void __bad_magic(struct lock *lock, const char *op,
-			const struct lock_context *where)
+static void __bad_magic(struct lock_info *info, const char *op,
+			const struct lock_context *where,
+			enum synch_type expected_type)
 {
-	cmn_err(CE_CRIT, "lockdep: thread trying to %s lock with bad magic", op);
-	print_lock(lock, where);
+	const char *type = synch_type_str(expected_type);
+
+	cmn_err(CE_CRIT, "lockdep: thread trying to %s %s with bad magic", op,
+		type);
+	print_synch_as(info, where, expected_type);
 #ifdef JEFFPC_LOCK_TRACKING
 	cmn_err(CE_CRIT, "lockdep: while holding:");
 	print_held_locks(NULL);
 #endif
-	panic("lockdep: Aborting - bad lock magic");
+	panic("lockdep: Aborting - bad %s magic", type);
 }
 
-static void __bad_type(struct lock *lock, const char *op,
-		       const struct lock_context *where)
+static void __bad_type(struct lock_info *info, const char *op,
+		       const struct lock_context *where,
+		       enum synch_type expected_type)
 {
-	cmn_err(CE_CRIT, "lockdep: thread trying to %s lock with "
-		"mismatched synch type", op);
-	print_lock(lock, where);
+	const char *type = synch_type_str(expected_type);
+
+	cmn_err(CE_CRIT, "lockdep: thread trying to %s %s with "
+		"mismatched synch type", op, type);
+	print_synch_as(info, where, expected_type);
 #ifdef JEFFPC_LOCK_TRACKING
 	cmn_err(CE_CRIT, "lockdep: while holding:");
 	print_held_locks(NULL);
@@ -418,13 +457,14 @@ static void __bad_type(struct lock *lock, const char *op,
 	panic("lockdep: Aborting - mismatched synch type");
 }
 
-static void check_lock_magic(struct lock *lock, const char *op,
-			     const struct lock_context *where)
+static void check_magic(struct lock_info *info, const char *op,
+			const struct lock_context *where,
+			enum synch_type expected_type)
 {
-	if (lock->info.magic != (uintptr_t) &lock->info)
-		__bad_magic(lock, op, where);
-	else if (lock->info.type != SYNCH_TYPE_MUTEX)
-		__bad_type(lock, op, where);
+	if (info->magic != (uintptr_t) info)
+		__bad_magic(info, op, where, expected_type);
+	else if (info->type != expected_type)
+		__bad_type(info, op, where, expected_type);
 }
 
 static void check_rw_magic(struct rwlock *lock, const char *op,
@@ -469,7 +509,7 @@ static void verify_lock_destroy(const struct lock_context *where, struct lock *l
 	if (!l)
 		print_invalid_call("MXDESTROY", where);
 
-	check_lock_magic(l, "destroy", where);
+	check_magic(&l->info, "destroy", where, SYNCH_TYPE_MUTEX);
 
 #ifdef JEFFPC_LOCK_TRACKING
 	struct held_lock *held;
@@ -493,7 +533,7 @@ static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 	if (!l)
 		print_invalid_call("MXLOCK", where);
 
-	check_lock_magic(l, "acquire", where);
+	check_magic(&l->info, "acquire", where, SYNCH_TYPE_MUTEX);
 
 #ifdef JEFFPC_LOCK_TRACKING
 	struct held_lock *held;
@@ -530,7 +570,7 @@ static void verify_lock_unlock(const struct lock_context *where, struct lock *l)
 	if (!l)
 		print_invalid_call("MXUNLOCK", where);
 
-	check_lock_magic(l, "release", where);
+	check_magic(&l->info, "release", where, SYNCH_TYPE_MUTEX);
 
 #ifdef JEFFPC_LOCK_TRACKING
 	struct held_lock *held;
