@@ -393,12 +393,9 @@ static bool check_circular_deps(struct lock *lock,
 /*
  * state checking
  */
-static void check_lock_magic(struct lock *lock, const char *op,
-			     const struct lock_context *where)
+static void __bad_magic(struct lock *lock, const char *op,
+			const struct lock_context *where)
 {
-	if (lock->info.magic == (uintptr_t) &lock->info)
-		return;
-
 	cmn_err(CE_CRIT, "lockdep: thread trying to %s lock with bad magic", op);
 	print_lock(lock, where);
 #ifdef JEFFPC_LOCK_TRACKING
@@ -406,6 +403,28 @@ static void check_lock_magic(struct lock *lock, const char *op,
 	print_held_locks(NULL);
 #endif
 	panic("lockdep: Aborting - bad lock magic");
+}
+
+static void __bad_type(struct lock *lock, const char *op,
+		       const struct lock_context *where)
+{
+	cmn_err(CE_CRIT, "lockdep: thread trying to %s lock with "
+		"mismatched synch type", op);
+	print_lock(lock, where);
+#ifdef JEFFPC_LOCK_TRACKING
+	cmn_err(CE_CRIT, "lockdep: while holding:");
+	print_held_locks(NULL);
+#endif
+	panic("lockdep: Aborting - mismatched synch type");
+}
+
+static void check_lock_magic(struct lock *lock, const char *op,
+			     const struct lock_context *where)
+{
+	if (lock->info.magic != (uintptr_t) &lock->info)
+		__bad_magic(lock, op, where);
+	else if (lock->info.type != SYNCH_TYPE_MUTEX)
+		__bad_type(lock, op, where);
 }
 
 static void check_rw_magic(struct rwlock *lock, const char *op,
