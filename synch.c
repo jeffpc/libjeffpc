@@ -467,17 +467,6 @@ static void check_magic(struct lock_info *info, const char *op,
 		__bad_type(info, op, where, expected_type);
 }
 
-static void check_rw_magic(struct rwlock *lock, const char *op,
-			   const struct lock_context *where)
-{
-	if (lock->info.magic == (uintptr_t) &lock->info)
-		return;
-
-	cmn_err(CE_CRIT, "lockdep: thread trying to %s rwlock with bad magic", op);
-	print_rw(lock, where);
-	panic("lockdep: Aborting - bad rwlock magic");
-}
-
 static void check_cond_magic(struct cond *cond, const char *op,
 			     const struct lock_context *where)
 {
@@ -610,7 +599,7 @@ static void verify_rw_destroy(const struct lock_context *where, struct rwlock *l
 	if (!l)
 		print_invalid_call("RWDESTROY", where);
 
-	check_rw_magic(l, "destroy", where);
+	check_magic(&l->info, "destroy", where, SYNCH_TYPE_RW);
 
 	l->info.magic = DESTROYED_MAGIC;
 	/* keep the synch type set to aid debugging */
@@ -622,7 +611,7 @@ static void verify_rw_lock(const struct lock_context *where, struct rwlock *l,
 	if (!l)
 		print_invalid_call("RWLOCK", where);
 
-	check_rw_magic(l, "acquire", where);
+	check_magic(&l->info, "acquire", where, SYNCH_TYPE_RW);
 }
 
 static void verify_rw_unlock(const struct lock_context *where, struct rwlock *l)
@@ -630,7 +619,7 @@ static void verify_rw_unlock(const struct lock_context *where, struct rwlock *l)
 	if (!l)
 		print_invalid_call("RWUNLOCK", where);
 
-	check_rw_magic(l, "release", where);
+	check_magic(&l->info, "release", where, SYNCH_TYPE_RW);
 }
 
 static void verify_cond_init(const struct lock_context *where, struct cond *c)
