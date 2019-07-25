@@ -24,6 +24,9 @@
 #define __JEFFPC_CONFIG_H
 
 #cmakedefine JEFFPC_CPU_BIG_ENDIAN
+#cmakedefine JEFFPC_DATAMODEL		"${JEFFPC_DATAMODEL}"
+#cmakedefine JEFFPC_ILP32
+#cmakedefine JEFFPC_LP64
 
 #cmakedefine JEFFPC_HAVE___ASSERT_FREEBSD_STYLE
 #cmakedefine JEFFPC_HAVE___ASSERT_LINUX_STYLE

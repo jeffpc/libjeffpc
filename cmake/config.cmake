@@ -29,6 +29,8 @@ include(TestBigEndian)
 
 test_big_endian(JEFFPC_CPU_BIG_ENDIAN)
 
+include("${CMAKE_DIR}/config-datamodel.cmake")
+
 # Find which library a particular function exists in
 macro(find_symbol fxn libs output_lib_name)
 	string(TOUPPER ${fxn} name)
