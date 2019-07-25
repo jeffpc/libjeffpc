@@ -53,9 +53,13 @@ struct lock_context {
 	int line;
 };
 
-struct lock {
-	pthread_mutex_t lock;
+struct lock_info {
 	uintptr_t magic;
+};
+
+struct lock {
+	struct lock_info info;
+	pthread_mutex_t lock;
 #ifdef JEFFPC_LOCK_TRACKING
 	struct lock_class *lc;
 	const char *name;
@@ -63,13 +67,13 @@ struct lock {
 };
 
 struct rwlock {
+	struct lock_info info;
 	pthread_rwlock_t lock;
-	uintptr_t magic;
 };
 
 struct cond {
+	struct lock_info info;
 	pthread_cond_t cond;
-	uintptr_t magic;
 };
 
 struct barrier {

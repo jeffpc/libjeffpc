@@ -104,11 +104,11 @@ static void print_invalid_call(const char *fxn, const struct lock_context *where
 }
 
 #define GENERATE_LOCK_MASK_ARGS(l)						\
-	((l)->magic != (uintptr_t) (l)) ? 'M' : '.'
+	((l)->info.magic != (uintptr_t) (l)) ? 'M' : '.'
 #define GENERATE_RW_MASK_ARGS(l)						\
-	((l)->magic != (uintptr_t) (l)) ? 'M' : '.'
+	((l)->info.magic != (uintptr_t) (l)) ? 'M' : '.'
 #define GENERATE_COND_MASK_ARGS(c)						\
-	((c)->magic != (uintptr_t) (c)) ? 'M' : '.'
+	((c)->info.magic != (uintptr_t) (c)) ? 'M' : '.'
 
 static void print_lock(struct lock *lock, const struct lock_context *where)
 {
@@ -387,7 +387,7 @@ static bool check_circular_deps(struct lock *lock,
 static void check_lock_magic(struct lock *lock, const char *op,
 			     const struct lock_context *where)
 {
-	if (lock->magic == (uintptr_t) lock)
+	if (lock->info.magic == (uintptr_t) lock)
 		return;
 
 	cmn_err(CE_CRIT, "lockdep: thread trying to %s lock with bad magic", op);
@@ -402,7 +402,7 @@ static void check_lock_magic(struct lock *lock, const char *op,
 static void check_rw_magic(struct rwlock *lock, const char *op,
 			   const struct lock_context *where)
 {
-	if (lock->magic == (uintptr_t) lock)
+	if (lock->info.magic == (uintptr_t) lock)
 		return;
 
 	cmn_err(CE_CRIT, "lockdep: thread trying to %s rwlock with bad magic", op);
@@ -413,7 +413,7 @@ static void check_rw_magic(struct rwlock *lock, const char *op,
 static void check_cond_magic(struct cond *cond, const char *op,
 			     const struct lock_context *where)
 {
-	if (cond->magic == (uintptr_t) cond)
+	if (cond->info.magic == (uintptr_t) cond)
 		return;
 
 	cmn_err(CE_CRIT, "lockdep: thread trying to %s cond with bad magic", op);
@@ -427,7 +427,7 @@ static void verify_lock_init(const struct lock_context *where, struct lock *l,
 	if (!l || !lc)
 		print_invalid_call("MXINIT", where);
 
-	l->magic = (uintptr_t) l;
+	l->info.magic = (uintptr_t) l;
 
 #ifdef JEFFPC_LOCK_TRACKING
 	l->lc = lc;
@@ -455,7 +455,7 @@ static void verify_lock_destroy(const struct lock_context *where, struct lock *l
 	}
 #endif
 
-	l->magic = DESTROYED_MAGIC;
+	l->info.magic = DESTROYED_MAGIC;
 }
 
 static void verify_lock_lock(const struct lock_context *where, struct lock *l)
@@ -531,7 +531,7 @@ static void verify_rw_init(const struct lock_context *where, struct rwlock *l)
 	if (!l)
 		print_invalid_call("RWINIT", where);
 
-	l->magic = (uintptr_t) l;
+	l->info.magic = (uintptr_t) l;
 }
 
 static void verify_rw_destroy(const struct lock_context *where, struct rwlock *l)
@@ -541,7 +541,7 @@ static void verify_rw_destroy(const struct lock_context *where, struct rwlock *l
 
 	check_rw_magic(l, "destroy", where);
 
-	l->magic = DESTROYED_MAGIC;
+	l->info.magic = DESTROYED_MAGIC;
 }
 
 static void verify_rw_lock(const struct lock_context *where, struct rwlock *l,
@@ -566,7 +566,7 @@ static void verify_cond_init(const struct lock_context *where, struct cond *c)
 	if (!c)
 		print_invalid_call("CONDINIT", where);
 
-	c->magic = (uintptr_t) c;
+	c->info.magic = (uintptr_t) c;
 }
 
 static void verify_cond_destroy(const struct lock_context *where, struct cond *c)
@@ -576,7 +576,7 @@ static void verify_cond_destroy(const struct lock_context *where, struct cond *c
 
 	check_cond_magic(c, "destroy", where);
 
-	c->magic = DESTROYED_MAGIC;
+	c->info.magic = DESTROYED_MAGIC;
 }
 
 static void verify_cond_wait(const struct lock_context *where, struct cond *c,
