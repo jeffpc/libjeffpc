@@ -56,15 +56,15 @@ struct lock_context {
 struct lock_info {
 	uintptr_t magic;
 	unsigned int type;
+#ifdef JEFFPC_LOCK_TRACKING
+	struct lock_class *lc;
+	const char *name;
+#endif
 };
 
 struct lock {
 	struct lock_info info;
 	pthread_mutex_t lock;
-#ifdef JEFFPC_LOCK_TRACKING
-	struct lock_class *lc;
-	const char *name;
-#endif
 };
 
 struct rwlock {

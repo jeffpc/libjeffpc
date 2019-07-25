@@ -139,7 +139,7 @@ static void print_lock(struct lock *lock, const struct lock_context *where)
 {
 	cmn_err(CE_CRIT, "lockdep:     %s (%p) <%c> at %s:%d",
 #ifdef JEFFPC_LOCK_TRACKING
-		lock->name,
+		lock->info.name,
 #else
 		"<unknown>",
 #endif
@@ -203,7 +203,7 @@ static void print_held_locks(struct held_lock *highlight)
 
 		cmn_err(CE_CRIT, "lockdep:  %s #%zd: %s (%p) <%c> acquired at %s:%d",
 			(cur == highlight) ? "->" : "  ",
-			i, lock->name, lock,
+			i, lock->info.name, lock,
 			GENERATE_LOCK_MASK_ARGS(lock),
 			cur->where.file, cur->where.line);
 	}
@@ -255,10 +255,11 @@ static void error_lock_circular(struct lock *new,
 
 	cmn_err(CE_CRIT, "lockdep: circular dependency detected");
 	cmn_err(CE_CRIT, "lockdep: thread is trying to acquire lock of "
-		"class %s (%p):", new->lc->name, new->lc);
+		"class %s (%p):", new->info.lc->name, new->info.lc);
 	print_lock(new, where);
 	cmn_err(CE_CRIT, "lockdep: but the thread is already holding of "
-		"class %s (%p):", last->lock->lc->name, last->lock->lc);
+		"class %s (%p):", last->lock->info.lc->name,
+		last->lock->info.lc);
 	print_lock(last->lock, &last->where);
 	cmn_err(CE_CRIT, "lockdep: which already depends on the new lock's "
 		"class.");
@@ -411,11 +412,11 @@ static bool check_circular_deps(struct lock *lock,
 
 	LOCK_DEP_GRAPH();
 
-	ret = add_dependency(lock->lc, last->lock->lc);
+	ret = add_dependency(lock->info.lc, last->lock->info.lc);
 	if (ret < 0)
 		error_alloc(lock, where, "lock dependency count limit reached");
 	else if (ret > 0)
-		find_path(lock, where, last->lock->lc, lock->lc, last);
+		find_path(lock, where, last->lock->info.lc, lock->info.lc, last);
 
 	UNLOCK_DEP_GRAPH();
 
@@ -478,8 +479,8 @@ static void verify_lock_init(const struct lock_context *where, struct lock *l,
 	l->info.type = SYNCH_TYPE_MUTEX;
 
 #ifdef JEFFPC_LOCK_TRACKING
-	l->lc = lc;
-	l->name = where->lockname;
+	l->info.lc = lc;
+	l->info.name = where->lockname;
 #endif
 }
 
@@ -523,7 +524,7 @@ static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 
 	/* check for deadlocks & recursive locking */
 	for_each_held_lock(i, held) {
-		if ((held->lock == l) || (held->lock->lc == l->lc)) {
+		if ((held->lock == l) || (held->lock->info.lc == l->info.lc)) {
 			error_lock(held, l, where);
 			return;
 		}
