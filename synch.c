@@ -386,7 +386,7 @@ static int add_dependency(struct lock_class *from,
 	return 1;
 }
 
-static bool __find_path(struct lock *lock,
+static bool __find_path(struct lock_info *info,
 			const struct lock_context *where,
 			struct lock_class *from,
 			struct lock_class *to)
@@ -394,13 +394,13 @@ static bool __find_path(struct lock *lock,
 	size_t i;
 
 	if (from == to) {
-		error_lock_circular(&lock->info, where);
+		error_lock_circular(info, where);
 		print_lock_class(from);
 		return true;
 	}
 
 	for (i = 0; i < from->ndeps; i++) {
-		if (__find_path(lock, where, from->deps[i], to)) {
+		if (__find_path(info, where, from->deps[i], to)) {
 			print_lock_class(from);
 			return true;
 		}
@@ -409,19 +409,19 @@ static bool __find_path(struct lock *lock,
 	return false;
 }
 
-static void find_path(struct lock *lock,
+static void find_path(struct lock_info *info,
 		      const struct lock_context *where,
 		      struct lock_class *from,
 		      struct lock_class *to,
 		      struct held_lock *held)
 {
-	if (__find_path(lock, where, from, to)) {
+	if (__find_path(info, where, from, to)) {
 		cmn_err(CE_CRIT, "lockdep: currently held locks:");
 		print_held_locks(held);
 	}
 }
 
-static bool check_circular_deps(struct lock *lock,
+static bool check_circular_deps(struct lock_info *info,
 				const struct lock_context *where)
 {
 	struct held_lock *last = last_acquired_lock();
@@ -432,11 +432,11 @@ static bool check_circular_deps(struct lock *lock,
 
 	LOCK_DEP_GRAPH();
 
-	ret = add_dependency(lock->info.lc, last->info->lc);
+	ret = add_dependency(info->lc, last->info->lc);
 	if (ret < 0)
-		error_alloc(&lock->info, where, "lock dependency count limit reached");
+		error_alloc(info, where, "lock dependency count limit reached");
 	else if (ret > 0)
-		find_path(lock, where, last->info->lc, lock->info.lc, last);
+		find_path(info, where, last->info->lc, info->lc, last);
 
 	UNLOCK_DEP_GRAPH();
 
@@ -558,7 +558,7 @@ static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 	}
 
 	/* check for circular dependencies */
-	if (check_circular_deps(l, where))
+	if (check_circular_deps(&l->info, where))
 		return;
 
 	held = held_stack_alloc();
