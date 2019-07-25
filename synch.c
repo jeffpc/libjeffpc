@@ -488,6 +488,41 @@ static void check_magic(struct lock_info *info, const char *op,
 		__bad_type(info, op, where, expected_type);
 }
 
+static void check_unheld_for_lock(struct lock_info *info,
+				  const struct lock_context *where)
+{
+#ifdef JEFFPC_LOCK_TRACKING
+	struct held_lock *held;
+	size_t i;
+
+	if (!atomic_read(&lockdep_on))
+		return;
+
+	/* check for deadlocks & recursive locking */
+	for_each_held_lock(i, held) {
+		if ((held->info != info) && (held->info->lc != info->lc))
+			continue;
+
+		error_lock(held, info, where);
+		return;
+	}
+
+	/* check for circular dependencies */
+	if (check_circular_deps(info, where))
+		return;
+
+	held = held_stack_alloc();
+	if (!held) {
+		error_alloc(info, where, "lock nesting limit reached");
+		return;
+	}
+
+	held->info = info;
+	held->where = *where;
+	held->type = info->type;
+#endif
+}
+
 static void verify_lock_init(const struct lock_context *where, struct lock *l,
 			     struct lock_class *lc)
 {
@@ -536,40 +571,7 @@ static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 		print_invalid_call("MXLOCK", where);
 
 	check_magic(&l->info, "acquire", where, SYNCH_TYPE_MUTEX);
-
-#ifdef JEFFPC_LOCK_TRACKING
-	struct held_lock *held;
-	size_t i;
-
-	if (!atomic_read(&lockdep_on))
-		return;
-
-	/* check for deadlocks & recursive locking */
-	for_each_held_lock(i, held) {
-		if ((held->info != &l->info) && (held->info->lc != l->info.lc))
-			continue;
-
-		if (held->info == &l->info)
-			sanity_check_held_synch_type(held, SYNCH_TYPE_MUTEX);
-
-		error_lock(held, &l->info, where);
-		return;
-	}
-
-	/* check for circular dependencies */
-	if (check_circular_deps(&l->info, where))
-		return;
-
-	held = held_stack_alloc();
-	if (!held) {
-		error_alloc(&l->info, where, "lock nesting limit reached");
-		return;
-	}
-
-	held->info = &l->info;
-	held->where = *where;
-	held->type = SYNCH_TYPE_MUTEX;
-#endif
+	check_unheld_for_lock(&l->info, where);
 }
 
 static void verify_lock_unlock(const struct lock_context *where, struct lock *l)
