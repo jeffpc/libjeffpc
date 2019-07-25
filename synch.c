@@ -523,6 +523,28 @@ static void check_unheld_for_lock(struct lock_info *info,
 #endif
 }
 
+static void check_held_for_unlock(struct lock_info *info,
+				  const struct lock_context *where)
+{
+#ifdef JEFFPC_LOCK_TRACKING
+	struct held_lock *held;
+	size_t i;
+
+	if (!atomic_read(&lockdep_on))
+		return;
+
+	for_each_held_lock(i, held) {
+		if (held->info != info)
+			continue;
+
+		held_stack_remove(held);
+		return;
+	}
+
+	error_unlock(info, where);
+#endif
+}
+
 static void verify_lock_init(const struct lock_context *where, struct lock *l,
 			     struct lock_class *lc)
 {
@@ -580,31 +602,7 @@ static void verify_lock_unlock(const struct lock_context *where, struct lock *l)
 		print_invalid_call("MXUNLOCK", where);
 
 	check_magic(&l->info, "release", where, SYNCH_TYPE_MUTEX);
-
-#ifdef JEFFPC_LOCK_TRACKING
-	struct held_lock *held;
-	size_t i;
-
-	if (!atomic_read(&lockdep_on))
-		return;
-
-	for_each_held_lock(i, held) {
-		if (held->info != &l->info)
-			continue;
-
-		sanity_check_held_synch_type(held, SYNCH_TYPE_MUTEX);
-
-		held_stack_remove(held);
-
-		goto out;
-	}
-
-	error_unlock(&l->info, where);
-	return;
-
-out:
-	return;
-#endif
+	check_held_for_unlock(&l->info, where);
 }
 
 static void verify_rw_init(const struct lock_context *where, struct rwlock *l)
