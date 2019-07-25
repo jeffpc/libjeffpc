@@ -74,6 +74,7 @@ static const char *synch_type_str(enum synch_type type)
 struct held_lock {
 	struct lock *lock;
 	struct lock_context where;
+	enum synch_type type;
 };
 
 static __thread struct held_lock held_stack[JEFFPC_LOCK_STACK_DEPTH];
@@ -540,6 +541,7 @@ static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 
 	held->lock = l;
 	held->where = *where;
+	held->type = SYNCH_TYPE_MUTEX;
 #endif
 }
 
