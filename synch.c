@@ -213,12 +213,14 @@ static void print_held_locks(struct held_lock *highlight)
 static void error_destroy(struct held_lock *held,
 			  const struct lock_context *where)
 {
-	cmn_err(CE_CRIT, "lockdep: thread is trying to destroy a lock it is "
-		"still holding:");
+	const char *type = synch_type_str(held->type);
+
+	cmn_err(CE_CRIT, "lockdep: thread is trying to destroy a %s it is "
+		"still holding:", type);
 	print_synch_as(held->info, where, held->type);
 	cmn_err(CE_CRIT, "lockdep: while holding:");
 	print_held_locks(held);
-	panic("lockdep: Aborting - destroying held lock");
+	panic("lockdep: Aborting - destroying held %s", type);
 }
 
 static void error_lock(struct held_lock *held, struct lock_info *new,
