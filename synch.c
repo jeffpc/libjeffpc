@@ -137,6 +137,27 @@ static inline char *get_synch_chars(struct lock_info *info, char buf[2])
 	return buf;
 }
 
+static inline char *get_held_chars(struct held_lock *held, char buf[2])
+{
+	char *ptr = buf;
+
+	switch (held->info->type) {
+		case SYNCH_TYPE_MUTEX:
+			break;
+		case SYNCH_TYPE_RW:
+			*ptr = held->rwlock_wr ? 'w' : 'r';
+			ptr++;
+			break;
+		case SYNCH_TYPE_COND:
+			break;
+	}
+
+	/* null terminate for good measure */
+	*ptr = '\0';
+
+	return buf;
+}
+
 static void print_invalid_call(const char *fxn, const struct lock_context *where)
 {
 	panic("lockdep: invalid call to %s at %s:%d", fxn, where->file,
@@ -193,12 +214,14 @@ static void print_held_locks(struct held_lock *highlight)
 		struct lock_info *info = cur->info;
 		struct lock *lock = container_of(info, struct lock, info);
 		char synch_chars[2];
+		char held_chars[2];
 
-		cmn_err(CE_CRIT, "lockdep:  %s #%zd: %s (%p) %s <%s> acquired at %s:%d",
+		cmn_err(CE_CRIT, "lockdep:  %s #%zd: %s (%p) %s <%s%s> acquired at %s:%d",
 			(cur == highlight) ? "->" : "  ",
 			i, info->name, lock,
 			synch_type_str(info->type),
 			get_synch_chars(info, synch_chars),
+			get_held_chars(cur, held_chars),
 			cur->where.file, cur->where.line);
 	}
 }
