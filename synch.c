@@ -609,6 +609,7 @@ static void verify_rw_destroy(const struct lock_context *where, struct rwlock *l
 		print_invalid_call("RWDESTROY", where);
 
 	check_magic(&l->info, "destroy", where, SYNCH_TYPE_RW);
+	check_unheld_for_destroy(&l->info, where);
 
 	l->info.magic = DESTROYED_MAGIC;
 	/* keep the synch type set to aid debugging */
@@ -621,6 +622,7 @@ static void verify_rw_lock(const struct lock_context *where, struct rwlock *l,
 		print_invalid_call("RWLOCK", where);
 
 	check_magic(&l->info, "acquire", where, SYNCH_TYPE_RW);
+	check_unheld_for_lock(&l->info, where);
 }
 
 static void verify_rw_unlock(const struct lock_context *where, struct rwlock *l)
@@ -629,6 +631,7 @@ static void verify_rw_unlock(const struct lock_context *where, struct rwlock *l)
 		print_invalid_call("RWUNLOCK", where);
 
 	check_magic(&l->info, "release", where, SYNCH_TYPE_RW);
+	check_held_for_unlock(&l->info, where);
 }
 
 static void verify_cond_init(const struct lock_context *where, struct cond *c)
