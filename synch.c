@@ -273,12 +273,14 @@ static void error_lock_circular(struct lock_info *new,
 static void error_unlock(struct lock_info *info,
 			 const struct lock_context *where)
 {
-	cmn_err(CE_CRIT, "lockdep: thread is trying to release lock it "
-		"doesn't hold:");
+	const char *type = synch_type_str(info->type);
+
+	cmn_err(CE_CRIT, "lockdep: thread is trying to release %s it "
+		"doesn't hold:", type);
 	print_synch_as(info, where, info->type);
 	cmn_err(CE_CRIT, "lockdep: while holding:");
 	print_held_locks(NULL);
-	panic("lockdep: Aborting - releasing unheld lock");
+	panic("lockdep: Aborting - releasing unheld %s", type);
 }
 
 static void error_condwait_circular(struct cond *cond, struct held_lock *held,
