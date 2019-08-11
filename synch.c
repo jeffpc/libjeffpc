@@ -122,6 +122,20 @@ static inline void held_stack_remove(struct held_lock *held)
 /*
  * error printing
  */
+static inline char *get_synch_chars(struct lock_info *info, char buf[2])
+{
+	char *ptr = buf;
+
+	/* magic is always first */
+	*ptr = (info->magic != (uintptr_t) info) ? 'M' : '.';
+	ptr++;
+
+	/* null terminate for good measure */
+	*ptr = '\0';
+
+	return buf;
+}
+
 static void print_invalid_call(const char *fxn, const struct lock_context *where)
 {
 	panic("lockdep: invalid call to %s at %s:%d", fxn, where->file,
@@ -135,50 +149,33 @@ static void print_invalid_call(const char *fxn, const struct lock_context *where
 #define GENERATE_COND_MASK_ARGS(c)						\
 	((c)->info.magic != (uintptr_t) &(c)->info) ? 'M' : '.'
 
-static void __print_lock(struct lock *lock, const struct lock_context *where)
-{
-	cmn_err(CE_CRIT, "lockdep:     %s (%p) <%c> at %s:%d",
-#ifdef JEFFPC_LOCK_TRACKING
-		lock->info.name,
-#else
-		"<unknown>",
-#endif
-		lock,
-		GENERATE_LOCK_MASK_ARGS(&lock->info),
-		where->file, where->line);
-}
-
-static void __print_rw(struct rwlock *lock, const struct lock_context *where)
-{
-	cmn_err(CE_CRIT, "lockdep:     %p <%c> at %s:%d",
-		lock,
-		GENERATE_RW_MASK_ARGS(lock),
-		where->file, where->line);
-}
-
-static void __print_cond(struct cond *cond, const struct lock_context *where)
-{
-	cmn_err(CE_CRIT, "lockdep:     %p <%c> at %s:%d",
-		cond,
-		GENERATE_COND_MASK_ARGS(cond),
-		where->file, where->line);
-}
-
 static void print_synch_as(struct lock_info *info,
 			   const struct lock_context *where,
 			   enum synch_type type)
 {
+	char synch_chars[2];
+	void *obj;
+
 	switch (type) {
 		case SYNCH_TYPE_MUTEX:
-			__print_lock(container_of(info, struct lock, info), where);
+			obj = container_of(info, struct lock, info);
 			break;
 		case SYNCH_TYPE_RW:
-			__print_rw(container_of(info, struct rwlock, info), where);
+			obj = container_of(info, struct rwlock, info);
 			break;
 		case SYNCH_TYPE_COND:
-			__print_cond(container_of(info, struct cond, info), where);
+			obj = container_of(info, struct cond, info);
 			break;
 	}
+
+	cmn_err(CE_CRIT, "lockdep:     %s (%p) <%s> at %s:%d",
+#ifdef JEFFPC_LOCK_TRACKING
+		info->name,
+#else
+		"<unknown>",
+#endif
+		obj, get_synch_chars(info, synch_chars),
+		where->file, where->line);
 }
 
 #ifdef JEFFPC_LOCK_TRACKING
