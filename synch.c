@@ -241,7 +241,8 @@ static void error_lock(struct held_lock *held, struct lock_info *new,
 			"holding it:");
 	else
 		cmn_err(CE_CRIT, "lockdep: but the thread is already "
-			"holding a lock of same class:");
+			"holding a %s of same class:",
+			synch_type_str(held->type));
 
 	print_held_locks(held);
 
