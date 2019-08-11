@@ -545,6 +545,24 @@ static void check_held_for_unlock(struct lock_info *info,
 #endif
 }
 
+static void check_unheld_for_destroy(struct lock_info *info,
+				     const struct lock_context *where)
+{
+#ifdef JEFFPC_LOCK_TRACKING
+	struct held_lock *held;
+	size_t i;
+
+	/* check that we're not holding it */
+	for_each_held_lock(i, held) {
+		if (held->info != info)
+			continue;
+
+		error_destroy(held, where);
+		return;
+	}
+#endif
+}
+
 static void verify_lock_init(const struct lock_context *where, struct lock *l,
 			     struct lock_class *lc)
 {
@@ -566,22 +584,7 @@ static void verify_lock_destroy(const struct lock_context *where, struct lock *l
 		print_invalid_call("MXDESTROY", where);
 
 	check_magic(&l->info, "destroy", where, SYNCH_TYPE_MUTEX);
-
-#ifdef JEFFPC_LOCK_TRACKING
-	struct held_lock *held;
-	size_t i;
-
-	/* check that we're not holding it */
-	for_each_held_lock(i, held) {
-		if (held->info != &l->info)
-			continue;
-
-		sanity_check_held_synch_type(held, SYNCH_TYPE_MUTEX);
-
-		error_destroy(held, where);
-		return;
-	}
-#endif
+	check_unheld_for_destroy(&l->info, where);
 
 	l->info.magic = DESTROYED_MAGIC;
 	/* keep the synch type set to aid debugging */
