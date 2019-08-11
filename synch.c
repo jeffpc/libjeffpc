@@ -239,7 +239,6 @@ static void error_destroy(struct held_lock *held,
 }
 
 static void error_lock(struct held_lock *held, struct lock_info *new,
-		       enum synch_type new_type,
 		       const struct lock_context *where)
 {
 	const bool deadlock = (new == held->info);
@@ -250,7 +249,7 @@ static void error_lock(struct held_lock *held, struct lock_info *new,
 		cmn_err(CE_CRIT, "lockdep: possible recursive locking detected");
 
 	cmn_err(CE_CRIT, "lockdep: thread is trying to acquire:");
-	print_synch_as(new, where, new_type);
+	print_synch_as(new, where, new->type);
 
 	if (deadlock)
 		cmn_err(CE_CRIT, "lockdep: but the thread is already "
@@ -553,7 +552,7 @@ static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 		if (held->info == &l->info)
 			sanity_check_held_synch_type(held, SYNCH_TYPE_MUTEX);
 
-		error_lock(held, &l->info, SYNCH_TYPE_MUTEX, where);
+		error_lock(held, &l->info, where);
 		return;
 	}
 
