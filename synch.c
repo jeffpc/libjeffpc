@@ -75,6 +75,7 @@ struct held_lock {
 	struct lock_info *info;
 	struct lock_context where;
 	enum synch_type type;
+	bool rwlock_wr:1;
 };
 
 static __thread struct held_lock held_stack[JEFFPC_LOCK_STACK_DEPTH];
@@ -469,7 +470,8 @@ static void check_magic(struct lock_info *info, const char *op,
 }
 
 static void check_unheld_for_lock(struct lock_info *info,
-				  const struct lock_context *where)
+				  const struct lock_context *where,
+				  bool rwlock_wr)
 {
 #ifdef JEFFPC_LOCK_TRACKING
 	struct held_lock *held;
@@ -500,6 +502,7 @@ static void check_unheld_for_lock(struct lock_info *info,
 	held->info = info;
 	held->where = *where;
 	held->type = info->type;
+	held->rwlock_wr = rwlock_wr;
 #endif
 }
 
@@ -576,7 +579,7 @@ static void verify_lock_lock(const struct lock_context *where, struct lock *l)
 		print_invalid_call("MXLOCK", where);
 
 	check_magic(&l->info, "acquire", where, SYNCH_TYPE_MUTEX);
-	check_unheld_for_lock(&l->info, where);
+	check_unheld_for_lock(&l->info, where, false);
 }
 
 static void verify_lock_unlock(const struct lock_context *where, struct lock *l)
@@ -622,7 +625,7 @@ static void verify_rw_lock(const struct lock_context *where, struct rwlock *l,
 		print_invalid_call("RWLOCK", where);
 
 	check_magic(&l->info, "acquire", where, SYNCH_TYPE_RW);
-	check_unheld_for_lock(&l->info, where);
+	check_unheld_for_lock(&l->info, where, wr);
 }
 
 static void verify_rw_unlock(const struct lock_context *where, struct rwlock *l)
