@@ -114,23 +114,6 @@ static inline void held_stack_remove(struct held_lock *held)
 	held_stack_count--;
 }
 
-/*
- * Sanity check that the two synch types are equal.  In several places, we
- * want to make sure that the held structure's type matches that it truly
- * should be.  Since this is such an unlikely to fail check, we don't even
- * try to make nice user friendly error messages.
- *
- * The only way this check could fail is if a lock got acquired, then
- * re-initialized as a different type of a lock, and then destroyed.  E.g.,
- * if the code acquires a mutex (struct lock), and then tries to destroy the
- * same structure as a (struct rwlock).
- */
-static inline void sanity_check_held_synch_type(struct held_lock *held,
-						enum synch_type exp)
-{
-	VERIFY3U(held->type, ==, exp);
-}
-
 #define LOCK_DEP_GRAPH()	VERIFY0(pthread_mutex_lock(&lockdep_lock))
 #define UNLOCK_DEP_GRAPH()	VERIFY0(pthread_mutex_unlock(&lockdep_lock))
 
