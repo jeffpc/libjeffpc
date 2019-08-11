@@ -588,13 +588,19 @@ static void verify_lock_unlock(const struct lock_context *where, struct lock *l)
 	check_held_for_unlock(&l->info, where);
 }
 
-static void verify_rw_init(const struct lock_context *where, struct rwlock *l)
+static void verify_rw_init(const struct lock_context *where, struct rwlock *l,
+			   struct lock_class *lc)
 {
-	if (!l)
+	if (!l || !lc)
 		print_invalid_call("RWINIT", where);
 
 	l->info.magic = (uintptr_t) &l->info;
 	l->info.type = SYNCH_TYPE_RW;
+
+#ifdef JEFFPC_LOCK_TRACKING
+	l->info.lc = lc;
+	l->info.name = where->lockname;
+#endif
 }
 
 static void verify_rw_destroy(const struct lock_context *where, struct rwlock *l)
@@ -776,11 +782,12 @@ void mxunlock(const struct lock_context *where, struct lock *l)
 		      where->file, where->line, strerror(ret));
 }
 
-void rwinit(const struct lock_context *where, struct rwlock *l)
+void rwinit(const struct lock_context *where, struct rwlock *l,
+	    struct lock_class *lc)
 {
 	int ret;
 
-	verify_rw_init(where, l);
+	verify_rw_init(where, l, lc);
 
 	ret = pthread_rwlock_init(&l->lock, NULL);
 	if (ret)

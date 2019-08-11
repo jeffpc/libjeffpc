@@ -114,13 +114,13 @@ struct barrier {
 				}; \
 				mxunlock(&mx_ctx, (l)); \
 			} while (0)
-#define RWINIT(l)	do { \
+#define RWINIT(l, lc)	do { \
 				struct lock_context rw_ctx = { \
 					.lockname = #l, \
 					.file = __FILE__, \
 					.line = __LINE__, \
 				}; \
-				rwinit(&rw_ctx, (l)); \
+				rwinit(&rw_ctx, (l), (lc)); \
 			} while (0)
 #define RWDESTROY(l)	do { \
 				struct lock_context rw_ctx = { \
@@ -247,7 +247,8 @@ extern void mxdestroy(const struct lock_context *where, struct lock *m);
 extern void mxlock(const struct lock_context *where, struct lock *m);
 extern void mxunlock(const struct lock_context *where, struct lock *m);
 
-extern void rwinit(const struct lock_context *where, struct rwlock *l);
+extern void rwinit(const struct lock_context *where, struct rwlock *l,
+		   struct lock_class *lc);
 extern void rwdestroy(const struct lock_context *where, struct rwlock *l);
 extern void rwlock(const struct lock_context *where, struct rwlock *l, bool wr);
 extern void rwunlock(const struct lock_context *where, struct rwlock *l);
