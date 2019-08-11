@@ -142,13 +142,6 @@ static void print_invalid_call(const char *fxn, const struct lock_context *where
 	      where->line);
 }
 
-#define GENERATE_LOCK_MASK_ARGS(i)						\
-	((i)->magic != (uintptr_t) (i)) ? 'M' : '.'
-#define GENERATE_RW_MASK_ARGS(l)						\
-	((l)->info.magic != (uintptr_t) &(l)->info) ? 'M' : '.'
-#define GENERATE_COND_MASK_ARGS(c)						\
-	((c)->info.magic != (uintptr_t) &(c)->info) ? 'M' : '.'
-
 static void print_synch_as(struct lock_info *info,
 			   const struct lock_context *where,
 			   enum synch_type type)
@@ -198,11 +191,13 @@ static void print_held_locks(struct held_lock *highlight)
 	for_each_held_lock(i, cur) {
 		struct lock_info *info = cur->info;
 		struct lock *lock = container_of(info, struct lock, info);
+		char synch_chars[2];
 
-		cmn_err(CE_CRIT, "lockdep:  %s #%zd: %s (%p) <%c> acquired at %s:%d",
+		cmn_err(CE_CRIT, "lockdep:  %s #%zd: %s (%p) %s <%s> acquired at %s:%d",
 			(cur == highlight) ? "->" : "  ",
 			i, info->name, lock,
-			GENERATE_LOCK_MASK_ARGS(info),
+			synch_type_str(info->type),
+			get_synch_chars(info, synch_chars),
 			cur->where.file, cur->where.line);
 	}
 }
