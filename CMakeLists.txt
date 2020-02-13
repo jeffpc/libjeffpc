@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+# Copyright (c) 2016-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -238,4 +238,5 @@ target_link_libraries(sexpr-repl
 	jeffpc
 )
 
+add_subdirectory(man)
 add_subdirectory(tests)
