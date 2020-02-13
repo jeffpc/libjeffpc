@@ -27,6 +27,13 @@ set(MANPAGES
 	xread.3
 )
 
+# run lint on all manpages
+foreach(man ${MANPAGES})
+	add_test(NAME "man-lint:${man}"
+		 COMMAND mandoc -Tlint ${man})
+endforeach()
+
+# install all manpages
 install(FILES	${MANPAGES}
 	DESTINATION share/man/man3
 	PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
