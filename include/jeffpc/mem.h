@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -70,10 +70,7 @@ extern void *mem_recallocarray(void *ptr, size_t old_nelem, size_t new_nelem,
  * slab allocator
  */
 
-struct mem_cache {
-	size_t size;
-	size_t align;
-};
+struct mem_cache;
 
 extern struct mem_cache *mem_cache_create(char *name, size_t size, size_t align);
 extern void mem_cache_destroy(struct mem_cache *cache);

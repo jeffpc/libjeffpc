@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2015-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,11 @@
 /*
  * A slab allocator - well, not really... just use malloc and free directly.
  */
+
+struct mem_cache {
+	size_t size;
+	size_t align;
+};
 
 #pragma weak mem_cache_create
 struct mem_cache *mem_cache_create(char *name, size_t size, size_t align)
