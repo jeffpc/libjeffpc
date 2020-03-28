@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -56,6 +56,7 @@ struct buffer {
 	size_t allocsize;	/* allocated buffer size */
 	const struct buffer_ops *ops;
 	void *private;		/* private data for implementation */
+	bool heap:1;		/* struct buffer is on the heap */
 };
 
 extern struct buffer *buffer_alloc(size_t expected_size);

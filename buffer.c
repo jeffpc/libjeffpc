@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,7 @@ struct buffer *buffer_alloc(size_t expected_size)
 	buffer->size = 0;
 	buffer->allocsize = expected_size;
 	buffer->ops = &heap_buffer;
+	buffer->heap = true;
 
 	return buffer;
 }
@@ -56,7 +57,8 @@ void buffer_free(struct buffer *buffer)
 	if (buffer->ops->free)
 		buffer->ops->free(buffer->data);
 
-	free(buffer);
+	if (buffer->heap)
+		free(buffer);
 }
 
 void buffer_init_sink(struct buffer *buffer)
@@ -66,6 +68,7 @@ void buffer_init_sink(struct buffer *buffer)
 	buffer->size = 0;
 	buffer->allocsize = SIZE_MAX;
 	buffer->ops = &sink_buffer;
+	buffer->heap = false;
 }
 
 void buffer_init_static(struct buffer *buffer, const void *data, size_t size,
@@ -76,6 +79,7 @@ void buffer_init_static(struct buffer *buffer, const void *data, size_t size,
 	buffer->size = size;
 	buffer->allocsize = size;
 	buffer->ops = writable ? &static_buffer_rw : &static_buffer_ro;
+	buffer->heap = false;
 }
 
 void buffer_init_stdio(struct buffer *buffer, FILE *f)
@@ -86,6 +90,7 @@ void buffer_init_stdio(struct buffer *buffer, FILE *f)
 	buffer->allocsize = SIZE_MAX;
 	buffer->ops = &stdio_buffer;
 	buffer->private = f;
+	buffer->heap = false;
 }
 
 static int resize(struct buffer *buffer, size_t newsize)
