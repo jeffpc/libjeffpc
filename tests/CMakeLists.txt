@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+# Copyright (c) 2016-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -40,6 +40,7 @@ build_test_bin_and_run(container_of)
 build_test_bin_and_run(endian)
 build_test_bin_and_run(errno)
 build_test_bin_and_run(hexdump)
+build_test_bin_and_run(is_p2)
 build_test_bin_and_run(list)
 build_test_bin_and_run(mutex-destroy-memcpy)
 build_test_bin_and_run(mutex-destroy-null)

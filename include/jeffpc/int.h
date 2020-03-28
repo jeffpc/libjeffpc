@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <errno.h>
 
 #include <jeffpc/config.h>
@@ -106,6 +107,15 @@ static inline int str2u8_full(const char *restrict s, uint8_t *i,
 #define str2u32(s, i)	str2u32_full((s), (i), 10, '\0')
 #define str2u16(s, i)	str2u16_full((s), (i), 10, '\0')
 #define str2u8(s, i)	str2u8_full((s), (i), 10, '\0')
+
+/*
+ * Powers of 2 mangling
+ */
+/* is the value a power of two? */
+static inline bool is_p2(uint64_t val)
+{
+	return !(val & (val - 1));
+}
 
 /*
  * These prototypes exist to catch bugs in the code generating macros below.
