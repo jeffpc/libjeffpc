@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,27 @@
 #include <jeffpc/rand.h>
 
 #include "test.c"
+
+/* allocate a heap buffer - either on the heap or on the stack */
+static inline struct buffer *alloc_heap_buffer(struct buffer *buf, size_t size)
+{
+	if (buf) {
+		int ret;
+
+		ret = buffer_init_heap(buf, size);
+		if (ret)
+			fail("buffer_init_heap(%zu) failed: %s", size,
+			     xstrerror(ret));
+	} else {
+		buf = buffer_alloc(size);
+		if (IS_ERR(buf))
+			fail("buffer_alloc(%zu) failed: %s", size,
+			     xstrerror(PTR_ERR(buf)));
+
+	}
+
+	return buf;
+}
 
 static inline void check_data_zeroes(struct buffer *buffer, size_t startoff)
 {
@@ -144,18 +165,15 @@ static inline void check_truncate(struct buffer *buffer, size_t newsize)
 	check_truncate_err(buffer, newsize, 0);
 }
 
-static void test_alloc_free(void)
+static void test_alloc_free(struct buffer *_buffer)
 {
 	struct buffer *buffer;
 	size_t i;
 
 	for (i = 0; i < 10; i++) {
-		fprintf(stderr, "%s: iter = %zu...", __func__, i);
+		fprintf(stderr, "%s(%p): iter = %zu...", __func__, _buffer, i);
 
-		buffer = buffer_alloc(i);
-		if (IS_ERR(buffer))
-			fail("buffer_alloc(%zu) failed: %s", i,
-			     xstrerror(PTR_ERR(buffer)));
+		buffer = alloc_heap_buffer(_buffer, i);
 
 		check_data(buffer);
 		check_used(buffer, 0);
@@ -193,7 +211,7 @@ static void inner_loop(size_t niter, struct buffer *buffer, uint8_t *data,
 	check_used(buffer, i);
 }
 
-static void test_append(void)
+static void test_append(struct buffer *_buffer)
 {
 	struct buffer *buffer;
 	size_t startsize;
@@ -201,12 +219,10 @@ static void test_append(void)
 	for (startsize = 0; startsize < 300; startsize++) {
 		uint8_t data[256];
 
-		fprintf(stderr, "%s: iter = %3zu...", __func__, startsize);
+		fprintf(stderr, "%s(%p): iter = %3zu...", __func__, _buffer,
+			startsize);
 
-		buffer = buffer_alloc(startsize);
-		if (IS_ERR(buffer))
-			fail("buffer_alloc(%zu) failed: %s", startsize,
-			     xstrerror(PTR_ERR(buffer)));
+		buffer = alloc_heap_buffer(_buffer, startsize);
 
 		inner_loop(256, buffer, data, check_data);
 
@@ -221,15 +237,12 @@ static void test_append(void)
 	}
 }
 
-static void test_truncate_grow(void)
+static void test_truncate_grow(struct buffer *_buffer)
 {
 	struct buffer *buffer;
 	size_t i;
 
-	buffer = buffer_alloc(0);
-	if (IS_ERR(buffer))
-		fail("buffer_alloc(%zu) failed: %s", 0,
-		     xstrerror(PTR_ERR(buffer)));
+	buffer = alloc_heap_buffer(_buffer, 0);
 
 	for (i = 0; i < 50000; i += 13) {
 		fprintf(stderr, "%s: iter = %3zu...", __func__, i);
@@ -244,16 +257,13 @@ static void test_truncate_grow(void)
 	buffer_free(buffer);
 }
 
-static void test_truncate_shrink(void)
+static void test_truncate_shrink(struct buffer *_buffer)
 {
 	const size_t maxsize = 5000 * sizeof(uint64_t);
 	struct buffer *buffer;
 	size_t i;
 
-	buffer = buffer_alloc(maxsize);
-	if (IS_ERR(buffer))
-		fail("buffer_alloc(%zu) failed: %s", maxsize,
-		     xstrerror(PTR_ERR(buffer)));
+	buffer = alloc_heap_buffer(_buffer, maxsize);
 
 	/* append some random data */
 	for (i = 0; i < maxsize; i += sizeof(uint64_t)) {
@@ -395,10 +405,20 @@ void test_static_rw(void)
 
 void test(void)
 {
-	test_alloc_free();
-	test_append();
-	test_truncate_grow();
-	test_truncate_shrink();
+	struct buffer stack_buf;
+
+	/* stack allocated buffer struct */
+	test_alloc_free(&stack_buf);
+	test_append(&stack_buf);
+	test_truncate_grow(&stack_buf);
+	test_truncate_shrink(&stack_buf);
+
+	/* heap allocated buffer struct */
+	test_alloc_free(NULL);
+	test_append(NULL);
+	test_truncate_grow(NULL);
+	test_truncate_shrink(NULL);
+
 	test_sink();
 	test_static_const_arg();
 	test_static_ro();

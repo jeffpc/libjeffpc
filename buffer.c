@@ -29,21 +29,18 @@
 struct buffer *buffer_alloc(size_t expected_size)
 {
 	struct buffer *buffer;
+	int ret;
 
 	buffer = malloc(sizeof(struct buffer));
 	if (!buffer)
 		return ERR_PTR(-ENOMEM);
 
-	buffer->data = malloc(expected_size ? expected_size : 1);
-	if (!buffer->data) {
+	ret = buffer_init_heap(buffer, expected_size);
+	if (ret) {
 		free(buffer);
-		return ERR_PTR(-ENOMEM);
+		return ERR_PTR(ret);
 	}
 
-	buffer->off = 0;
-	buffer->size = 0;
-	buffer->allocsize = expected_size;
-	buffer->ops = &heap_buffer;
 	buffer->heap = true;
 
 	return buffer;
@@ -59,6 +56,21 @@ void buffer_free(struct buffer *buffer)
 
 	if (buffer->heap)
 		free(buffer);
+}
+
+int buffer_init_heap(struct buffer *buffer, size_t expected_size)
+{
+	buffer->data = malloc(expected_size ? expected_size : 1);
+	if (!buffer->data)
+		return -ENOMEM;
+
+	buffer->off = 0;
+	buffer->size = 0;
+	buffer->allocsize = expected_size;
+	buffer->ops = &heap_buffer;
+	buffer->heap = false;
+
+	return 0;
 }
 
 void buffer_init_sink(struct buffer *buffer)

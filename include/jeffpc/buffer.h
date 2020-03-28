@@ -62,6 +62,9 @@ struct buffer {
 extern struct buffer *buffer_alloc(size_t expected_size);
 extern void buffer_free(struct buffer *buffer);
 
+/* a buffer that uses a growable heap buffer */
+extern int buffer_init_heap(struct buffer *buffer, size_t expected_size);
+
 /* a buffer that behaves similarly to /dev/null - all appends are lost */
 extern void buffer_init_sink(struct buffer *buffer);
 /*
