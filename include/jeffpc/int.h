@@ -117,6 +117,33 @@ static inline bool is_p2(uint64_t val)
 	return !(val & (val - 1));
 }
 
+/* round val to the next multiple of power of 2 */
+static inline uint64_t p2roundup(uint64_t val, uint64_t align)
+{
+	if (align <= 1)
+		return val;
+
+	/*
+	 * alignment must be a power of two - if it isn't, panic
+	 *
+	 * Note: We cannot include error.h since we don't want everyone that
+	 * includes in types.h (and therefore int.h) to automatically pull
+	 * in error.h.  We work around it by making a local prototype and
+	 * then calling it.  This is still type safe, since many places
+	 * include both error.h (and therefore get the real panic prototype)
+	 * and this header.  In those compilation units, the compiler makes
+	 * sure that the two signatures match.  No warnings/errors there,
+	 * imply that the below prototype is 100% correct.
+	 */
+	if (!is_p2(align)) {
+		extern void panic(const char *, ...);
+
+		panic("roundup - non-power of 2 align: %#"PRIx64, align);
+	}
+
+	return (val + (align - 1)) & ~(align - 1);
+}
+
 /*
  * These prototypes exist to catch bugs in the code generating macros below.
  */

@@ -37,6 +37,7 @@ test_mutex-unlock-null
 test_mutex-unlock-unheld
 test_nvl
 test_nvl_pack
+test_p2roundup
 test_padding
 test_qstring
 test_rwlock-destroy-memcpy
