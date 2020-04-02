@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,11 +43,7 @@ ssize_t val_pack_into(struct val *val, void *buf, size_t bufsize,
 	struct buffer buffer;
 	int ret;
 
-	buffer_init_static(&buffer, buf, bufsize, true);
-
-	ret = buffer_truncate(&buffer, 0);
-	if (ret)
-		return ret;
+	buffer_init_static(&buffer, buf, 0, bufsize, true);
 
 	ret = do_val_pack(&buffer, val, format);
 

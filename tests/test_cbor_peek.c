@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2019-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -69,7 +69,7 @@ static void test_zero(void)
 
 	fprintf(stderr, "empty input: expecting -EFAULT...");
 
-	buffer_init_static(&buf, NULL, 0, false);
+	buffer_init_static(&buf, NULL, 0, 0, false);
 
 	ret = cbor_peek_type(&buf, &type);
 
@@ -97,7 +97,7 @@ static void test_one(void)
 
 		in = i;
 
-		buffer_init_static(&buf, &in, sizeof(in), false);
+		buffer_init_static(&buf, &in, sizeof(in), sizeof(in), false);
 
 		/*
 		 * type

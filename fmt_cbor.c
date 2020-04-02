@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -520,7 +520,7 @@ int cbor_unpack_uint(struct buffer *buffer, uint64_t *v)
 	int ret;
 
 	buffer_init_static(&tmp, buffer_data_current(buffer),
-			   buffer_remain(buffer), false);
+			   buffer_remain(buffer), buffer_remain(buffer), false);
 
 	ret = unpack_cbor_int(&tmp, CMT_UINT, v);
 	if (ret)
@@ -535,7 +535,7 @@ int cbor_unpack_nint(struct buffer *buffer, uint64_t *v)
 	int ret;
 
 	buffer_init_static(&tmp, buffer_data_current(buffer),
-			   buffer_remain(buffer), false);
+			   buffer_remain(buffer), buffer_remain(buffer), false);
 
 	ret = unpack_cbor_int(&tmp, CMT_NINT, v);
 	if (ret)
@@ -555,7 +555,7 @@ int cbor_unpack_int(struct buffer *buffer, int64_t *v)
 	 */
 
 	buffer_init_static(&tmp, buffer_data_current(buffer),
-			   buffer_remain(buffer), false);
+			   buffer_remain(buffer), buffer_remain(buffer), false);
 
 	ret = cbor_unpack_uint(&tmp, &tmpv);
 	if (!ret) {
@@ -572,7 +572,7 @@ int cbor_unpack_int(struct buffer *buffer, int64_t *v)
 	 */
 
 	buffer_init_static(&tmp, buffer_data_current(buffer),
-			   buffer_remain(buffer), false);
+			   buffer_remain(buffer), buffer_remain(buffer), false);
 
 	ret = cbor_unpack_nint(&tmp, &tmpv);
 	if (!ret) {
@@ -601,7 +601,7 @@ int cbor_unpack_cstr_len(struct buffer *buffer, char **str, size_t *len)
 	char *out;
 
 	buffer_init_static(&tmp, buffer_data_current(buffer),
-			   buffer_remain(buffer), false);
+			   buffer_remain(buffer), buffer_remain(buffer), false);
 
 	ret = unpack_cbor_int(&tmp, CMT_TEXT, &parsed_len);
 	if (ret)
@@ -663,7 +663,7 @@ int cbor_unpack_bool(struct buffer *buffer, bool *b)
 	int ret;
 
 	buffer_init_static(&tmp, buffer_data_current(buffer),
-			   buffer_remain(buffer), false);
+			   buffer_remain(buffer), buffer_remain(buffer), false);
 
 	ret = unpack_cbor_float(&tmp, &extra);
 	if (ret)
@@ -690,7 +690,7 @@ int cbor_unpack_null(struct buffer *buffer)
 	int ret;
 
 	buffer_init_static(&tmp, buffer_data_current(buffer),
-			   buffer_remain(buffer), false);
+			   buffer_remain(buffer), buffer_remain(buffer), false);
 
 	ret = unpack_cbor_float(&tmp, &extra);
 	if (ret)
@@ -713,7 +713,7 @@ int cbor_unpack_break(struct buffer *buffer)
 	int ret;
 
 	buffer_init_static(&tmp, buffer_data_current(buffer),
-			   buffer_remain(buffer), false);
+			   buffer_remain(buffer), buffer_remain(buffer), false);
 
 	ret = unpack_cbor_float(&tmp, &extra);
 	if (ret)
@@ -736,7 +736,7 @@ int cbor_unpack_map_start(struct buffer *buffer, uint64_t *npairs,
 	int ret;
 
 	buffer_init_static(&tmp, buffer_data_current(buffer),
-			   buffer_remain(buffer), false);
+			   buffer_remain(buffer), buffer_remain(buffer), false);
 
 	ret = unpack_cbor_arraymap_start(&tmp, CMT_MAP, ADDL_MAP_INDEF,
 					 npairs, end_required);
@@ -761,7 +761,7 @@ int cbor_unpack_array_start(struct buffer *buffer, uint64_t *nelem,
 	int ret;
 
 	buffer_init_static(&tmp, buffer_data_current(buffer),
-			   buffer_remain(buffer), false);
+			   buffer_remain(buffer), buffer_remain(buffer), false);
 
 	ret = unpack_cbor_arraymap_start(&tmp, CMT_ARRAY, ADDL_ARRAY_INDEF,
 					 nelem, end_required);
@@ -1036,7 +1036,7 @@ struct val *cbor_unpack_val(struct buffer *buffer)
 	int ret;
 
 	buffer_init_static(&tmp, buffer_data_current(buffer),
-			   buffer_remain(buffer), false);
+			   buffer_remain(buffer), buffer_remain(buffer), false);
 
 	val = unpack_cbor_val(&tmp);
 	if (IS_ERR(val))

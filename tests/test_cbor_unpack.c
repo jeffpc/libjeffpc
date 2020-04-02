@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2018-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,8 @@ static inline void dumpbuf(struct buffer *buf)
 		int ret;						\
 									\
 		buffer_init_static(&tmp, buffer_data(in),		\
-				   buffer_size(in), false);		\
+				   buffer_size(in), buffer_size(in),	\
+				   false);				\
 									\
 		fprintf(stderr, "unpack via %s (should %s)...",		\
 			#fxn, (exp_ret) ? "fail" : "succeed");		\
@@ -81,7 +82,8 @@ static inline void dumpbuf(struct buffer *buf)
 		struct val *ret;					\
 									\
 		buffer_init_static(&tmp, buffer_data(in),		\
-				   buffer_size(in), false);		\
+				   buffer_size(in), buffer_size(in),	\
+				   false);				\
 									\
 		fprintf(stderr, "unpack via cbor_unpack_val (should %s)...",\
 			IS_ERR(exp) ? "fail" : "succeed");		\
@@ -434,7 +436,7 @@ void test(const char *ifname, void *in, size_t ilen, const char *iext,
 {
 	struct buffer input;
 
-	buffer_init_static(&input, in, ilen, false);
+	buffer_init_static(&input, in, ilen, ilen, false);
 
 	onefile(&input, get_expected_output(out, olen));
 }

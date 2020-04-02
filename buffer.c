@@ -84,12 +84,14 @@ void buffer_init_sink(struct buffer *buffer)
 }
 
 void buffer_init_static(struct buffer *buffer, const void *data, size_t size,
-			bool writable)
+			size_t bufsize, bool writable)
 {
+	ASSERT3U(size, <=, bufsize);
+
 	buffer->data = (void *) data;
 	buffer->off = 0;
 	buffer->size = size;
-	buffer->allocsize = size;
+	buffer->allocsize = bufsize;
 	buffer->ops = writable ? &static_buffer_rw : &static_buffer_ro;
 	buffer->heap = false;
 }

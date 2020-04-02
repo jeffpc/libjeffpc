@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ struct val *val_unpack(const void *ptr, size_t len, enum val_format format)
 	if (!ops || !ops->unpack)
 		return ERR_PTR(-ENOTSUP);
 
-	buffer_init_static(&buffer, ptr, len, false);
+	buffer_init_static(&buffer, ptr, len, len, false);
 
 	return ops->unpack(&buffer);
 }

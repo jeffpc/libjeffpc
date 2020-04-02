@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2019-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ static void dump(const char *fname)
 		exit(1);
 	}
 
-	buffer_init_static(&input, in, len, false);
+	buffer_init_static(&input, in, len, len, false);
 
 	val = cbor_unpack_val(&input);
 	if (IS_ERR(val)) {

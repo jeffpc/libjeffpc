@@ -26,6 +26,11 @@
 
 #include "test.c"
 
+#define COMMON_TEST_STRING \
+	"759f7e2d-67ec-4e72-8f61-86a3fd93b1be" \
+	"60e9149e-d039-e32b-b25d-c995b28bf890" \
+	"40f0fddc-ddca-4ff5-cd81-b0ae4c7d6123"
+
 /* allocate a heap buffer - either on the heap or on the stack */
 static inline struct buffer *alloc_heap_buffer(struct buffer *buf, size_t size)
 {
@@ -325,7 +330,8 @@ void test_static_const_arg(void)
 	struct buffer buffer;
 
 	/* (statically) check for passing in const pointer being ok */
-	buffer_init_static(&buffer, const_data, strlen(const_data), false);
+	buffer_init_static(&buffer, const_data, strlen(const_data),
+			   strlen(const_data), false);
 }
 
 void test_static_ro(void)
@@ -336,7 +342,8 @@ void test_static_ro(void)
 	struct buffer buffer;
 	int i;
 
-	buffer_init_static(&buffer, rawdata, strlen(rawdata), false);
+	buffer_init_static(&buffer, rawdata, strlen(rawdata), strlen(rawdata),
+			   false);
 
 	check_used(&buffer, strlen(rawdata));
 	check_data_ptr(&buffer, rawdata);
@@ -358,49 +365,57 @@ void test_static_ro(void)
 
 void test_static_rw(void)
 {
-	char rawdata[] = "759f7e2d-67ec-4e72-8f61-86a3fd93b1be"
-			 "60e9149e-d039-e32b-b25d-c995b28bf890"
-			 "40f0fddc-ddca-4ff5-cd81-b0ae4c7d6123";
+	char rawdata[] = COMMON_TEST_STRING;
 	const size_t rawlen = strlen(rawdata);
 	struct buffer buffer;
+	size_t size;
 
-	buffer_init_static(&buffer, rawdata, rawlen, true);
+	for (size = 0; size <= rawlen; size++) {
+		buffer_init_static(&buffer, rawdata, size, rawlen, true);
 
-	fprintf(stderr, "%s: initial sanity check...", __func__);
-	check_used(&buffer, rawlen);
-	check_data_ptr(&buffer, rawdata);
-	fprintf(stderr, "ok.\n");
+		fprintf(stderr, "%s(%zu): initial sanity check...", __func__,
+			size);
+		check_used(&buffer, size);
+		check_data_ptr(&buffer, rawdata);
+		fprintf(stderr, "ok.\n");
 
-	fprintf(stderr, "%s: append to a full buffer...", __func__);
-	check_append_err(&buffer, "abc", 3, -ENOSPC);
-	check_used(&buffer, rawlen);
-	check_data_ptr(&buffer, rawdata);
-	fprintf(stderr, "ok.\n");
+		fprintf(stderr, "%s(%zu): append to a buffer without enough "
+			"space...", __func__, size);
+		check_append_err(&buffer, COMMON_TEST_STRING, rawlen + 1,
+				 -ENOSPC);
+		check_used(&buffer, size);
+		check_data_ptr(&buffer, rawdata);
+		fprintf(stderr, "ok.\n");
 
-	fprintf(stderr, "%s: truncate to a larger than original size...",
-		__func__);
-	check_truncate_err(&buffer, rawlen + 1, -ENOSPC);
-	check_used(&buffer, rawlen);
-	check_data_ptr(&buffer, rawdata);
-	fprintf(stderr, "ok.\n");
+		fprintf(stderr, "%s(%zu): truncate to a larger than buffer "
+			"size...", __func__, size);
+		check_truncate_err(&buffer, rawlen + 1, -ENOSPC);
+		check_used(&buffer, size);
+		check_data_ptr(&buffer, rawdata);
+		fprintf(stderr, "ok.\n");
 
-	fprintf(stderr, "%s: truncate to a smaller size...", __func__);
-	check_truncate_err(&buffer, rawlen - 10, 0);
-	check_used(&buffer, rawlen - 10);
-	check_data_ptr(&buffer, rawdata);
-	fprintf(stderr, "ok.\n");
+		if (size >= 5) {
+			fprintf(stderr, "%s(%zu): truncate to a smaller than "
+				"initial size...", __func__, size);
+			check_truncate_err(&buffer, size - 5, 0);
+			check_used(&buffer, size - 5);
+			check_data_ptr(&buffer, rawdata);
+			fprintf(stderr, "ok.\n");
 
-	fprintf(stderr, "%s: append too much...", __func__);
-	check_append_err(&buffer, "12345678901", 11, -ENOSPC);
-	check_used(&buffer, rawlen - 10);
-	check_data_ptr(&buffer, rawdata);
-	fprintf(stderr, "ok.\n");
+			fprintf(stderr, "%s(%zu): append too much...", __func__, size);
+			check_append_err(&buffer, COMMON_TEST_STRING COMMON_TEST_STRING,
+					 rawlen - size + 11, -ENOSPC);
+			check_used(&buffer, size - 5);
+			check_data_ptr(&buffer, rawdata);
+			fprintf(stderr, "ok.\n");
 
-	fprintf(stderr, "%s: append a little...", __func__);
-	check_append_err(&buffer, "12345", 5, 0);
-	check_used(&buffer, rawlen - 5);
-	check_data_ptr(&buffer, rawdata);
-	fprintf(stderr, "ok.\n");
+			fprintf(stderr, "%s(%zu): append a little...", __func__, size);
+			check_append_err(&buffer, COMMON_TEST_STRING, 5, 0);
+			check_used(&buffer, size);
+			check_data_ptr(&buffer, rawdata);
+			fprintf(stderr, "ok.\n");
+		}
+	}
 }
 
 void test(void)

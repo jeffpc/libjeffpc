@@ -70,9 +70,12 @@ extern void buffer_init_sink(struct buffer *buffer);
 /*
  * a buffer that wraps a data pointer (we use const void * to allow passing
  * in both void * and const void *)
+ *
+ * size is the "written" size while bufsize is the actual size of the
+ * backing buffer - beyond which we cannot write/grow
  */
 extern void buffer_init_static(struct buffer *buffer, const void *data,
-			       size_t size, bool writable);
+			       size_t size, size_t allocsize, bool writable);
 /* a buffer that writes to a FILE * */
 extern void buffer_init_stdio(struct buffer *buffer, FILE *f);
 
