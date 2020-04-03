@@ -336,9 +336,7 @@ void test_static_const_arg(void)
 
 void test_static_ro(void)
 {
-	const char rawdata[] = "759f7e2d-67ec-4e72-8f61-86a3fd93b1be"
-			       "60e9149e-d039-e32b-b25d-c995b28bf890"
-			       "40f0fddc-ddca-4ff5-cd81-b0ae4c7d6123";
+	const char rawdata[] = COMMON_TEST_STRING;
 	struct buffer buffer;
 	int i;
 
