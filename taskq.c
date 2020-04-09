@@ -30,11 +30,15 @@
 static LOCK_CLASS(taskq_lc);
 
 static struct mem_cache *taskq_cache;
+static struct mem_cache *taskq_item_cache;
 
 static void __attribute__((constructor)) init_taskq_subsys(void)
 {
 	taskq_cache = mem_cache_create("taskq-cache", sizeof(struct taskq), 0);
 	ASSERT(!IS_ERR(taskq_cache));
+	taskq_item_cache = mem_cache_create("taskq-item-cache",
+					    sizeof(struct taskq_item), 0);
+	ASSERT(!IS_ERR(taskq_item_cache));
 }
 
 static void enqueue(struct taskq *tq, struct taskq_item *item)
@@ -77,7 +81,7 @@ static void *taskq_worker(void *arg)
 
 		item->fxn(item->arg);
 
-		free(item);
+		mem_cache_free(taskq_item_cache, item);
 
 		MXLOCK(&tq->lock);
 
@@ -184,7 +188,7 @@ int taskq_dispatch(struct taskq *tq, void (*fxn)(void *), void *arg)
 {
 	struct taskq_item *item;
 
-	item = malloc(sizeof(struct taskq_item));
+	item = mem_cache_alloc(taskq_item_cache);
 	if (!item)
 		return -ENOMEM;
 
