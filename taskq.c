@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2017-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,8 +25,17 @@
 #include <jeffpc/error.h>
 #include <jeffpc/taskq.h>
 #include <jeffpc/cstr.h>
+#include <jeffpc/mem.h>
 
 static LOCK_CLASS(taskq_lc);
+
+static struct mem_cache *taskq_cache;
+
+static void __attribute__((constructor)) init_taskq_subsys(void)
+{
+	taskq_cache = mem_cache_create("taskq-cache", sizeof(struct taskq), 0);
+	ASSERT(!IS_ERR(taskq_cache));
+}
 
 static void enqueue(struct taskq *tq, struct taskq_item *item)
 {
@@ -132,7 +141,7 @@ struct taskq *taskq_create_fixed(const char *name, long nthreads)
 
 	VERIFY(nthreads);
 
-	tq = malloc(sizeof(struct taskq));
+	tq = mem_cache_alloc(taskq_cache);
 	if (!tq)
 		goto err;
 
@@ -162,7 +171,7 @@ struct taskq *taskq_create_fixed(const char *name, long nthreads)
 	return tq;
 
 err_free:
-	free(tq);
+	mem_cache_free(taskq_cache, tq);
 err:
 	return ERR_PTR(-ENOMEM);
 }
@@ -233,5 +242,5 @@ void taskq_destroy(struct taskq *tq)
 	MXDESTROY(&tq->lock);
 	list_destroy(&tq->queue);
 	free(tq->threads);
-	free(tq);
+	mem_cache_free(taskq_cache, tq);
 }
