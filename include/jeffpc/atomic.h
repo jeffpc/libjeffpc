@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2014-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ typedef struct {
 #define atomic_inc(var)		atomic_add((var), 1)
 #define atomic_dec(var)		atomic_sub((var), 1)
 
-/* The following return the 'after' value.  If == new, then a swap occured. */
+/* The following return the 'before' value.  If == old, then a swap occured. */
 #define atomic_cas(var, old, new)	\
 		__sync_val_compare_and_swap(&(var)->v, (old), (new))
 #define atomic_cas_ptr(var, old, new)	\
