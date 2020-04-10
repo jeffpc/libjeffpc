@@ -14,6 +14,7 @@ test_container_of
 test_endian
 test_errno
 test_hexdump
+test_hostname
 test_is_p2
 test_list
 test_mutex-destroy-held
