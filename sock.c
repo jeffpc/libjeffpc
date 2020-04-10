@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2016-2020 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -60,7 +60,7 @@ const char *xgethostname(void)
 		goto unknown;
 	}
 
-	if (atomic_cas_ptr(&cached, NULL, name) != name)
+	if (atomic_cas_ptr(&cached, NULL, name) != NULL)
 		free(name);
 
 	return cached;
